@@ -1,0 +1,13 @@
+__pycache__/
+*.py[cod]
+.venv/
+venv/
+*.egg-info/
+.env
+.env.*
+.DS_Store
+
+# Built vector indexes (rebuilt by `make ingest`)
+index/
+qdrant_storage/
+chromadb/

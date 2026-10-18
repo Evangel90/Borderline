@@ -1,0 +1,15 @@
+[project]
+name = "borderline"
+version = "0.0.1"
+description = "Country-agnostic engine for cross-border AI incident drills"
+readme = "README.md"
+license = "MIT"
+requires-python = ">=3.11,<3.12"
+dependencies = [
+    "pydantic>=2",
+    "pyyaml>=6",
+    "pymupdf>=1.24",
+]
+
+[tool.setuptools]
+packages = ["engine", "audit", "gaps"]
