@@ -17,7 +17,8 @@ model update.
 
 ## Status
 
-M0 (setup). The layout exists; nothing runs yet.
+M0 (setup). The layout exists and the ITU reference ingestion runs on a sample
+PDF (`make itu-smoke`); the engine itself does not run yet.
 
 ## Layout
 
@@ -35,6 +36,21 @@ runs/<run_id>/            log.jsonl, gaps.jsonl
 ui/                       Streamlit timeline
 report/, video/           submission material
 ```
+
+## Setup
+
+```sh
+git clone --recurse-submodules https://github.com/Evangel90/Borderline.git
+cd Borderline
+python3.11 -m venv .venv && .venv/bin/pip install -e '.[itu]'
+ollama serve &                  # local models; no API key needed
+ollama pull nomic-embed-text    # embedding model used by the ITU reference code
+make itu-smoke                  # ITU reference ingestion on one sample PDF
+```
+
+`vendor/ITUAIReadiness` is the [ITU reference code](https://github.com/CrashingGuru/ITUAIReadiness)
+(MIT), pinned as a git submodule. Borderline's engine uses Qdrant; the knowledge
+base is also exported in the reference code's ChromaDB format.
 
 ## Commands
 
