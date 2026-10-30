@@ -15,6 +15,17 @@ class HashChainedLogger:
         os.makedirs(run_dir, exist_ok=True)
         self.entries = []
         self.latest_hash = "0" * 64
+        if os.path.exists(self.log_path):
+            valid, message, broken_index = self.verify_log(self.log_path)
+            if not valid:
+                raise ValueError(
+                    f"Cannot append to invalid hash chain ({self.log_path}): "
+                    f"{message} (entry {broken_index})."
+                )
+            with open(self.log_path, "r", encoding="utf-8") as source:
+                self.entries = [json.loads(line) for line in source if line.strip()]
+            if self.entries:
+                self.latest_hash = self.entries[-1]["current_hash"]
 
     def compute_hash(self, prev_hash: str, payload: Dict[str, Any]) -> str:
         serialized = json.dumps(payload, sort_keys=True, ensure_ascii=False)

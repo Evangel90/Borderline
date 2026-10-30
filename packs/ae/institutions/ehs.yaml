@@ -20,14 +20,14 @@ relevant_authorities:
   - AE-HEALTH-9.3 # MoHAP AI in Healthcare Guidelines
 
 powers:
-  - halt_clinic_level_ai_inference
+  - recommend_halt_of_clinic_level_ai_inference_for_human_review
   - escalate_safety_incidents_to_mohap
   - initiate_clinical_re-evaluation
   - isolate_affected_patient_cohorts
 
 available_actions:
-  - name: halt_clinic_ai
-    description: Pause the screening model in affected clinics in the synthetic drill.
+  - name: recommend_clinic_ai_halt
+    description: Record a recommendation to pause clinic screening; a human must approve before simulated service state changes.
   - name: escalate_to_mohap
     description: Create a simulated safety escalation for MoHAP.
   - name: request_manual_review

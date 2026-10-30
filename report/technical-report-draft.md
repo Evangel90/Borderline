@@ -5,14 +5,13 @@
 **Team:** [add team members]  
 **Repository:** [Borderline on GitHub](https://github.com/Evangel90/Borderline)
 
-> Draft status: the expanded scenario has been attempted twice. The first
-> remote run (`borderline-eight-stage-20261030-1`) stopped during step 4 after
-> nine decisions on an invalid citation. The second run
-> (`borderline-eight-stage-20261030-2`) logged 25 decisions through step 6 and part of step 7, then stopped
-> when OpenRouter's 50-request daily free limit was exhausted. Its partial hash
-> chain verifies, but there is no completed gap record. The scenario still
-> needs a complete run, citation relevance review, legal-source review, and
-> the six-gap analysis.
+> Draft status: a full eight-stage run using local `qwen3:8b`
+> (`local-qwen3-human-gate-20261030-1`) completed with 31 decisions and a
+> generated gap register. Its hash chain verifies. EHS recorded a pause
+> recommendation pending human approval; the simulated service was not paused,
+> and no approval has yet been recorded. This is a prototype evaluation, not a
+> legal validation: citations and the generated gap evidence need human review,
+> and the country source collection and six-gap analysis remain incomplete.
 
 ## 1. Overall introduction
 
@@ -70,8 +69,8 @@ This is an architectural mapping, not a claim of full Y.3172 conformance.
 | ML collector / preprocessing | Registered source PDFs are extracted and split into citation-bearing chunks. | Retrieval is deterministic keyword search; ingestion is not yet an integrated distributed vector knowledge base hosted in the ITU Sandbox. |
 | Policy node | AE–CH bridge YAML contains transfer and regulator-route rules. | Rules are static and do not yet execute and record each of the three policy checks separately. |
 | ML function orchestrator | Python releases timeline stages and invokes declared participants. | Timing is a staged label, not a simulated clock; no dynamic event scheduler or judge UI exists. |
-| Model / agents | OpenRouter's free-model router produces structured agent proposals. | The model can vary across decisions; no LoRA fine-tune or event-tagging model is implemented. |
-| Sandbox | Action handlers update synthetic state and return tool outcomes. | No external systems are integrated; human approval is represented in the scenario but not enforced as a live approval workflow. |
+| Model / agents | Local Ollama `qwen3:8b` produced structured agent proposals for the completed evaluation run. | No LoRA fine-tune or event-tagging model is implemented; model output still needs evidence and legal review. |
+| Sandbox | Action handlers update synthetic state and return tool outcomes. A clinic-pause recommendation now waits for a separate human decision in the Streamlit review UI. | Human approval is local and unauthenticated; it changes only displayed synthetic state and does not control a real system. |
 | Audit | JSONL decisions are hash-chained and independently verifiable. | The log records concise rationales and citations, not private chain-of-thought; full retrieval and liaison message traces still need completion. |
 
 ## 5. Mapping to the ITU AI Readiness Framework 2.0
@@ -112,21 +111,31 @@ rules apply to a real incident.
 The current intent contains eight staged events and an optional reserve
 escalation. Static checks confirmed that the intent parses, all declared
 participants have profiles, each participant has an explicit view, and all
-declared actions have sandbox handlers. The first OpenRouter attempt stopped
-in step 4 after nine decisions because the FDPIC agent returned a citation ID
-outside its retrieved evidence. A second attempt recorded 25 decisions through
-step 6 and part of step 7 before the daily free-model quota was exhausted. Its
-partial log's hash chain verifies, but no policy-gap record was produced and
-the run is not a completed evaluation. At least one rationale cited a source
-that does not support the asserted device-regulatory basis; citation presence
-alone is not counted as evidence quality.
+declared actions have sandbox handlers. The expanded run
+`local-qwen3-human-gate-20261030-1` completed all seven default stages with 31 decisions
+from 12 agents; the optional reserve escalation was not enabled. The run
+generated a policy-gap record and its 31-entry hash chain verifies. The log
+contains 23 decisions with citations. The step-6 gate result was visible to
+six agents, while two actions were recorded on the simulated liaison route; no
+external message or data was sent. Review found all 31 actions allowed by
+their event views and institution profiles, and all logged payloads matched
+the assigned private views. Citation membership did not guarantee support:
+the NCSC's cyber-reporting assessment cited Swiss medical-device provisions,
+and EDE cited a UAE data-protection preamble for a device-evidence request.
+The earlier run `local-qwen3-20261030-1` recorded the AI as paused without
+approval. In the latest run, EHS recorded a recommendation only, leaving the
+simulated service unpaused pending a separate local human decision. That
+approval is not yet recorded.
+The detailed engineering review and findings are in
+[`run-review-local-qwen3-20261030-1.md`](run-review-local-qwen3-20261030-1.md).
+This run is not submission-ready evidence for human oversight, legal accuracy,
+or a complete liaison policy check until those issues are addressed.
 
 An earlier four-step prototype run, `or-free-20261030-5`, completed with 11
 agent decisions and a verified hash chain. That run validates the earlier
-action-selection, gate, and logging path; it does not evaluate the new staged
-scenario or its private-view behavior. The next evaluation should rerun all
-seven default stages, verify the chain, and review each decision for action
-authorization, information visibility, evidence relevance, and gate outcome.
+action-selection, gate, and logging path; it does not evaluate the expanded
+scenario or its private-view behavior. The two incomplete OpenRouter attempts
+are retained as historical records.
 
 ## 8. Candidate policy and standards gaps
 
@@ -159,8 +168,8 @@ and evidence from the completed drill before it is reported as a finding.
 ## Submission checklist
 
 - [ ] Complete legal-source verification and update the source register/chunks.
-- [ ] Run the expanded scenario and verify the audit chain.
-- [ ] Review agent visibility, action permissions, citations, and gate outcomes.
+- [x] Run the expanded scenario with local `qwen3:8b` and verify the audit chain.
+- [x] Review agent visibility, action permissions, citations, and gate outcomes; findings recorded in the run review.
 - [ ] Develop and evidence the six domain-level gap comparisons.
 - [ ] Confirm team details and final report layout against the official template.
 - [ ] Add report references and stay within the five-page maximum.

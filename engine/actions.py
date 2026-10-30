@@ -45,7 +45,10 @@ class ActionExecutor:
         "request_ncsc_security_evidence": ("ncsc_security_evidence", "requested"),
         "prepare_policy_gap_review": ("policy_gap_review", "human_review_required"),
         "request_gap_supporting_evidence": ("gap_supporting_evidence", "requested"),
-        "halt_clinic_ai": ("clinical_ai_status", "paused"),
+        "recommend_clinic_ai_halt": (
+            "clinic_ai_halt_recommendation",
+            "human_approval_required",
+        ),
         "escalate_to_mohap": ("safety_escalation", "created"),
         "request_manual_review": ("manual_review", "required"),
         "pause_transfer_pending_review": ("data_transfer_status", "paused_pending_review"),

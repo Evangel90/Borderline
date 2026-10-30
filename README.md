@@ -21,23 +21,29 @@ model update.
 ## Status
 
 The eight-stage timeline gives participating agents role-specific event views;
-an optional judge-injected escalation can be enabled for a run. The OpenRouter
-free-model router chooses the agents' actions. Policy retrieval remains
-deterministic keyword search; there is no vector database. The checked-in
-scenario actions only change synthetic drill state. No real clinical,
-regulatory, or data-transfer system is connected. If the configured model is
-unavailable, the drill stops; there is no scripted decision fallback. The
-Streamlit viewer displays each agent's visible facts, decisions, tool outcomes,
-evidence, and audit-chain status. `make replay` and `make report-figures` are
-not implemented yet.
+an optional judge-injected escalation can be enabled for a run. The latest
+full evaluation, `local-qwen3-human-gate-20261030-1`, used local Ollama
+`qwen3:8b` and completed all seven default stages with 31 decisions and a
+generated gap record. EHS recorded a pause recommendation pending human
+approval; the run did not pause the simulated service. Policy retrieval remains deterministic keyword search; there is no
+vector database. The checked-in scenario actions only change synthetic drill
+state. No real clinical, regulatory, or data-transfer system is connected. If
+the configured model is unavailable, the drill stops; there is no scripted
+decision fallback. The Streamlit viewer displays each agent's visible facts,
+decisions, tool outcomes, evidence, and audit-chain status. `make replay` and
+`make report-figures` are not implemented yet.
 
-The expanded timeline has passed static validation but is not yet verified
-end to end. A first remote attempt stopped during step 4 on an invalid evidence
-ID. A second attempt logged 25 decisions through step 6 and part of step 7,
-then stopped when OpenRouter's 50-request daily free limit was exhausted. Its
-partial hash chain verifies, but no gap record was produced. Some citations in
-the partial run also need human relevance review before being treated as
-support for legal claims.
+An EHS clinic-pause choice records a recommendation. The Streamlit viewer has
+a separate human review form; approval updates only the synthetic display
+state and is recorded in a separate hash-chained `human_approvals/log.jsonl`.
+Approver labels are self-entered and unauthenticated; no real clinic or system
+is controlled.
+
+The expanded timeline has passed static validation and a full local-model run.
+Verify its audit chain with `make verify-log RUN=local-qwen3-human-gate-20261030-1`. The
+generated gap and agent citations still need human evidence and legal review;
+the run is prototype evidence, not legal validation. Earlier incomplete
+OpenRouter attempts remain in `runs/` as historical runs.
 
 ## Layout
 
