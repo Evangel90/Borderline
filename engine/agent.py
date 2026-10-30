@@ -7,7 +7,7 @@ from typing import Any, List, Optional
 
 from engine.actions import ActionExecutor
 from engine.gates import BorderGate
-from engine.llm import OllamaChatClient
+from engine.llm import OllamaChatClient, OpenRouterChatClient, create_chat_client
 from engine.models import AgentProposal, Chunk, DecisionLogEntry, Institution
 
 
@@ -16,14 +16,14 @@ class InstitutionalAgent:
         self,
         institution: Institution,
         chunks: List[Chunk],
-        llm: Optional[OllamaChatClient] = None,
+        llm: Optional[OllamaChatClient | OpenRouterChatClient] = None,
         action_executor: Optional[ActionExecutor] = None,
     ):
         if not institution.available_actions:
             raise ValueError(f"Institution '{institution.id}' has no declared sandbox actions.")
         self.institution = institution
         self.chunks = chunks
-        self.llm = llm or OllamaChatClient()
+        self.llm = llm or create_chat_client()
         self.action_executor = action_executor or ActionExecutor()
 
     def search_knowledge(self, query_terms: List[str], top_k: int = 4) -> List[Chunk]:

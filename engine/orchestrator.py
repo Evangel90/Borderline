@@ -14,7 +14,7 @@ from engine.models import (
 from engine.gates import BorderGate
 from engine.agent import InstitutionalAgent
 from engine.actions import ActionExecutor
-from engine.llm import OllamaChatClient
+from engine.llm import create_chat_client
 from audit.hasher import HashChainedLogger
 from gaps.register import GapRegister
 
@@ -49,7 +49,7 @@ class DrillOrchestrator:
             self.bridge = BridgeConfig(**raw_bridge)
 
         self.gate = BorderGate(self.bridge)
-        self.llm = OllamaChatClient()
+        self.llm = create_chat_client()
         self.simulation_state: Dict[str, Any] = {}
         self.action_executor = ActionExecutor(self.simulation_state)
 
