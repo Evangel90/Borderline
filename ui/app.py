@@ -95,6 +95,9 @@ with timeline_tab:
                         if record.get("visible_state"):
                             st.caption("Visible prior simulation state")
                             st.json(record["visible_state"])
+                        if record.get("authorized_actions"):
+                            st.caption("Actions available to this agent for this event")
+                            st.write(", ".join(record["authorized_actions"]))
                 st.write(f"Action: `{record.get('action_taken', '—')}`")
                 st.write(record.get("justification", "No justification recorded."))
                 if record.get("model_name"):

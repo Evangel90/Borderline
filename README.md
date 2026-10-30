@@ -31,6 +31,12 @@ Streamlit viewer displays each agent's visible facts, decisions, tool outcomes,
 evidence, and audit-chain status. `make replay` and `make report-figures` are
 not implemented yet.
 
+The expanded timeline has passed static validation but is not yet verified
+end to end. The first remote attempt stopped during step 4 when the model
+returned an evidence ID outside the supplied context; its nine recorded
+decisions form a valid partial hash chain. Runtime citation recovery and
+event-specific action limits are being added before the next full run.
+
 ## Layout
 
 ```

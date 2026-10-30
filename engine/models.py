@@ -58,6 +58,7 @@ class AgentView(BaseModel):
     payload: Dict[str, Any] = Field(default_factory=dict)
     expected_policy_checks: List[str] = Field(default_factory=list)
     visible_state_keys: List[str] = Field(default_factory=list)
+    allowed_actions: Optional[List[str]] = None
 
 
 class StepPayload(BaseModel):
@@ -124,6 +125,7 @@ class DecisionLogEntry(BaseModel):
     visible_event: Optional[str] = None
     visible_payload: Dict[str, Any] = Field(default_factory=dict)
     visible_state: Dict[str, Any] = Field(default_factory=dict)
+    authorized_actions: List[str] = Field(default_factory=list)
     cited_clauses: List[str] = Field(default_factory=list)
     justification: str
     model_name: Optional[str] = None

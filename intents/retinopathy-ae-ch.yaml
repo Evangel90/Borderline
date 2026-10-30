@@ -53,6 +53,7 @@ timeline:
       retina_swiss_ag:
         event: "Your v2.4 update was pushed to the Dubai screening service."
         payload: {model: RetinaVision-DX, version: "2.4", deployment_status: completed}
+        allowed_actions: [confirm_model_deployment]
 
   - step: 2
     time_offset: "T+2h"
@@ -85,6 +86,7 @@ timeline:
       retina_swiss_ag:
         event: "Your incident team found evidence that stolen account credentials were used to push v2.4."
         payload: {credential_status: suspected_stolen, update: "2.4", evidence_preservation: pending}
+        allowed_actions: [preserve_vendor_security_evidence]
       uae_cyber:
         event: "A Dubai health service reports that a vendor update may have used stolen credentials."
         payload: {affected_service_country: AE, credential_status: suspected_stolen, attribution: unconfirmed}
@@ -105,6 +107,7 @@ timeline:
       retina_swiss_ag:
         event: "Your review found that UAE patients' retinal images stored in Switzerland were used to retrain v2.4."
         payload: {data_origin: AE, data_location: CH, data_type: retinal_images, use: model_retraining, identifiable_status: not_yet_assessed}
+        allowed_actions: [record_secondary_use_for_review]
       fodio:
         event: "The Swiss vendor reports UAE-origin retinal images held in Switzerland were used to retrain its model."
         payload: {data_origin: AE, processing_location: CH, data_type: retinal_images, purpose: retraining, controller_roles: unresolved}
@@ -121,6 +124,7 @@ timeline:
       retina_swiss_ag:
         event: "The vendor's position is that retraining on the images was research."
         payload: {claimed_purpose: research, identifiability: unresolved, ethics_approval: unknown}
+        allowed_actions: [document_research_claim]
       fodio:
         event: "The vendor claims research as the purpose for retraining UAE-origin images in Switzerland."
         payload: {claimed_purpose: research, identifiability: unresolved, consent_or_other_basis: unknown}
@@ -143,6 +147,7 @@ timeline:
         event: "Prepare a formal liaison request about data transferred from the UAE and subsequent use."
         payload: {target: swissmedic, requested_information: [data_categories, transfer_dates, recipients, purposes, safeguards], patient_data_included: false}
         expected_policy_checks: ["Is Swissmedic the correct counterpart under the configured liaison route, and can the request proceed without patient data?"]
+        allowed_actions: [request_regulatory_evidence]
       uae_data_office:
         event: "MoHAP is preparing a liaison request about cross-border processing linked to the incident."
         payload: {requesting_authority: mohap, purpose: establish_data_lineage, patient_data_included: false}

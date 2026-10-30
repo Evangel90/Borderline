@@ -5,11 +5,13 @@
 **Team:** [add team members]  
 **Repository:** [Borderline on GitHub](https://github.com/Evangel90/Borderline)
 
-> Draft status: this report reflects the repository as of commit `d26df0a`.
-> The expanded eight-stage scenario has passed static configuration checks but
-> has not yet completed a model-backed run. Legal-source review and the six-gap
-> analysis remain in progress. Replace these status notes with run evidence
-> before submission.
+> Draft status: this report reflects the staged-scenario implementation in
+> commit `d26df0a` and subsequent runtime review. The first expanded remote run
+> stopped during step 4 after nine decisions when an agent returned a citation
+> outside its supplied evidence. The partial log's hash chain verifies, but the
+> run has no completed gap record. Citation retry and event-specific action
+> limits are being added; rerun before treating this scenario as evaluated.
+> Legal-source review and the six-gap analysis remain in progress.
 
 ## 1. Overall introduction
 
@@ -109,15 +111,16 @@ rules apply to a real incident.
 The current intent contains eight staged events and an optional reserve
 escalation. Static checks confirmed that the intent parses, all declared
 participants have profiles, each participant has an explicit view, and all
-34 declared actions have sandbox handlers. The expanded scenario has not yet
-been run against OpenRouter, so there is no model-backed result or hash-chain
-verification for this version.
+declared actions have sandbox handlers. The first OpenRouter attempt stopped
+in step 4 after nine decisions because the FDPIC agent returned a citation ID
+outside its retrieved evidence. The partial log's hash chain verifies, but no
+policy-gap record was produced and the run is not a completed evaluation.
 
 An earlier four-step prototype run, `or-free-20261030-5`, completed with 11
 agent decisions and a verified hash chain. That run validates the earlier
 action-selection, gate, and logging path; it does not evaluate the new staged
-scenario or its private-view behavior. The next evaluation should run the
-eight default stages, verify the chain, and review each decision for action
+scenario or its private-view behavior. The next evaluation should rerun all
+seven default stages, verify the chain, and review each decision for action
 authorization, information visibility, evidence relevance, and gate outcome.
 
 ## 8. Candidate policy and standards gaps

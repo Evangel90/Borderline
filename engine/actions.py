@@ -26,6 +26,10 @@ class ActionExecutor:
     }
 
     LOCAL_STATE_ACTIONS = {
+        "confirm_model_deployment": ("vendor_model_deployment", "confirmed"),
+        "preserve_vendor_security_evidence": ("vendor_security_evidence", "preservation_requested"),
+        "record_secondary_use_for_review": ("secondary_use_review", "recorded"),
+        "document_research_claim": ("vendor_research_claim", "recorded"),
         "report_model_update": ("screening_model_update", "recorded"),
         "pause_screening_service": ("screening_service_status", "paused_pending_human_review"),
         "flag_cases_for_human_review": ("patient_cohort_review", "requested"),
@@ -73,10 +77,15 @@ class ActionExecutor:
         gate: BorderGate,
         observed_gate_status: str | None = None,
         observed_gate_reason: str = "",
+        context_allowed_actions: set[str] | None = None,
     ) -> ActionResult:
         allowed = {item.name for item in institution.available_actions}
         if action not in allowed:
             raise ValueError(f"{institution.id} is not authorized for action '{action}'.")
+        if context_allowed_actions is not None and action not in context_allowed_actions:
+            raise ValueError(
+                f"Action '{action}' is not available to {institution.id} in this event."
+            )
 
         if action in self.GATED_ACTIONS:
             data_type = self.GATED_ACTIONS[action]

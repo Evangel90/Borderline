@@ -325,6 +325,7 @@ class DrillOrchestrator:
                         for key in view.visible_state_keys
                         if key in self.simulation_state
                     },
+                    allowed_actions=view.allowed_actions,
                 )
                 chained_entry = self.logger.append(decision.model_dump())
                 all_decisions.append(DecisionLogEntry(**chained_entry))
