@@ -13,6 +13,8 @@ from engine.models import (
 )
 from engine.gates import BorderGate
 from engine.agent import InstitutionalAgent
+from engine.actions import ActionExecutor
+from engine.llm import OllamaChatClient
 from audit.hasher import HashChainedLogger
 from gaps.register import GapRegister
 
@@ -47,6 +49,9 @@ class DrillOrchestrator:
             self.bridge = BridgeConfig(**raw_bridge)
 
         self.gate = BorderGate(self.bridge)
+        self.llm = OllamaChatClient()
+        self.simulation_state: Dict[str, Any] = {}
+        self.action_executor = ActionExecutor(self.simulation_state)
 
         # Load chunks
         self.chunks: Dict[str, List[Chunk]] = {
@@ -115,13 +120,13 @@ class DrillOrchestrator:
                 jurisdiction=decision.jurisdiction,
                 excerpt=(
                     f"{decision.action_taken}: {decision.justification} "
-                    f"Liaison status: {decision.liaison_status}."
+                    f"Gate status: {decision.gate_status}; liaison status: {decision.liaison_status}."
                 ),
                 relevance=relevance,
             )
             for decision in decisions
             if decision.step == step
-            and decision.liaison_status == status
+            and decision.gate_status == status
             and decision.actor_id == actor_id
         ]
 
@@ -235,7 +240,10 @@ class DrillOrchestrator:
                 with open(os.path.join("packs/ae/institutions", inst_file)) as f:
                     data = yaml.safe_load(f)
                     inst = Institution(**data)
-                    agents[inst.id] = InstitutionalAgent(inst, self.chunks["AE"])
+                    agents[inst.id] = InstitutionalAgent(
+                        inst, self.chunks["AE"] + self.chunks["GLOBAL"],
+                        self.llm, self.action_executor,
+                    )
 
         # Swiss institutions
         for inst_file in os.listdir("packs/ch/institutions"):
@@ -243,7 +251,10 @@ class DrillOrchestrator:
                 with open(os.path.join("packs/ch/institutions", inst_file)) as f:
                     data = yaml.safe_load(f)
                     inst = Institution(**data)
-                    agents[inst.id] = InstitutionalAgent(inst, self.chunks["CH"])
+                    agents[inst.id] = InstitutionalAgent(
+                        inst, self.chunks["CH"] + self.chunks["GLOBAL"],
+                        self.llm, self.action_executor,
+                    )
 
         return agents
 
@@ -291,7 +302,13 @@ class DrillOrchestrator:
                 if actor_id in self.agents:
                     agent = self.agents[actor_id]
                     decision = agent.evaluate_step(
-                        step.step, step.event, step.payload, gate_status=gate_status
+                        step.step,
+                        step.event,
+                        step.payload,
+                        gate=self.gate,
+                        gate_status=gate_status,
+                        gate_reason=gate_reason,
+                        expected_policy_checks=step.expected_policy_checks,
                     )
                     # Record in hash-chained log
                     chained_entry = self.logger.append(decision.model_dump())
@@ -299,6 +316,9 @@ class DrillOrchestrator:
                     print(f"  🏛️  [{agent.institution.jurisdiction}] {agent.institution.id.upper()}: {decision.action_taken}")
                     print(f"     Reason: {decision.justification}")
                     print(f"     Cited: {', '.join(decision.cited_clauses[:2])}")
+                    print(f"     LLM: {decision.model_name} (self-reported confidence {decision.confidence})")
+                    print(f"     Tool result: {decision.tool_result}")
+                    print(f"     State changes: {decision.state_changes}")
 
         # Record a scenario finding grounded in this run and retrieved source chunks.
         gap = self._build_policy_gap(all_decisions)

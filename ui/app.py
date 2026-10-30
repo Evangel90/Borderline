@@ -42,7 +42,7 @@ def available_runs() -> list[str]:
 
 
 st.title("🧭 Borderline")
-st.caption("Cross-border AI incident drill review · Synthetic scenario; simulated institutional roles")
+st.caption("Cross-border AI incident drill review · LLM-driven choices, simulated tool actions · Synthetic scenario")
 
 runs = available_runs()
 if not runs:
@@ -63,8 +63,8 @@ except (OSError, ValueError) as exc:
 valid_chain, chain_message, broken_index = HashChainedLogger.verify_log(str(run_dir / "log.jsonl"))
 steps = sorted({record.get("step", 0) for record in decisions})
 actors = {record.get("actor_id") for record in decisions}
-blocked = sum(record.get("liaison_status") == "BLOCK" for record in decisions)
-routed = sum(record.get("liaison_status") == "ROUTE" for record in decisions)
+blocked = len({record.get("step") for record in decisions if record.get("gate_status") == "BLOCK"})
+routed = len({record.get("step") for record in decisions if record.get("gate_status") == "ROUTE"})
 
 metric_cols = st.columns(4)
 metric_cols[0].metric("Scenario steps", len(steps))
@@ -89,11 +89,20 @@ with timeline_tab:
                 st.markdown(f"**{heading}**")
                 st.write(f"Action: `{record.get('action_taken', '—')}`")
                 st.write(record.get("justification", "No justification recorded."))
+                if record.get("model_name"):
+                    st.caption(f"LLM: {record['model_name']} · self-reported confidence {record.get('confidence', '—')}")
+                if record.get("tool_result"):
+                    st.write(f"Tool outcome: {record['tool_result']}")
+                if record.get("state_changes"):
+                    st.json(record["state_changes"])
                 citations = record.get("cited_clauses", [])
                 st.caption("Citations: " + (" · ".join(citations) if citations else "None recorded"))
                 liaison = record.get("liaison_status")
                 if liaison:
                     st.caption(f"Liaison status: {liaison}")
+                gate_status = record.get("gate_status")
+                if gate_status:
+                    st.caption(f"Border gate: {gate_status} · {record.get('gate_reason', '')}")
                 st.divider()
 
 with gaps_tab:
@@ -140,7 +149,10 @@ with audit_tab:
                 "step": record.get("step"),
                 "actor": record.get("actor_id"),
                 "action": record.get("action_taken"),
+                "model": record.get("model_name"),
                 "liaison": record.get("liaison_status"),
+                "gate": record.get("gate_status"),
+                "tool result": record.get("tool_result"),
                 "current hash": record.get("current_hash"),
             }
             for record in decisions

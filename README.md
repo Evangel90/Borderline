@@ -3,10 +3,11 @@
 A country-agnostic engine for cross-border AI incident drills, built for the
 [ITU AI for Good Lab Hackathon: United Arab Emirates](https://aiforgood.itu.int/event/ai-for-good-sandbox-hackathon-united-arab-emirates/).
 
-Each country's laws and institutions load as plug-in packs. The engine generates
-one agent per institution, releases an incident step by step, controls what may
-cross the border through a liaison channel, logs every decision with its cited
-clause, and outputs domain-level policy gaps paired with global examples.
+Each institution is represented by an LLM-driven operator. Operators choose
+among role-authorized actions, execute those actions in the synthetic drill
+state, and cite retrieved policy chunks. A separate border gate can veto data
+transfers or route regulator notifications. Decisions and tool outcomes are
+written to a hash-chained audit log.
 
 The demo drill pairs the UAE (host) with Switzerland in healthcare: a Swiss
 vendor's AI diabetic retinopathy screening tool fails in UAE clinics after a
@@ -17,15 +18,14 @@ model update.
 
 ## Status
 
-The offline M1 drill runs end to end: it loads the checked-in policy chunks and
-institution profiles, releases the four scenario steps, applies the bilateral
-transfer gate, writes a hash-chained decision log, and records a policy-gap
-entry grounded in run outcomes and retrieved policy chunks. The Streamlit viewer
-reviews the run, cited clauses, policy-gap evidence, and audit-chain status. The
-current agents and evidence retrieval use deterministic rules and keyword
-search; they do not call an LLM or a vector database. `make replay` and
-`make report-figures` are not implemented yet. The ITU reference ingestion smoke
-command is an optional separate setup and is not required to run this drill.
+The four-step drill uses a local Ollama chat model to choose and execute
+role-authorized actions. Policy retrieval remains deterministic keyword search;
+there is no vector database. The checked-in scenario actions only change the
+synthetic drill state. No real clinical, regulatory, or data-transfer system is
+connected. If Ollama or the configured model is unavailable, the drill stops;
+there is no scripted decision fallback. The Streamlit viewer displays model
+choices, tool outcomes, evidence, and audit-chain status. `make replay` and
+`make report-figures` are not implemented yet.
 
 ## Layout
 
@@ -35,7 +35,7 @@ packs/bridge/ae-ch.yaml   what links the two countries (adequacy, treaties)
 packs/global/             global benchmarks and ITU standards (chunks.jsonl)
 domains/health/           incident template
 intents/                  drill specs (the Y.3172 "ML intent")
-engine/                   orchestrator, agents, liaison channel, policy node, gates
+engine/                   Ollama operators, action sandbox, orchestrator, gates
 audit/                    hash-chained log and verifier
 gaps/                     gap register
 data/raw/, data/sources.csv   source files and provenance register
@@ -51,14 +51,21 @@ git clone --recurse-submodules https://github.com/Evangel90/Borderline.git
 cd Borderline
 python3.11 -m venv .venv
 .venv/bin/pip install -e .
+ollama pull qwen3:8b
 make verify-sources
 make drill INTENT=retinopathy-ae-ch RUN=demo-2026-10-30
 make verify-log RUN=demo-2026-10-30
 ```
 
+Before running the drill, start `ollama serve` in a separate terminal and leave
+it running. `BORDERLINE_LLM_MODEL` defaults to `qwen3:8b`; set
+`BORDERLINE_OLLAMA_URL` or `BORDERLINE_LLM_TIMEOUT` to configure the local
+runtime. The chat request uses Ollama's structured JSON response format and
+does not send prompts to an external API.
+
 The `RUN` value must be new each time; existing run IDs are immutable and the
 engine refuses to append to them. The supplied policy chunks are checked in, so
-the demo runs offline. `vendor/ITUAIReadiness` contains the [ITU reference
+after the model is installed the drill runs locally. `vendor/ITUAIReadiness` contains the [ITU reference
 code](https://github.com/CrashingGuru/ITUAIReadiness) (MIT), pinned as a git
 submodule; `make itu-smoke` is optional and requires that project's dependencies
 and a locally running Ollama embedding model.
@@ -80,7 +87,7 @@ Run from the repo root.
 | `make fetch` | Not implemented yet |
 | `make verify-sources` | Re-hash sources and flag any change |
 | `make ingest` | Rebuild citation-ready text chunks from registered PDFs (no vector index) |
-| `make drill INTENT=retinopathy-ae-ch` | Run the full drill offline, write `runs/<run_id>/` |
+| `make drill INTENT=retinopathy-ae-ch` | Run the LLM-driven local drill; requires `ollama serve` and the configured model |
 | `make verify-log RUN=<run_id>` | Check the hash chain; name the first broken entry |
 | `make replay RUN=<run_id>` | Not implemented yet |
 | `make report-figures RUN=<run_id>` | Not implemented yet |
@@ -89,15 +96,15 @@ Run from the repo root.
 ## Scope and limitations
 
 This is a synthetic policy-drill prototype, not a clinical tool or legal
-opinion. Institutional agents are simulated, deterministic rule-based actors;
-they use keyword matching over jurisdiction chunks, and their canned actions
-are not generated by a language model. The audit log is tamper-evident through a
-SHA-256 hash chain, but it is not digitally signed or externally anchored. The
-current four-step scenario, bilateral gate, and policy-gap entry are configured
-for the UAE–Switzerland healthcare example. The policy-gap finding uses a fixed
-scenario rule and keyword-retrieved evidence; it is not an autonomous legal
-analysis. Review legal citations against authoritative current sources before
-relying on them.
+opinion. The LLM chooses from actions declared in each institution profile;
+Python validates the chosen action and runs a corresponding sandbox tool. The
+border gate has veto authority over transfers and external notifications. These
+tools only update in-memory drill state and the local audit log. The model's
+short rationale is logged; private chain-of-thought is neither requested nor
+stored. The hash chain is tamper-evident but not digitally signed or externally
+anchored. The gap analysis is scenario-specific and keyword-retrieved, not an
+autonomous legal conclusion. Review citations and actions against current
+authoritative sources before real-world use.
 
 ## License
 

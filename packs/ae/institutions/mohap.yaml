@@ -25,6 +25,14 @@ powers:
   - demand_audit_trail_and_validation_logs
   - sanction_unauthorized_cross_border_health_data_transfers
 
+available_actions:
+  - name: issue_safety_inquiry
+    description: Open a simulated safety inquiry into the device incident.
+  - name: route_regulatory_notification
+    description: Route a simulated regulatory notice through the configured bilateral liaison gate.
+  - name: request_device_incident_report
+    description: Request the manufacturer incident report through the simulated process.
+
 drill_behavior:
   strictness: high
   adverse_event_threshold: immediate_investigation

@@ -25,6 +25,14 @@ powers:
   - initiate_clinical_re-evaluation
   - isolate_affected_patient_cohorts
 
+available_actions:
+  - name: halt_clinic_ai
+    description: Pause the screening model in affected clinics in the synthetic drill.
+  - name: escalate_to_mohap
+    description: Create a simulated safety escalation for MoHAP.
+  - name: request_manual_review
+    description: Require clinicians to review affected cases in the synthetic drill.
+
 drill_behavior:
   strictness: high
   incident_response: prioritize_patient_safety_first

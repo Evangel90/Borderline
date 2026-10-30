@@ -25,6 +25,14 @@ powers:
   - assess_validity_of_transfer_safeguards (SCCs, BCRs)
   - issue_binding_administrative_measures
 
+available_actions:
+  - name: assess_transfer_direction_scope
+    description: Assess whether Swiss transfer rules apply to the direction and actor roles in this scenario.
+  - name: request_safeguards
+    description: Request documentation of safeguards relevant to Swiss processing or disclosure.
+  - name: recommend_pause_disclosure
+    description: Recommend pausing a disclosure pending review of scope and safeguards.
+
 drill_behavior:
   strictness: very_high
   cross_border_assessment:

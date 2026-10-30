@@ -7,6 +7,7 @@ import argparse
 import sys
 import time
 from engine.orchestrator import DrillOrchestrator
+from engine.llm import OllamaError
 
 
 def main():
@@ -18,8 +19,11 @@ def main():
     intent_file = f"intents/{args.intent}.yaml"
     run_id = args.run_id or f"{args.intent}-{int(time.time())}"
 
-    orchestrator = DrillOrchestrator(intent_path=intent_file, run_id=run_id)
-    orchestrator.run()
+    try:
+        orchestrator = DrillOrchestrator(intent_path=intent_file, run_id=run_id)
+        orchestrator.run()
+    except (OllamaError, ValueError) as exc:
+        parser.exit(2, f"LLM runtime error: {exc}\n")
 
 
 if __name__ == "__main__":

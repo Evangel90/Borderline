@@ -25,6 +25,14 @@ powers:
   - require_data_protection_impact_assessments (DPIA)
   - demand_cryptographic_and_access_audit_logs
 
+available_actions:
+  - name: pause_transfer_pending_review
+    description: Pause a proposed data transfer while its basis and safeguards are reviewed.
+  - name: assess_transfer_basis
+    description: Record a review of the proposed transfer basis under the UAE PDPL.
+  - name: request_transfer_safeguards
+    description: Request documentation of the purpose, recipient, safeguards, and retention.
+
 drill_behavior:
   strictness: very_high
   cross_border_data_policy: deny_unauthorized_pii_and_health_data

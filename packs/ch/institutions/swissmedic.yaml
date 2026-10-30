@@ -25,6 +25,14 @@ powers:
   - order_device_recall_or_marketing_ban
   - demand_technical_documentation_and_clinical_evaluation_reports
 
+available_actions:
+  - name: review_foreign_incident_report
+    description: Assess the report and determine which vigilance and reporting rules apply.
+  - name: request_manufacturer_report
+    description: Request the manufacturer's incident report through the simulated process.
+  - name: consider_field_safety_action
+    description: Record whether a field safety action merits further review in the synthetic drill.
+
 drill_behavior:
   strictness: high
   vigilance_trigger: serious_incident_criteria_met

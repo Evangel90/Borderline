@@ -18,6 +18,11 @@ class Chunk(BaseModel):
     source_file: str
 
 
+class AvailableAction(BaseModel):
+    name: str
+    description: str
+
+
 class Institution(BaseModel):
     id: str
     name: str
@@ -28,6 +33,7 @@ class Institution(BaseModel):
     regulatory_scope: List[str] = Field(default_factory=list)
     relevant_authorities: List[str] = Field(default_factory=list)
     powers: List[str] = Field(default_factory=list)
+    available_actions: List[AvailableAction] = Field(default_factory=list)
     drill_behavior: Dict[str, Any] = Field(default_factory=dict)
 
 
@@ -75,9 +81,23 @@ class DecisionLogEntry(BaseModel):
     action_taken: str
     cited_clauses: List[str] = Field(default_factory=list)
     justification: str
-    liaison_status: Optional[str] = None  # BLOCKED, PERMITTED, ROUTED, LOCAL_ONLY
+    model_name: Optional[str] = None
+    tool_name: Optional[str] = None
+    tool_result: Optional[str] = None
+    confidence: Optional[float] = None
+    state_changes: Dict[str, Any] = Field(default_factory=dict)
+    liaison_status: Optional[str] = None  # gate result for the selected action or LOCAL_ONLY
+    gate_status: Optional[str] = None
+    gate_reason: Optional[str] = None
     prev_hash: str
     current_hash: str
+
+
+class AgentProposal(BaseModel):
+    action: str
+    rationale: str = Field(min_length=1, max_length=600)
+    cited_chunk_ids: List[str] = Field(min_length=1, max_length=4)
+    confidence: float = Field(ge=0, le=1)
 
 
 class PolicyEvidence(BaseModel):
