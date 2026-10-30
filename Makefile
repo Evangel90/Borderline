@@ -14,7 +14,7 @@ fetch:
 	$(call todo,M1)
 
 verify-sources:
-	$(call todo,M1)
+	$(PYTHON) scripts/verify_sources.py
 
 ingest:
 	$(call todo,M1)

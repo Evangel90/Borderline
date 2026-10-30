@@ -1,0 +1,44 @@
+id: ae-ch
+title: UAE - Switzerland Bilateral AI & Health Data Regulatory Bridge
+version: "1.0.0"
+
+parties:
+  host_state:
+    code: AE
+    regulators:
+      health: mohap
+      data: uae_data_office
+      provider: ehs
+  partner_state:
+    code: CH
+    regulators:
+      health: swissmedic
+      data: fodio
+      manufacturer: retina_swiss_ag
+
+adequacy_status:
+  ch_recognizes_ae: false
+  basis_ch: "DPO (SR 235.11) Annex 1: UAE is not listed as providing adequate data protection"
+  ae_recognizes_ch: conditional
+  basis_ae: "UAE PDPL (Federal Decree-Law 45/2021) Art 22: Transfers permitted only with approved adequacy or standard guarantees"
+
+cross_border_regimes:
+  health_data:
+    ae_rule: "UAE Health Data Law (Law 2/2019) Art 13 strictly prohibits unauthorized transmission of health data outside UAE territory."
+    ch_rule: "FADP Art 16 & HRA Art 32 require explicit informed consent or statutory justification for cross-border research disclosures."
+  medical_device_vigilance:
+    ch_rule: "MedDO (SR 812.213) Art 66 mandates manufacturer report serious incidents to Swissmedic within strict statutory deadlines."
+    ae_rule: "MoHAP AI Guidelines require adverse incident notification to UAE health authorities."
+
+liaison_gate_rules:
+  raw_patient_telemetry:
+    action: BLOCK
+    reason: "Direct export of identified or pseudonymized retinal scans violates UAE Health Data Law Art 13 and lacks DPO Annex 1 adequacy."
+  anonymized_error_metadata:
+    action: ALLOW
+    conditions:
+      - "Cryptographic zero-PII verification"
+      - "Limited strictly to model weights, softmax confidence scores, and error classification codes"
+  mutual_regulatory_notification:
+    action: ROUTE
+    path: "MoHAP <-> Swissmedic bilateral vigilance channel"

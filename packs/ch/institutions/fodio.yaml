@@ -1,0 +1,33 @@
+id: fodio
+name: Federal Data Protection and Information Commissioner (FDPIC / EDÖB)
+jurisdiction: CH
+type: independent_federal_authority
+role: data_protection_supervisory_authority
+
+mandate: >
+  Swiss federal supervisory authority responsible for ensuring compliance with the
+  Federal Act on Data Protection (FADP) and assessing adequacy of foreign jurisdictions.
+
+regulatory_scope:
+  - personal_data_processing
+  - cross_border_data_disclosures (Arts 16-17 FADP)
+  - high_risk_profiling_and_ai_decision_making
+  - standard_contractual_clauses_verification
+
+relevant_authorities:
+  - CH-DATA-FADP # Federal Act on Data Protection (SR 235.1)
+  - CH-DATA-DPO  # Data Protection Ordinance (SR 235.11) & Annex 1 (Adequacy list)
+  - CH-HEALTH-HRA # Human Research Act (SR 810.30)
+
+powers:
+  - investigate_unauthorized_cross_border_disclosures
+  - order_suspension_or_termination_of_processing
+  - assess_validity_of_transfer_safeguards (SCCs, BCRs)
+  - issue_binding_administrative_measures
+
+drill_behavior:
+  strictness: very_high
+  cross_border_assessment:
+    adequate_states_list: DPO_Annex_1
+    uae_adequacy_status: non_adequate
+    requirement: explicit_safeguards_or_statutory_exception

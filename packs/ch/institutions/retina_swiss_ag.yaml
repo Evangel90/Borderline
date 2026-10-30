@@ -1,0 +1,28 @@
+id: retina_swiss_ag
+name: RetinaSwiss AG
+jurisdiction: CH
+type: medical_ai_manufacturer
+role: commercial_samd_vendor
+
+mandate: >
+  Zurich-based medtech startup producing an autonomous AI diagnostic screening tool
+  for diabetic retinopathy, deployed in Swiss clinics and exported to UAE health providers.
+
+regulatory_status:
+  legal_seat: Zurich, Switzerland
+  device_classification: Class IIa / IIb Software as a Medical Device (SaMD)
+  regulatory_frameworks:
+    - CH-HEALTH-MedDO
+    - CH-DATA-FADP
+
+operational_profile:
+  model_name: RetinaVision-DX
+  deployment: Cloud-assisted inference and edge on-premise screening
+  recent_event: Deployed Model Update v2.4 intended to optimize retinal vascular segmentation
+
+drill_behavior:
+  commercial_incentive: preserve_reputation_and_avoid_regulatory_shutdown
+  response_to_incident:
+    phase_1: request_telemetry_and_clinical_scan_logs_from_uae_clinics
+    phase_2: claim_research_exemption_under_hra_if_data_transfer_blocked
+    phase_3: evaluate_field_safety_notice_if_swissmedic_intervenes

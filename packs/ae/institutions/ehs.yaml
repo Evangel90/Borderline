@@ -1,0 +1,31 @@
+id: ehs
+name: Emirates Health Services (EHS)
+jurisdiction: AE
+type: public_health_provider_network
+role: health_delivery_and_clinical_operator
+
+mandate: >
+  Leading public health provider in the Northern Emirates operating clinics and hospitals.
+  First regional healthcare entity certified to ISO 42001:2023 (AI Management System).
+  Deploys clinical AI tools (e.g. diabetic retinopathy screening, Amal assistant) at point-of-care.
+
+regulatory_scope:
+  - clinical_ai_deployment
+  - patient_safety
+  - iso_42001_compliance
+  - model_monitoring_and_drift_detection
+
+relevant_authorities:
+  - AE-HEALTH-9.5 # EHS AI Policy and ISO 42001:2023 Certification
+  - AE-HEALTH-9.3 # MoHAP AI in Healthcare Guidelines
+
+powers:
+  - halt_clinic_level_ai_inference
+  - escalate_safety_incidents_to_mohap
+  - initiate_clinical_re-evaluation
+  - isolate_affected_patient_cohorts
+
+drill_behavior:
+  strictness: high
+  incident_response: prioritize_patient_safety_first
+  model_monitoring: flag_sudden_accuracy_drop_or_false_negative_surge

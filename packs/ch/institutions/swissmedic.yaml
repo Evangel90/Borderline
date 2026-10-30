@@ -1,0 +1,31 @@
+id: swissmedic
+name: Swiss Agency for Therapeutic Products (Swissmedic)
+jurisdiction: CH
+type: federal_regulatory_agency
+role: national_medical_device_and_therapeutic_regulator
+
+mandate: >
+  Swiss national supervisory authority for medicines and medical devices.
+  Regulates Software as a Medical Device (SaMD), oversees vigilance, evaluates
+  serious incident reports, and enforces post-market surveillance.
+
+regulatory_scope:
+  - medical_device_software_qualification
+  - post_market_surveillance (PMS)
+  - vigilance_reporting_and_incident_triage
+  - conformity_assessment_enforcement
+
+relevant_authorities:
+  - CH-HEALTH-MedDO # Medical Devices Ordinance (MedDO, SR 812.213) Art 66
+  - CH-HEALTH-TPA   # Therapeutic Products Act (TPA, SR 812.21)
+
+powers:
+  - receive_mandatory_incident_reports (Art 66 MedDO)
+  - issue_field_safety_corrective_actions (FSCA)
+  - order_device_recall_or_marketing_ban
+  - demand_technical_documentation_and_clinical_evaluation_reports
+
+drill_behavior:
+  strictness: high
+  vigilance_trigger: serious_incident_criteria_met
+  audit_posture: require_full_root_cause_analysis_from_manufacturer

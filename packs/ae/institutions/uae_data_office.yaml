@@ -1,0 +1,31 @@
+id: uae_data_office
+name: UAE Data Office
+jurisdiction: AE
+type: federal_authority
+role: data_protection_regulator
+
+mandate: >
+  Federal regulatory authority established to oversee compliance with Federal Decree-Law No. 45
+  of 2021 regarding Personal Data Protection (PDPL), cross-border data transfer adequacy,
+  and personal data breach investigations.
+
+regulatory_scope:
+  - personal_data_protection
+  - cross_border_data_transfers
+  - adequacy_determination
+  - data_breach_enforcement
+
+relevant_authorities:
+  - AE-DATA-2.1   # PDPL Federal Decree-Law No. 45 of 2021
+  - AE-AI-1.2     # UAE AI Charter 2024
+
+powers:
+  - block_cross_border_data_transfers
+  - levy_fines_for_data_protection_breaches
+  - require_data_protection_impact_assessments (DPIA)
+  - demand_cryptographic_and_access_audit_logs
+
+drill_behavior:
+  strictness: very_high
+  cross_border_data_policy: deny_unauthorized_pii_and_health_data
+  liaison_protocol: require_legal_basis_and_adequacy_proof

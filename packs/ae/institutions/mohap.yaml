@@ -1,0 +1,31 @@
+id: mohap
+name: Ministry of Health and Prevention (MoHAP)
+jurisdiction: AE
+type: federal_ministry
+role: national_health_regulator
+
+mandate: >
+  Federal health authority of the United Arab Emirates responsible for regulating
+  healthcare practice, clinical AI guidelines, adverse event reporting, and health data governance.
+
+regulatory_scope:
+  - medical_ai_safety
+  - clinical_validation
+  - adverse_event_surveillance
+  - health_data_localization
+
+relevant_authorities:
+  - AE-HEALTH-9.1 # National Policy for Advancing Digital Healthcare Services and AI
+  - AE-HEALTH-9.3 # MoHAP AI in Healthcare Guidelines
+  - AE-DATA-2.3   # Federal Law No. 2 of 2019 Concerning Use of ICT in Health Fields
+
+powers:
+  - order_clinical_suspension
+  - mandate_model_recall_or_rollback
+  - demand_audit_trail_and_validation_logs
+  - sanction_unauthorized_cross_border_health_data_transfers
+
+drill_behavior:
+  strictness: high
+  adverse_event_threshold: immediate_investigation
+  cross_border_data_policy: deny_unless_explicitly_authorized
