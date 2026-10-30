@@ -124,8 +124,14 @@ with gaps_tab:
         st.write(gap.get("global_benchmark", "—"))
         st.markdown("**Suggested remediation**")
         st.write(gap.get("remediation_recommendation", "—"))
-        st.markdown("**How this finding was produced**")
-        st.write(gap.get("finding_method", "Not recorded."))
+        st.markdown("**How to read this finding**")
+        st.info(
+            "The agents make the decisions shown in the incident timeline. "
+            "This gap summary is assembled separately from scenario rules and "
+            "retrieved policy sources; it is not an agent's legal determination."
+        )
+        with st.expander("Technical method"):
+            st.write(gap.get("finding_method", "Not recorded."))
         st.caption(gap.get("limitations", "Limitations not recorded."))
 
         evidence = gap.get("evidence", [])
