@@ -4,6 +4,7 @@ from __future__ import annotations
 
 import json
 import os
+from pathlib import Path
 from urllib.error import HTTPError, URLError
 from urllib.request import Request, urlopen
 
@@ -14,8 +15,30 @@ class OllamaError(RuntimeError):
     """Raised when the configured model cannot produce a valid response."""
 
 
+def _load_project_env() -> None:
+    """Load simple KEY=value entries from the repo-root .env without overriding the shell."""
+    env_path = Path.cwd() / ".env"
+    if not env_path.is_file():
+        return
+    for raw_line in env_path.read_text(encoding="utf-8").splitlines():
+        line = raw_line.strip()
+        if not line or line.startswith("#"):
+            continue
+        if line.startswith("export "):
+            line = line[7:].lstrip()
+        key, separator, value = line.partition("=")
+        key = key.strip()
+        if not separator or not key:
+            continue
+        value = value.strip()
+        if len(value) >= 2 and value[0] == value[-1] and value[0] in "\"'":
+            value = value[1:-1]
+        os.environ.setdefault(key, value)
+
+
 class OllamaChatClient:
     def __init__(self) -> None:
+        _load_project_env()
         self.base_url = os.environ.get("BORDERLINE_OLLAMA_URL", "http://127.0.0.1:11434").rstrip("/")
         self.model = os.environ.get("BORDERLINE_LLM_MODEL", "qwen3:8b")
         self.timeout = float(os.environ.get("BORDERLINE_LLM_TIMEOUT", "180"))
@@ -76,6 +99,7 @@ class OpenRouterChatClient:
     """OpenRouter client using its free-model router and JSON-schema outputs."""
 
     def __init__(self) -> None:
+        _load_project_env()
         self.base_url = os.environ.get(
             "BORDERLINE_OPENROUTER_URL", "https://openrouter.ai/api/v1"
         ).rstrip("/")
@@ -112,6 +136,8 @@ class OpenRouterChatClient:
                 },
             },
             "temperature": 0,
+            "max_tokens": 4096,
+            "reasoning": {"max_tokens": 512, "exclude": True},
         }
         request = Request(
             f"{self.base_url}/chat/completions",
@@ -138,14 +164,24 @@ class OpenRouterChatClient:
             raise OllamaError(f"OpenRouter returned an invalid chat response: {exc}") from exc
 
         try:
-            content = result["choices"][0]["message"]["content"]
+            choice = result["choices"][0]
+            message = choice["message"]
+            content = message.get("content")
             self.model = result.get("model", self.model)
+            if content is None:
+                raise OllamaError(
+                    "OpenRouter returned no final content "
+                    f"(model={self.model}, finish_reason={choice.get('finish_reason')}, "
+                    f"refusal={bool(message.get('refusal'))})."
+                )
             if isinstance(content, list):
                 content = "".join(
                     item.get("text", "") for item in content if isinstance(item, dict)
                 )
             parsed = json.loads(content)
             return schema.model_validate(parsed)
+        except OllamaError:
+            raise
         except (KeyError, IndexError, TypeError, json.JSONDecodeError, ValidationError) as exc:
             raise OllamaError(
                 f"OpenRouter response did not match {schema.__name__}: {exc}"
@@ -153,6 +189,7 @@ class OpenRouterChatClient:
 
 
 def create_chat_client() -> OllamaChatClient | OpenRouterChatClient:
+    _load_project_env()
     provider = os.environ.get("BORDERLINE_LLM_PROVIDER", "openrouter").lower()
     if provider == "openrouter":
         return OpenRouterChatClient()
