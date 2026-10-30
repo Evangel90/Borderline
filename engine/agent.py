@@ -8,6 +8,7 @@ from typing import Any, List, Optional
 from engine.actions import ActionExecutor
 from engine.gates import BorderGate
 from engine.llm import OllamaChatClient, OpenRouterChatClient, create_chat_client
+from engine.knowledge import KnowledgeIndex
 from engine.models import AgentProposal, Chunk, DecisionLogEntry, Institution
 
 
@@ -18,16 +19,25 @@ class InstitutionalAgent:
         chunks: List[Chunk],
         llm: Optional[OllamaChatClient | OpenRouterChatClient] = None,
         action_executor: Optional[ActionExecutor] = None,
+        knowledge_index: Optional[KnowledgeIndex] = None,
     ):
         if not institution.available_actions:
             raise ValueError(f"Institution '{institution.id}' has no declared sandbox actions.")
         self.institution = institution
         self.chunks = chunks
+        self.knowledge_index = knowledge_index
+        self.allowed_jurisdictions = sorted({chunk.jurisdiction for chunk in chunks})
         self.llm = llm or create_chat_client()
         self.action_executor = action_executor or ActionExecutor()
 
     def search_knowledge(self, query_terms: List[str], top_k: int = 4) -> List[Chunk]:
-        """Retrieve evidence chunks with deterministic lexical ranking."""
+        """Retrieve semantically similar evidence within this agent's pack view."""
+        if self.knowledge_index:
+            return self.knowledge_index.search(
+                " ".join(query_terms), self.allowed_jurisdictions, top_k=top_k
+            )
+
+        # Keep a lexical fallback for callers constructing agents outside the drill.
         scored = []
         for chunk in self.chunks:
             text_lower = chunk.text.lower()
@@ -104,6 +114,11 @@ class InstitutionalAgent:
                     "document": chunk.title,
                     "jurisdiction": chunk.jurisdiction,
                     "page": chunk.page,
+                    "source_url": chunk.source_url,
+                    "source_issuer": chunk.source_issuer,
+                    "source_language": chunk.source_language,
+                    "source_binding": chunk.source_binding,
+                    "source_sha256": chunk.source_sha256,
                     "text": " ".join(chunk.text.split())[:900],
                 }
                 for chunk in evidence
@@ -205,6 +220,7 @@ class InstitutionalAgent:
             tool_result=execution.result,
             confidence=proposal.confidence,
             state_changes=execution.state_changes,
+            retrieved_chunk_ids=[chunk.chunk_id for chunk in evidence],
             visible_event=event,
             visible_payload=payload,
             visible_state=visible_state or {},

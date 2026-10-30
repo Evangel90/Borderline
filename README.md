@@ -25,9 +25,12 @@ an optional judge-injected escalation can be enabled for a run. The latest
 full evaluation, `local-qwen3-human-gate-20261030-1`, used local Ollama
 `qwen3:8b` and completed all seven default stages with 31 decisions and a
 generated gap record. EHS recorded a pause recommendation pending human
-approval; the run did not pause the simulated service. Policy retrieval remains deterministic keyword search; there is no
-vector database. The checked-in scenario actions only change synthetic drill
-state. No real clinical, regulatory, or data-transfer system is connected. If
+approval; the run did not pause the simulated service. Current policy retrieval
+uses a local persistent Chroma vector index with multilingual embeddings. That
+saved evaluation predates the vector index and must be rerun before its
+retrieval results are used as submission evidence. The checked-in scenario
+actions only change synthetic drill state. No real clinical, regulatory, or
+data-transfer system is connected. If
 the configured model is unavailable, the drill stops; there is no scripted
 decision fallback. The Streamlit viewer displays each agent's visible facts,
 decisions, tool outcomes, evidence, and audit-chain status. `make replay` and
@@ -70,6 +73,7 @@ python3.11 -m venv .venv
 .venv/bin/pip install -e .
 export OPENROUTER_API_KEY=your-key
 make verify-sources
+make index  # downloads the embedding model once (~220 MB)
 make drill INTENT=retinopathy-ae-ch RUN=demo-2026-10-30
 make verify-log RUN=demo-2026-10-30
 ```
@@ -88,6 +92,13 @@ the local service and timeout).
 The `RUN` value must be new each time; existing run IDs are immutable and the
 engine refuses to append to them. The supplied policy chunks are checked in;
 agent prompts and retrieved excerpts are sent to OpenRouter when a drill runs.
+The local Chroma index is built from the checked-in chunks; it is ignored by
+Git and can be recreated with `make index`. The first index build downloads the
+multilingual [FastEmbed model](https://qdrant.github.io/fastembed/examples/Supported_Models/)
+(about 220 MB); embedding and search then run locally. Set
+`BORDERLINE_VECTOR_PATH` to change the index directory or
+`BORDERLINE_EMBEDDING_MODEL` to select another supported FastEmbed text model. Each
+decision log records the IDs of all chunks retrieved for its agent view.
 Each `packs/*/chunks.jsonl` record retains its source URL, issuer, registered
 file path and SHA-256, retrieval date, language, legal status, and provenance
 notes. A decision's cited chunk ID therefore resolves to both an exact page
@@ -115,7 +126,8 @@ Run from the repo root.
 | --- | --- |
 | `make fetch` | Not implemented yet |
 | `make verify-sources` | Re-hash sources and flag any change |
-| `make ingest` | Rebuild citation-ready text chunks from registered PDFs (no vector index) |
+| `make ingest` | Rebuild provenance-bearing chunks and update the local vector index |
+| `make index` | Build or update the local Chroma index from existing chunks |
 | `make drill INTENT=retinopathy-ae-ch` | Run the LLM-driven drill; requires a configured model provider and API key for OpenRouter |
 | `make verify-log RUN=<run_id>` | Check the hash chain; name the first broken entry |
 | `make replay RUN=<run_id>` | Not implemented yet |
@@ -131,8 +143,8 @@ border gate has veto authority over transfers and external notifications. These
 tools only update in-memory drill state and the local audit log. The model's
 short rationale is logged; private chain-of-thought is neither requested nor
 stored. The hash chain is tamper-evident but not digitally signed or externally
-anchored. The gap analysis is scenario-specific and keyword-retrieved, not an
-autonomous legal conclusion. Review citations and actions against current
+anchored. Gap evidence is scenario-specific and retrieved from selected source
+documents; it is not an autonomous legal conclusion. Review citations and actions against current
 authoritative sources before real-world use.
 
 ## License

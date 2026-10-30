@@ -14,6 +14,7 @@ from engine.models import (
 from engine.gates import BorderGate
 from engine.agent import InstitutionalAgent
 from engine.actions import ActionExecutor
+from engine.knowledge import KnowledgeIndex
 from engine.llm import create_chat_client
 from audit.hasher import HashChainedLogger
 from gaps.register import GapRegister
@@ -59,6 +60,9 @@ class DrillOrchestrator:
             "CH": self._load_chunks("packs/ch/chunks.jsonl"),
             "GLOBAL": self._load_chunks("packs/global/chunks.jsonl")
         }
+        self.knowledge_index = KnowledgeIndex(
+            self.chunks["AE"] + self.chunks["CH"] + self.chunks["GLOBAL"]
+        )
 
         # Load institutions
         self.agents: Dict[str, InstitutionalAgent] = self._init_agents()
@@ -81,11 +85,16 @@ class DrillOrchestrator:
         limit: int = 1,
         required_terms: List[str] | None = None,
     ) -> List[PolicyEvidence]:
-        """Retrieve citation-ready chunks with deterministic lexical ranking."""
+        """Retrieve citation-ready chunks from a jurisdiction-filtered vector search."""
         candidates = []
-        for chunk in self.chunks.get(jurisdiction, []):
-            if chunk.doc_id != doc_id:
-                continue
+        query = " ".join(terms + (required_terms or []))
+        matches = self.knowledge_index.search(
+            query,
+            [jurisdiction],
+            top_k=max(50, limit * 20),
+            doc_id=doc_id,
+        )
+        for chunk in matches:
             text_lower = chunk.text.lower()
             if required_terms and not all(term.lower() in text_lower for term in required_terms):
                 continue
@@ -263,7 +272,8 @@ class DrillOrchestrator:
                     else self.chunks[jurisdiction] + self.chunks["GLOBAL"]
                 )
                 agents[inst.id] = InstitutionalAgent(
-                    inst, jurisdiction_chunks, self.llm, self.action_executor
+                    inst, jurisdiction_chunks, self.llm, self.action_executor,
+                    self.knowledge_index,
                 )
 
         return agents

@@ -135,6 +135,7 @@ class DecisionLogEntry(BaseModel):
     visible_payload: Dict[str, Any] = Field(default_factory=dict)
     visible_state: Dict[str, Any] = Field(default_factory=dict)
     authorized_actions: List[str] = Field(default_factory=list)
+    retrieved_chunk_ids: List[str] = Field(default_factory=list)
     cited_clauses: List[str] = Field(default_factory=list)
     justification: str
     model_name: Optional[str] = None

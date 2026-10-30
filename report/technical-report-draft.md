@@ -66,12 +66,12 @@ This is an architectural mapping, not a claim of full Y.3172 conformance.
 | Y.3172-related concept       | Borderline prototype                                                                                                                                               | Current limit                                                                                                                                    |
 | ---------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------ | ------------------------------------------------------------------------------------------------------------------------------------------------ |
 | ML intent                    | YAML drill intent defines the use case, stages, participants, and private agent views.                                                                             | The engine is currently wired to AE–CH files and identifiers.                                                                                   |
-| ML collector / preprocessing | Registered source PDFs are extracted and split into citation-bearing chunks.                                                                                       | Retrieval is deterministic keyword search; ingestion is not yet an integrated distributed vector knowledge base hosted in the ITU Sandbox.       |
+| ML collector / preprocessing | Registered source PDFs are extracted into provenance-bearing chunks; the current code indexes them in local persistent Chroma using multilingual embeddings. | The index is local and not an integrated distributed knowledge base hosted in the ITU Sandbox; retrieval quality still needs scenario evaluation. |
 | Policy node                  | AE–CH bridge YAML contains transfer and regulator-route rules.                                                                                                    | Rules are static and do not yet execute and record each of the three policy checks separately.                                                   |
 | ML function orchestrator     | Python releases timeline stages and invokes declared participants.                                                                                                 | Timing is a staged label, not a simulated clock; no dynamic event scheduler or judge UI exists.                                                  |
 | Model / agents               | Local Ollama `qwen3:8b` produced structured agent proposals for the completed evaluation run.                                                                    | No LoRA fine-tune or event-tagging model is implemented; model output still needs evidence and legal review.                                     |
 | Sandbox                      | Action handlers update synthetic state and return tool outcomes. A clinic-pause recommendation now waits for a separate human decision in the Streamlit review UI. | Human approval is local and unauthenticated; it changes only displayed synthetic state and does not control a real system.                       |
-| Audit                        | JSONL decisions are hash-chained and independently verifiable.                                                                                                     | The log records concise rationales and citations, not private chain-of-thought; full retrieval and liaison message traces still need completion. |
+| Audit                        | JSONL decisions are hash-chained and independently verifiable; current decisions record retrieved chunk IDs as well as citations.                               | The log records concise rationales, not private chain-of-thought; embedding queries, match scores, and liaison message traces are not recorded. |
 
 ## 5. Mapping to the ITU AI Readiness Framework 2.0
 
@@ -168,6 +168,12 @@ action-selection, gate, and logging path; it does not evaluate the expanded
 scenario or its private-view behavior. The two incomplete OpenRouter attempts
 are retained as historical records.
 
+The persistent Chroma index and multilingual embedding retrieval were added
+after the saved 30 October evaluation runs. Those historical runs used the
+previous lexical retrieval implementation and do not contain retrieved-chunk
+IDs. Run and review the expanded drill again against the current index before
+using it as submission evidence.
+
 ## 8. Candidate policy and standards gaps
 
 The repository currently records one scenario-specific gap concerning
@@ -194,7 +200,8 @@ by a completed mapping and run:
    model.
 
 Each candidate needs a sourced local-policy mapping, a checked global example,
-and evidence from the completed drill before it is reported as a finding.
+and evidence from a reviewed run using the current vector retrieval before it
+is reported as a finding.
 
 ## Submission checklist
 

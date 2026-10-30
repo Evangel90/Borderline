@@ -1,4 +1,4 @@
-.PHONY: fetch verify-sources ingest drill verify-log replay report-figures ui itu-smoke
+.PHONY: fetch verify-sources ingest index drill verify-log replay report-figures ui itu-smoke
 
 INTENT ?= retinopathy-ae-ch
 RUN ?=
@@ -19,6 +19,10 @@ verify-sources:
 
 ingest:
 	$(PYTHON) scripts/ingest.py
+	$(PYTHON) scripts/build_index.py
+
+index:
+	$(PYTHON) scripts/build_index.py
 
 drill:
 	$(PYTHON) scripts/run_drill.py --intent $(INTENT) $(if $(RUN),--run-id $(RUN),) $(DRILL_ARGS)
