@@ -33,7 +33,7 @@ report-figures:
 	$(call todo,M4)
 
 ui:
-	$(call todo,M2)
+	STREAMLIT_BROWSER_GATHER_USAGE_STATS=false $(PYTHON) -m streamlit run ui/app.py --server.headless true
 
 # M0 check: ITU reference ingestion on one PDF, into a throwaway index.
 # Needs `ollama serve` running and `ollama pull nomic-embed-text`.

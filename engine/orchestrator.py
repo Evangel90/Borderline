@@ -26,6 +26,14 @@ class DrillOrchestrator:
         self.logger = HashChainedLogger(self.run_dir)
         self.gap_register = GapRegister(self.run_dir)
 
+        # A run ID identifies one deterministic execution. Refuse to append to a
+        # prior run so rerunning the same ID cannot silently corrupt its chain.
+        if os.path.exists(self.logger.log_path) or os.path.exists(self.gap_register.gaps_path):
+            raise FileExistsError(
+                f"Run '{run_id}' already has output. Choose a new --run-id "
+                "to preserve each run as an immutable artifact."
+            )
+
         # Load Intent
         with open(intent_path, "r", encoding="utf-8") as f:
             raw_intent = yaml.safe_load(f)

@@ -18,6 +18,9 @@ itu = [
     "chromadb>=0.5.0",
     "pydantic-settings>=2.0.0",
 ]
+ui = [
+    "streamlit>=1.40",
+]
 
 [tool.setuptools]
 packages = ["engine", "audit", "gaps"]
