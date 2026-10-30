@@ -96,11 +96,16 @@ ITU materials are included in the global pack. Provenance is recorded in
 [`data/sources.csv`](../data/sources.csv); source hashes can be checked with
 `make verify-sources`.
 
-The collection is incomplete for the proposed scenario. The UAE ICT Health
-Law, its executive regulation, and 2021 exemptions have been located on the
-official Ministry of Health and Prevention (MoHAP) site but still need to be
-downloaded, registered, and ingested. Primary materials supporting EDE's role
-and relevant DHA materials remain outstanding. The Swiss Information Security
+The collection is incomplete for the proposed scenario. Federal Law No. 2 of
+2019 on ICT in Health is now registered and ingested; its English PDF was
+obtained from ISAHD, a platform managed by the Dubai Health Authority, and
+checked against the official UAE Legislation portal. The portal states that
+the Arabic text prevails. The executive regulation (Cabinet Resolution No. 32
+of 2020) and the 2021 exemption resolution (MoHAP Resolution No. 51) have been
+located on official portals but their PDF downloads remain unavailable from
+this environment, so they are not yet in the source register or chunks.
+Primary materials supporting EDE's role and relevant DHA materials remain
+outstanding. The Swiss Information Security
 Act reporting amendment, Cybersecurity Ordinance, and official BACS fact sheet
 are now registered and ingested. NCSC guidance limits mandatory reporting to
 entities in the statutory scope; the drill must not assume the Swiss vendor is
@@ -144,6 +149,12 @@ unresolved. See
 [`run-review-local-qwen3-cyber-scope-20261030-1.md`](run-review-local-qwen3-cyber-scope-20261030-1.md).
 The newest run improves this one issue but is not submission-ready evidence
 for legal accuracy, human oversight, or a complete liaison policy check.
+The subsequent run `local-qwen3-uae-law-scope-20261030-1` completed with 31
+decisions and a verified hash chain after the ICT Health Law was ingested.
+The Data Office cited Article 13 in step 7 but not at the earlier step-6
+review, and the missing exemption resolution prevents a complete assessment.
+Its review is in
+[`run-review-local-qwen3-uae-law-scope-20261030-1.md`](run-review-local-qwen3-uae-law-scope-20261030-1.md).
 
 An earlier four-step prototype run, `or-free-20261030-5`, completed with 11
 agent decisions and a verified hash chain. That run validates the earlier

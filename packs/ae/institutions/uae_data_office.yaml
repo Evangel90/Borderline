@@ -7,17 +7,27 @@ role: data_protection_regulator
 mandate: >
   Federal regulatory authority established to oversee compliance with Federal Decree-Law No. 45
   of 2021 regarding Personal Data Protection (PDPL), cross-border data transfer adequacy,
-  and personal data breach investigations.
+  and personal data breach investigations. For health data, also consider Federal Law No. 2
+  of 2019, including its Article 13 restriction on storing or processing relevant health data
+  outside the State. Do not decide whether a statutory exception applies without the 2021
+  exemption resolution and evidence of any required health-authority approval; request the
+  applicable approval, legal basis, and safeguards for review.
 
 regulatory_scope:
   - personal_data_protection
   - cross_border_data_transfers
   - adequacy_determination
   - data_breach_enforcement
+  - health data
+  - outside State
+  - Article (13)
+  - localization
+  - health authority approval
 
 relevant_authorities:
-  - AE-DATA-2.1   # PDPL Federal Decree-Law No. 45 of 2021
-  - AE-AI-1.2     # UAE AI Charter 2024
+  - AE-DATA-PDPL-2021
+  - AE-HEALTH-ICT-LAW-2019
+  - AE-AI-CHARTER-2024
 
 powers:
   - block_cross_border_data_transfers
