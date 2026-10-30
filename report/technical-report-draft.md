@@ -100,12 +100,18 @@ The collection is incomplete for the proposed scenario. Federal Law No. 2 of
 2019 on ICT in Health is now registered and ingested; its English PDF was
 obtained from ISAHD, a platform managed by the Dubai Health Authority, and
 checked against the official UAE Legislation portal. The portal states that
-the Arabic text prevails. The executive regulation (Cabinet Resolution No. 32
-of 2020) and the 2021 exemption resolution (MoHAP Resolution No. 51) have been
-located on official portals but their PDF downloads remain unavailable from
-this environment, so they are not yet in the source register or chunks.
-Primary materials supporting EDE's role and relevant DHA materials remain
-outstanding. The Swiss Information Security
+the Arabic text prevails. The executive regulation ([Cabinet Resolution No. 32
+of 2020](https://uaelegislation.gov.ae/en/legislations/1444), official UAE
+Legislation record and download) and the 2021 exemption resolution ([MoHAP
+Ministerial Resolution No. 51](https://mohap.gov.ae/en/w/ministerial-decree-no.-51-of-the-year-2021-regarding-cases-in-which-health-data-and-information-may-be-stored-or-transferred-outside-the-country),
+official MoHAP record; its official attachment is
+[here](https://uaephl.mohap.gov.ae/admin/Attachment/Download?id=8e6c0280-78fc-4b4f-bdb4-2637c2909b38&response=download))
+have been located and their contents reviewed, but the PDF downloads remain
+unavailable from this environment (UAE Legislation returns HTTP 403 and the
+MoHAP attachment host times out). They are therefore not yet in the source
+register or chunks. Archive and hash the official PDFs before treating these
+rules as evidence in a drill. Primary materials supporting EDE's role and
+relevant DHA materials remain outstanding. The Swiss Information Security
 Act reporting amendment, Cybersecurity Ordinance, and official BACS fact sheet
 are now registered and ingested. NCSC guidance limits mandatory reporting to
 entities in the statutory scope; the drill must not assume the Swiss vendor is
