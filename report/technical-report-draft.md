@@ -5,13 +5,16 @@
 **Team:** [add team members]  
 **Repository:** [Borderline on GitHub](https://github.com/Evangel90/Borderline)
 
-> Draft status: a full eight-stage run using local `qwen3:8b`
-> (`local-qwen3-human-gate-20261030-1`) completed with 31 decisions and a
-> generated gap register. Its hash chain verifies. EHS recorded a pause
-> recommendation pending human approval; the simulated service was not paused,
-> and no approval has yet been recorded. This is a prototype evaluation, not a
-> legal validation: citations and the generated gap evidence need human review,
-> and the country source collection and six-gap analysis remain incomplete.
+> Draft status: the latest vector-retrieval run
+> (`vector-retrieval-retry-20261030-1`) completed all seven default stages with
+> 31 decisions and a generated gap register. Its hash chain and citation links
+> verify, but review found an off-topic rationale and multiple unsupported
+> citations. It demonstrates index integration and audit tracing, not legal
+> accuracy. See the [run review](run-review-vector-retrieval-retry-20261030-1.md).
+> The earlier human-gate run recorded an EHS pause recommendation pending
+> human approval; the simulated service was not paused and no approval has
+> been recorded. The country source collection and six-gap analysis remain
+> incomplete.
 
 ## 1. Overall introduction
 
@@ -171,8 +174,13 @@ are retained as historical records.
 The persistent Chroma index and multilingual embedding retrieval were added
 after the saved 30 October evaluation runs. Those historical runs used the
 previous lexical retrieval implementation and do not contain retrieved-chunk
-IDs. Run and review the expanded drill again against the current index before
-using it as submission evidence.
+IDs. The expanded drill has since completed against the current index as
+`vector-retrieval-retry-20261030-1`. Its engineering review verified all
+retrieval/citation links and agent-view/action boundaries, but found that
+several cited passages do not support the associated rationale and one
+rationale is off-topic. Improve retrieval and evidence checks, then rerun before
+using any output as submission evidence. The review is in
+[`run-review-vector-retrieval-retry-20261030-1.md`](run-review-vector-retrieval-retry-20261030-1.md).
 
 ## 8. Candidate policy and standards gaps
 
@@ -200,8 +208,8 @@ by a completed mapping and run:
    model.
 
 Each candidate needs a sourced local-policy mapping, a checked global example,
-and evidence from a reviewed run using the current vector retrieval before it
-is reported as a finding.
+and evidence from a run whose cited passages have been reviewed for support
+before it is reported as a finding.
 
 ## Submission checklist
 

@@ -85,7 +85,7 @@ class DrillOrchestrator:
         limit: int = 1,
         required_terms: List[str] | None = None,
     ) -> List[PolicyEvidence]:
-        """Retrieve citation-ready chunks from a jurisdiction-filtered vector search."""
+        """Retrieve scoped vector candidates and rank them by configured legal terms."""
         candidates = []
         query = " ".join(terms + (required_terms or []))
         matches = self.knowledge_index.search(
@@ -240,13 +240,16 @@ class DrillOrchestrator:
             ),
             finding_method=(
                 "Deterministic scenario rule: connect the recorded liaison ROUTE outcome "
-                "and step-specific agent views to lexical retrieval from the UAE PDPL, "
-                "Swiss FADP / DPO, Human Research Act, and WHO health-AI guidance. "
+                "and step-specific agent views to jurisdiction- and document-scoped vector "
+                "retrieval, then rank candidates using configured legal terms from the UAE "
+                "PDPL, Swiss FADP / DPO, Human Research Act, and WHO health-AI guidance. "
                 "The agents make the simulated decisions; this gap summary is compiled "
                 "separately and is not an agent's legal determination."
             ),
             limitations=(
-                "This is a synthetic drill finding, not legal advice. Retrieval is keyword-based; "
+                "This is a synthetic drill finding, not legal advice. Vector similarity and "
+                "keyword ranking do not verify that each selected passage supports its "
+                "assigned relevance statement; "
                 "the DPO Annex 1 check uses the checked-in 2023 text; source currency and "
                 "application to a real incident require human review."
             ),

@@ -30,11 +30,18 @@ class InstitutionalAgent:
         self.llm = llm or create_chat_client()
         self.action_executor = action_executor or ActionExecutor()
 
-    def search_knowledge(self, query_terms: List[str], top_k: int = 4) -> List[Chunk]:
+    def search_knowledge(
+        self,
+        query_terms: List[str],
+        top_k: int = 6,
+        query_context: str = "",
+    ) -> List[Chunk]:
         """Retrieve semantically similar evidence within this agent's pack view."""
         if self.knowledge_index:
             return self.knowledge_index.search(
-                " ".join(query_terms), self.allowed_jurisdictions, top_k=top_k
+                " ".join([*query_terms, query_context]),
+                self.allowed_jurisdictions,
+                top_k=top_k,
             )
 
         # Keep a lexical fallback for callers constructing agents outside the drill.
@@ -83,7 +90,7 @@ class InstitutionalAgent:
             "Choose exactly one action from the available_actions list in this event view for the runtime to execute through the sandbox tool. "
             "Do not claim an action succeeded if the tool result later vetoes it. The border gate is mandatory. "
             "Do not invent legal rules, facts, or citations. Cite only supplied chunk IDs that support your action. "
-            "If no relevant evidence chunks are supplied, cite none and request review or information. "
+            "If none of the supplied chunks supports your decision, cite none and request review or information. "
             "Expected policy checks are questions to consider, not authority or evidence by themselves. "
             "If evidence is incomplete, choose a review, pause, or information-request action. "
             "Return a short decision rationale, not private chain-of-thought. Return confidence from 0 to 1."
@@ -139,7 +146,10 @@ class InstitutionalAgent:
         allowed_actions: Optional[List[str]] = None,
     ) -> DecisionLogEntry:
         """Ask the LLM for an action, validate it, and execute it in the sandbox."""
-        evidence = self.search_knowledge(self._keywords(event, payload, self.institution))
+        evidence = self.search_knowledge(
+            self._keywords(event, payload, self.institution),
+            query_context=f"{event} {json.dumps(payload, ensure_ascii=False)}",
+        )
         declared_actions = {item.name: item for item in self.institution.available_actions}
         selected_actions = allowed_actions or list(declared_actions)
         unknown_actions = set(selected_actions) - set(declared_actions)
@@ -176,16 +186,15 @@ class InstitutionalAgent:
                 chunk_id for chunk_id in generated.cited_chunk_ids
                 if chunk_id not in evidence_by_id
             ]
-            missing_citations = bool(evidence and not generated.cited_chunk_ids)
-            if not invalid_citations and not missing_citations:
+            if not invalid_citations:
                 proposal = generated
                 break
             if attempt == 0:
                 problem = (
                     f"The previous proposal was rejected. Invalid citation IDs: {invalid_citations}. "
                     f"Supplied citation IDs: {list(evidence_by_id)}. "
-                    "Retry with only supplied IDs that support the action; if none support it, "
-                    "choose a review action and cite an available supporting chunk."
+                    "Retry with only supplied IDs that genuinely support the action. "
+                    "If none support it, cite none and choose a review or information-request action."
                 )
                 user = f"{user}\n\nValidation feedback: {problem}"
         if proposal is None:

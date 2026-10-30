@@ -20,17 +20,18 @@ model update.
 
 ## Status
 
-The eight-stage timeline gives participating agents role-specific event views;
-an optional judge-injected escalation can be enabled for a run. The latest
-full evaluation, `local-qwen3-human-gate-20261030-1`, used local Ollama
-`qwen3:8b` and completed all seven default stages with 31 decisions and a
-generated gap record. EHS recorded a pause recommendation pending human
-approval; the run did not pause the simulated service. Current policy retrieval
-uses a local persistent Chroma vector index with multilingual embeddings. That
-saved evaluation predates the vector index and must be rerun before its
-retrieval results are used as submission evidence. The checked-in scenario
-actions only change synthetic drill state. No real clinical, regulatory, or
-data-transfer system is connected. If
+The timeline gives participating agents role-specific event views; an optional
+judge-injected escalation can be enabled for a run. The latest expanded run,
+`vector-retrieval-retry-20261030-1`, used local Ollama `qwen3:8b` and the
+persistent Chroma index, completing all seven default stages with 31 decisions
+and a generated gap record. Its hash chain and retrieved/cited chunk links
+verify, but review found an off-topic rationale and multiple unsupported
+citations; it is not evidence of legal accuracy. See the
+[run review](report/run-review-vector-retrieval-retry-20261030-1.md). The
+earlier human-gate run `local-qwen3-human-gate-20261030-1` recorded a pause
+recommendation pending human approval; it did not pause the simulated service.
+The checked-in scenario actions only change synthetic drill state. No real
+clinical, regulatory, or data-transfer system is connected. If
 the configured model is unavailable, the drill stops; there is no scripted
 decision fallback. The Streamlit viewer displays each agent's visible facts,
 decisions, tool outcomes, evidence, and audit-chain status. `make replay` and
