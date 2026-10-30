@@ -17,13 +17,14 @@ verify-sources:
 	$(PYTHON) scripts/verify_sources.py
 
 ingest:
-	$(call todo,M1)
+	$(PYTHON) scripts/ingest.py
 
 drill:
-	$(call todo,M2)
+	$(PYTHON) scripts/run_drill.py --intent $(INTENT) $(if $(RUN),--run-id $(RUN),)
 
 verify-log:
-	$(call todo,M2)
+	@if [ -z "$(RUN)" ]; then echo "Error: specify RUN=<run_id>"; exit 1; fi
+	$(PYTHON) scripts/verify_log.py --run $(RUN)
 
 replay:
 	$(call todo,M2)

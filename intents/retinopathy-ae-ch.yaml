@@ -1,0 +1,75 @@
+id: retinopathy-ae-ch
+title: "Cross-Border AI Incident Drill: Diabetic Retinopathy Diagnostic Drift"
+version: "1.0.0"
+
+# ITU-T Y.3172 Standard Mapping
+standard_alignment:
+  itu_recommendation: "ITU-T Y.3172"
+  components:
+    ml_intent: "Automated diabetic retinopathy screening and triage in primary clinics"
+    ml_collector: "Telemetry and diagnostic feedback from point-of-care ophthalmic scanners"
+    policy_node: "Cross-border regulatory liaison channel (packs/bridge/ae-ch.yaml)"
+    sandbox: "Borderline isolated multi-agent drill execution runtime"
+
+context:
+  domain: health
+  host_country: AE
+  partner_country: CH
+  description: >
+    RetinaSwiss AG (Zurich) deployed RetinaVision-DX v2.4 (SaMD) to UAE clinics operated by Emirates Health Services (EHS).
+    Following an algorithmic model update intended to improve microaneurysm detection, UAE ophthalmologists observe
+    a 23% false-negative rate for Stage 3 proliferative diabetic retinopathy on local patient demographic scans.
+
+actors:
+  ae:
+    - ehs            # Clinic network discovering diagnostic divergence
+    - mohap          # Federal health ministry enforcing clinical AI safety
+    - uae_data_office # Federal data regulator enforcing PDPL & cross-border export limits
+  ch:
+    - retina_swiss_ag # Commercial vendor requesting telemetry and debugging data
+    - swissmedic     # Swiss medical device regulator monitoring post-market vigilance
+    - fodio          # Swiss Federal Data Protection Commissioner (EDÖB)
+
+timeline:
+  - step: 1
+    phase: "Detection & Anomaly Flagging"
+    event: "EHS clinicians flag a cluster of missed Stage 3 proliferative retinopathy cases across 3 Dubai & Northern Emirates clinics."
+    initiator: ehs
+    payload:
+      affected_patients: 47
+      false_negative_rate: "23.4%"
+      action: "EHS halts automated diagnosis and switches to human-in-the-loop manual review."
+    expected_policy_checks:
+      - "EHS AI Policy / ISO 42001:2023 incident escalation"
+      - "MoHAP AI in Healthcare adverse incident triage"
+
+  - step: 2
+    phase: "Vendor Telemetry Request & Border Clash"
+    event: "RetinaSwiss AG requests immediate transfer of 500 raw high-resolution retinal fundus scans from UAE clinics to Zurich for debugging."
+    initiator: retina_swiss_ag
+    payload:
+      data_requested: "raw_patient_fundus_images"
+      claimed_purpose: "Urgent retrospective model debugging & human research analysis"
+    expected_policy_checks:
+      - "UAE PDPL Art. 22 / Health Data Law: Raw health data export prohibited without bilateral adequacy"
+      - "CH DPO Annex 1: UAE is non-adequate; vendor claims research exemption under HRA SR 810.30"
+      - "Bridge Gate: Must BLOCK raw patient images, permit ONLY anonymized model weight vectors"
+
+  - step: 3
+    phase: "Bilateral Vigilance & Regulatory Intervention"
+    event: "MoHAP issues formal regulatory inquiry; Swissmedic initiates vigilance review under MedDO Art. 66."
+    initiator: mohap
+    payload:
+      target: swissmedic
+      inquiry: "Verification of RetinaVision-DX v2.4 conformity assessment and foreign field safety actions"
+    expected_policy_checks:
+      - "MedDO SR 812.213 Art. 66: Mandatory manufacturer vigilance reporting to Swissmedic"
+      - "MoHAP regulatory suspension powers: Model recall vs. rollback mandate"
+
+  - step: 4
+    phase: "Policy Gap Output & Remediation"
+    event: "Borderline engine compares institutional legal bases, calculates jurisdictional friction, and logs policy gap."
+    initiator: engine
+    payload:
+      gap_category: "cross_border_health_data_sovereignty_vs_post_market_vigilance"
+      remediation: "Bilateral mutual recognition protocol with federated zero-PII error telemetry"
