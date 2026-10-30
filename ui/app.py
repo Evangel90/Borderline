@@ -115,6 +115,21 @@ with gaps_tab:
         st.write(gap.get("global_benchmark", "—"))
         st.markdown("**Suggested remediation**")
         st.write(gap.get("remediation_recommendation", "—"))
+        st.markdown("**How this finding was produced**")
+        st.write(gap.get("finding_method", "Not recorded."))
+        st.caption(gap.get("limitations", "Limitations not recorded."))
+
+        evidence = gap.get("evidence", [])
+        st.markdown(f"**Supporting evidence ({len(evidence)})**")
+        if not evidence:
+            st.info("No supporting evidence references were recorded for this finding.")
+        for item in evidence:
+            page = f" · p. {item['page']}" if item.get("page") else ""
+            label = f"{item.get('title', 'Source')} · {item.get('source_ref', 'no reference')}{page}"
+            with st.expander(label):
+                st.caption(f"{item.get('source_type', 'source')} · {item.get('jurisdiction', '—')}")
+                st.write(item.get("relevance", ""))
+                st.markdown("> " + item.get("excerpt", "No excerpt recorded."))
 
 with audit_tab:
     st.subheader("Hash-chained decisions")

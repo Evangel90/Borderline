@@ -11,3 +11,7 @@ venv/
 index/
 qdrant_storage/
 chromadb/
+
+# Drill outputs are generated locally; keep the runs directory placeholder only.
+/runs/*
+!/runs/.gitkeep

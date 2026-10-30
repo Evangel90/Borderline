@@ -55,8 +55,8 @@ class InstitutionalAgent:
             justification = "Requested diagnostic failure logs and retinal fundus images for urgent model debugging and retraining."
         elif self.institution.id == "uae_data_office":
             if gate_status == "BLOCK":
-                action = "ENFORCE_EXPORT_BLOCK"
-                justification = "Enforced Federal Decree-Law No. 45/2021 (PDPL) Art. 22; blocked export of raw clinical retinal scans due to absence of bilateral adequacy."
+                action = "PAUSE_TRANSFER_PENDING_REVIEW"
+                justification = "Paused this raw-scan transfer because no applicable UAE PDPL Arts. 22–23 basis or required safeguards were documented; the transfer route needs review before disclosure."
             else:
                 action = "AUDIT_DATA_TRANSFERS"
                 justification = "Audited cross-border transfer channels for compliance with data localization."
@@ -64,11 +64,11 @@ class InstitutionalAgent:
             action = "ISSUE_SAFETY_INQUIRY"
             justification = "Mandated safety review and initiated bilateral regulatory notification to Swissmedic."
         elif self.institution.id == "swissmedic":
-            action = "OPEN_VIGILANCE_INVESTIGATION"
-            justification = "Opened medical device software vigilance case under MedDO SR 812.213 Art. 66 following foreign serious incident report."
+            action = "REVIEW_FOREIGN_INCIDENT_REPORT"
+            justification = "Opened a review to determine the applicable MedDO Art. 66 reporting route; the provision covers serious incidents in Switzerland and, where required, authorized representatives have trend-report duties for incidents in Switzerland and abroad."
         elif self.institution.id == "fodio":
-            action = "CONFIRM_NON_ADEQUACY"
-            justification = "Confirmed UAE is not listed in DPO (SR 235.11) Annex 1; notified vendor that transfers require statutory guarantees or standard contractual clauses."
+            action = "ASSESS_TRANSFER_DIRECTION_AND_SCOPE"
+            justification = "Reviewed the checked-in DPO Annex 1 list: UAE is not listed, which is relevant to disclosures from Switzerland to the UAE. This scenario requests a UAE-to-Switzerland transfer, so the list alone does not determine whether this request is permitted; assess the UAE export basis and the Swiss recipient's processing duties."
 
         return DecisionLogEntry(
             entry_id=f"log-{step}-{self.institution.id}",

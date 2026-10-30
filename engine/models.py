@@ -80,6 +80,16 @@ class DecisionLogEntry(BaseModel):
     current_hash: str
 
 
+class PolicyEvidence(BaseModel):
+    source_type: str  # policy_chunk or run_log
+    source_ref: str
+    title: str
+    jurisdiction: str
+    page: Optional[int] = None
+    excerpt: str
+    relevance: str
+
+
 class PolicyGap(BaseModel):
     gap_id: str
     category: str
@@ -91,3 +101,6 @@ class PolicyGap(BaseModel):
     partner_citation: str
     global_benchmark: str
     remediation_recommendation: str
+    finding_method: str
+    limitations: str
+    evidence: List[PolicyEvidence] = Field(default_factory=list)

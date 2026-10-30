@@ -18,27 +18,29 @@ parties:
 
 adequacy_status:
   ch_recognizes_ae: false
-  basis_ch: "DPO (SR 235.11) Annex 1: UAE is not listed as providing adequate data protection"
+  basis_ch: "DPO (SR 235.11) Annex 1 (checked-in 2023 text): UAE is not listed; this adequacy list concerns disclosures from Switzerland."
   ae_recognizes_ch: conditional
-  basis_ae: "UAE PDPL (Federal Decree-Law 45/2021) Art 22: Transfers permitted only with approved adequacy or standard guarantees"
+  basis_ae: "UAE PDPL (Federal Decree-Law 45/2021) Arts. 22–23: transfers may proceed through the applicable adequacy, approval, safeguard, or statutory-exception route."
 
 cross_border_regimes:
   health_data:
-    ae_rule: "UAE Health Data Law (Law 2/2019) Art 13 strictly prohibits unauthorized transmission of health data outside UAE territory."
-    ch_rule: "FADP Art 16 & HRA Art 32 require explicit informed consent or statutory justification for cross-border research disclosures."
+    ae_rule: "UAE PDPL (Federal Decree-Law 45/2021) Arts. 22–23 condition transfers of personal data outside the State on adequacy, Office approval, or specified safeguards and exceptions."
+    ch_rule: "Swiss FADP Arts. 16–17 and DPO Arts. 8–9 / Annex 1 set conditions for disclosures abroad by Swiss controllers; assess role and direction because these provisions do not by themselves decide a UAE-to-Switzerland export."
   medical_device_vigilance:
-    ch_rule: "MedDO (SR 812.213) Art 66 mandates manufacturer report serious incidents to Swissmedic within strict statutory deadlines."
+    ch_rule: "MedDO (SR 812.213) Art. 66 covers manufacturer reports for serious incidents in Switzerland; where an authorized representative is required, trend reports include incidents in Switzerland and abroad. Assess applicability to the UAE event."
     ae_rule: "MoHAP AI Guidelines require adverse incident notification to UAE health authorities."
 
 liaison_gate_rules:
   raw_patient_telemetry:
     action: BLOCK
-    reason: "Direct export of identified or pseudonymized retinal scans violates UAE Health Data Law Art 13 and lacks DPO Annex 1 adequacy."
+    reason: "Blocked in this scenario pending evidence of an applicable UAE PDPL transfer basis and required Swiss safeguards; this is not a blanket prohibition on every transfer."
   anonymized_error_metadata:
-    action: ALLOW
+    action: ROUTE
+    reason: "Requires a documented legal basis, data-minimization review, and privacy/security assessment before any transfer; reduced-data telemetry is not presumed anonymous or safe."
     conditions:
-      - "Cryptographic zero-PII verification"
-      - "Limited strictly to model weights, softmax confidence scores, and error classification codes"
+      - "Document the applicable transfer basis and required authorization"
+      - "Minimize fields and assess re-identification and model-inversion risk"
+      - "Record purpose, recipient, safeguards, retention, and access controls"
   mutual_regulatory_notification:
     action: ROUTE
     path: "MoHAP <-> Swissmedic bilateral vigilance channel"

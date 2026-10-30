@@ -51,24 +51,24 @@ timeline:
       data_requested: "raw_patient_fundus_images"
       claimed_purpose: "Urgent retrospective model debugging & human research analysis"
     expected_policy_checks:
-      - "UAE PDPL Art. 22 / Health Data Law: Raw health data export prohibited without bilateral adequacy"
-      - "CH DPO Annex 1: UAE is non-adequate; vendor claims research exemption under HRA SR 810.30"
-      - "Bridge Gate: Must BLOCK raw patient images, permit ONLY anonymized model weight vectors"
+      - "UAE PDPL Arts. 22–23: establish whether an approved adequacy route, safeguard, or statutory exception applies before transfer"
+      - "Swiss FADP Arts. 16–17 and DPO Arts. 8–9 / Annex 1: establish whether the Swiss vendor/controller makes any onward disclosure from Switzerland; the Annex 1 list alone does not decide this UAE-to-Switzerland request"
+      - "Bridge Gate: pause raw-image transfer until the applicable basis and safeguards are documented; assess any lower-data alternative without assuming it is anonymous or safe"
 
   - step: 3
     phase: "Bilateral Vigilance & Regulatory Intervention"
-    event: "MoHAP issues formal regulatory inquiry; Swissmedic initiates vigilance review under MedDO Art. 66."
+    event: "MoHAP routes a formal regulatory inquiry; Swissmedic receives the report and assesses the applicable vigilance and reporting route, including MedDO Art. 66."
     initiator: mohap
     payload:
       target: swissmedic
       inquiry: "Verification of RetinaVision-DX v2.4 conformity assessment and foreign field safety actions"
     expected_policy_checks:
-      - "MedDO SR 812.213 Art. 66: Mandatory manufacturer vigilance reporting to Swissmedic"
+      - "MedDO SR 812.213 Art. 66: assess manufacturer reporting for incidents in Switzerland and authorized-representative trend reporting for incidents abroad"
       - "MoHAP regulatory suspension powers: Model recall vs. rollback mandate"
 
   - step: 4
     phase: "Policy Gap Output & Remediation"
-    event: "Borderline engine compares institutional legal bases, calculates jurisdictional friction, and logs policy gap."
+    event: "Borderline records a scenario coordination gap with supporting policy evidence."
     initiator: engine
     payload:
       gap_category: "cross_border_health_data_sovereignty_vs_post_market_vigilance"

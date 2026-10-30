@@ -33,7 +33,7 @@ class BorderGate:
         if "vector" in data_type.lower() or "anonymized" in data_type.lower() or "metrics" in data_type.lower():
             if "anonymized_error_metadata" in gate_rules:
                 rule = gate_rules["anonymized_error_metadata"]
-                return rule.action, f"Allowed under conditions: {', '.join(rule.conditions)}"
+                return rule.action, rule.reason or f"Review required: {', '.join(rule.conditions)}"
 
         # 4. Check for regulatory-to-regulatory notifications
         if "inquiry" in data_type.lower() or "notification" in data_type.lower():
