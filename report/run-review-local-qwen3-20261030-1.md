@@ -49,9 +49,10 @@ or official notification occurred.
 - `GAP-HEALTH-001` is deterministically assembled from selected step records
   and keyword-retrieved chunks. It is one generated candidate gap, not an
   independent legal analysis and not evidence for all six project themes.
-- Current primary-source checks remain outstanding for UAE ICT health-data
-  localization and exemptions, EDE powers, DHA duties, and Swiss cyber
-  reporting. The source/provenance caveats in the technical report still apply.
+- UAE ICT health-data localization and exemptions, EDE powers, and DHA duties
+  remain outstanding. Swiss cyber-reporting sources have since been added;
+  their retrieval and citation issue is documented in
+  [`run-review-local-qwen3-cyber-scope-20261030-1.md`](run-review-local-qwen3-cyber-scope-20261030-1.md).
 
 ## Recommended next changes
 
@@ -65,9 +66,9 @@ or official notification occurred.
    its hash chain, and left the simulated service unpaused with no approval
    record yet. The original run is unchanged and still shows the old
    immediate-pause behavior.
-2. Add the missing primary sources, then rerun the drill so agents can retrieve
-   relevant material for cyber reporting, device vigilance, clinical duties,
-   and health-data localization.
+2. Add the missing UAE primary sources, and improve the new Swiss cyber-source
+   retrieval so the NCSC cites the statutory scope provisions it relies on.
+   Rerun the drill after those changes.
 3. Record liaison gate status and each policy-check outcome on the action log;
    distinguish agent observations of a gate from routed requests.
 4. Rebuild and review the generated gap evidence after those source and

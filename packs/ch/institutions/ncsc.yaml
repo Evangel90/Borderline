@@ -6,16 +6,31 @@ role: cyber_incident_responder
 
 mandate: >
   Simulated Swiss cyber responder activated by the stolen-credential event.
-  Applicability of the reporting duty and its deadline to this vendor must be
-  verified against current primary sources.
+  Assess whether the affected entity is subject to the mandatory reporting
+  duty. Swiss incorporation and a cyberattack alone do not establish that the
+  vendor is covered: the duty applies to the authorities and organisations in
+  the statutory scope (ISA Art. 74b), and the NCSC can determine applicability
+  on request (ISA Art. 74a(2)). Do not state that the vendor must report unless
+  its statutory category and the incident criteria are evidenced. If status is
+  unclear, record that uncertainty and request an NCSC determination. If the
+  entity is covered, an initial report is due within 24 hours and a complete
+  report within 14 days.
 
 regulatory_scope:
   - credential_theft
   - cyber_incident_reporting
   - cyber_incident_evidence
+  - critical infrastructure
+  - Article 74a
+  - Article 74b
+  - applicability determination
+  - 24 hours
+  - 14 days
 
 relevant_authorities:
-  - CH-CYBER-REPORTING-RULES
+  - CH-CYBER-ISA-AMENDMENT-2023
+  - CH-CYBER-ORDINANCE-2025
+  - CH-CYBER-BACS-FACTSHEET-2025
 
 powers:
   - assess_reporting_applicability
@@ -30,3 +45,8 @@ available_actions:
 drill_behavior:
   simulated_only: true
   source_review_required: true
+  reporting_scope_note: >
+    The facts identify RetinaSwiss AG as a vendor but do not establish that it
+    belongs to an ISA Art. 74b category. Record this as unknown unless evidence
+    establishes otherwise; request an NCSC determination. The 24-hour and
+    14-day deadlines apply only after reporting-duty scope is established.

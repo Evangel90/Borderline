@@ -63,15 +63,15 @@ not yet been run end to end against the remote model.
 
 This is an architectural mapping, not a claim of full Y.3172 conformance.
 
-| Y.3172-related concept | Borderline prototype | Current limit |
-| --- | --- | --- |
-| ML intent | YAML drill intent defines the use case, stages, participants, and private agent views. | The engine is currently wired to AE–CH files and identifiers. |
-| ML collector / preprocessing | Registered source PDFs are extracted and split into citation-bearing chunks. | Retrieval is deterministic keyword search; ingestion is not yet an integrated distributed vector knowledge base hosted in the ITU Sandbox. |
-| Policy node | AE–CH bridge YAML contains transfer and regulator-route rules. | Rules are static and do not yet execute and record each of the three policy checks separately. |
-| ML function orchestrator | Python releases timeline stages and invokes declared participants. | Timing is a staged label, not a simulated clock; no dynamic event scheduler or judge UI exists. |
-| Model / agents | Local Ollama `qwen3:8b` produced structured agent proposals for the completed evaluation run. | No LoRA fine-tune or event-tagging model is implemented; model output still needs evidence and legal review. |
-| Sandbox | Action handlers update synthetic state and return tool outcomes. A clinic-pause recommendation now waits for a separate human decision in the Streamlit review UI. | Human approval is local and unauthenticated; it changes only displayed synthetic state and does not control a real system. |
-| Audit | JSONL decisions are hash-chained and independently verifiable. | The log records concise rationales and citations, not private chain-of-thought; full retrieval and liaison message traces still need completion. |
+| Y.3172-related concept       | Borderline prototype                                                                                                                                               | Current limit                                                                                                                                    |
+| ---------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------ | ------------------------------------------------------------------------------------------------------------------------------------------------ |
+| ML intent                    | YAML drill intent defines the use case, stages, participants, and private agent views.                                                                             | The engine is currently wired to AE–CH files and identifiers.                                                                                   |
+| ML collector / preprocessing | Registered source PDFs are extracted and split into citation-bearing chunks.                                                                                       | Retrieval is deterministic keyword search; ingestion is not yet an integrated distributed vector knowledge base hosted in the ITU Sandbox.       |
+| Policy node                  | AE–CH bridge YAML contains transfer and regulator-route rules.                                                                                                    | Rules are static and do not yet execute and record each of the three policy checks separately.                                                   |
+| ML function orchestrator     | Python releases timeline stages and invokes declared participants.                                                                                                 | Timing is a staged label, not a simulated clock; no dynamic event scheduler or judge UI exists.                                                  |
+| Model / agents               | Local Ollama `qwen3:8b` produced structured agent proposals for the completed evaluation run.                                                                    | No LoRA fine-tune or event-tagging model is implemented; model output still needs evidence and legal review.                                     |
+| Sandbox                      | Action handlers update synthetic state and return tool outcomes. A clinic-pause recommendation now waits for a separate human decision in the Streamlit review UI. | Human approval is local and unauthenticated; it changes only displayed synthetic state and does not control a real system.                       |
+| Audit                        | JSONL decisions are hash-chained and independently verifiable.                                                                                                     | The log records concise rationales and citations, not private chain-of-thought; full retrieval and liaison message traces still need completion. |
 
 ## 5. Mapping to the ITU AI Readiness Framework 2.0
 
@@ -97,14 +97,21 @@ ITU materials are included in the global pack. Provenance is recorded in
 `make verify-sources`.
 
 The collection is incomplete for the proposed scenario. The UAE ICT Health
-Law and its 2021 exemptions, primary materials supporting EDE's role, and
-relevant DHA materials still need to be registered and ingested. The Swiss
-cyber reporting duty and its applicability to this vendor also require primary
-source verification. The DPO Annex 1 text in the repository is noted as a
-checked-in 2023 version and must be checked for currency. Agent profiles
-marked `source_review_required` are placeholders for simulation until this
-work is done. The project does not issue legal advice or determine how these
-rules apply to a real incident.
+Law, its executive regulation, and 2021 exemptions have been located on the
+official Ministry of Health and Prevention (MoHAP) site but still need to be
+downloaded, registered, and ingested. Primary materials supporting EDE's role
+and relevant DHA materials remain outstanding. The Swiss Information Security
+Act reporting amendment, Cybersecurity Ordinance, and official BACS fact sheet
+are now registered and ingested. NCSC guidance limits mandatory reporting to
+entities in the statutory scope; the drill must not assume the Swiss vendor is
+covered without an applicability determination. The updated run's step-3
+rationale still has a citation mismatch for its Art. 74b reference, as recorded
+in [`run-review-local-qwen3-cyber-scope-20261030-1.md`](run-review-local-qwen3-cyber-scope-20261030-1.md).
+The DPO Annex 1 text in the repository is noted as a checked-in 2023 version
+and must be checked for currency. Agent profiles marked
+`source_review_required` are placeholders for simulation until this work is
+done. The project does not issue legal advice or determine how these rules
+apply to a real incident.
 
 ## 7. Evaluation scenario and prototype evidence
 
@@ -126,10 +133,17 @@ The earlier run `local-qwen3-20261030-1` recorded the AI as paused without
 approval. In the latest run, EHS recorded a recommendation only, leaving the
 simulated service unpaused pending a separate local human decision. That
 approval is not yet recorded.
-The detailed engineering review and findings are in
+That earlier run's engineering review is in
 [`run-review-local-qwen3-20261030-1.md`](run-review-local-qwen3-20261030-1.md).
-This run is not submission-ready evidence for human oversight, legal accuracy,
-or a complete liaison policy check until those issues are addressed.
+A later run, `local-qwen3-cyber-scope-20261030-1`, completed with 31 decisions
+and a verified hash chain after the Swiss cyber sources and NCSC scope
+instructions were added. Its step-3 rationale correctly leaves the vendor's
+mandatory reporting status unestablished, but cites a chunk that does not
+support its Art. 74b reference. The step-7 NCSC decision also treats scope as
+unresolved. See
+[`run-review-local-qwen3-cyber-scope-20261030-1.md`](run-review-local-qwen3-cyber-scope-20261030-1.md).
+The newest run improves this one issue but is not submission-ready evidence
+for legal accuracy, human oversight, or a complete liaison policy check.
 
 An earlier four-step prototype run, `or-free-20261030-5`, completed with 11
 agent decisions and a verified hash chain. That run validates the earlier
@@ -168,10 +182,10 @@ and evidence from the completed drill before it is reported as a finding.
 ## Submission checklist
 
 - [ ] Complete legal-source verification and update the source register/chunks.
-- [x] Run the expanded scenario with local `qwen3:8b` and verify the audit chain.
-- [x] Review agent visibility, action permissions, citations, and gate outcomes; findings recorded in the run review.
+- [X] Run the expanded scenario with local `qwen3:8b` and verify the audit chain.
+- [X] Review agent visibility, action permissions, citations, and gate outcomes; findings recorded in the run review.
 - [ ] Develop and evidence the six domain-level gap comparisons.
 - [ ] Confirm team details and final report layout against the official template.
 - [ ] Add report references and stay within the five-page maximum.
 - [ ] Optional: record a demo video of no more than seven minutes; shortlisted
-      teams will need one.
+  teams will need one.
