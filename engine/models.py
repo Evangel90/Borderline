@@ -16,6 +16,15 @@ class Chunk(BaseModel):
     chunk_index: int
     text: str
     source_file: str
+    source_url: str = ""
+    source_issuer: str = ""
+    source_sha256: str = ""
+    source_retrieved: str = ""
+    source_language: str = ""
+    source_official_language: str = ""
+    source_binding: str = ""
+    source_in_force_from: str = ""
+    source_notes: str = ""
 
 
 class AvailableAction(BaseModel):

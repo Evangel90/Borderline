@@ -1,7 +1,8 @@
 #!/usr/bin/env python3
 """
-scripts/ingest.py - Ingest official PDFs into structured, citation-ready chunks.jsonl
-Preserves document ID, title, jurisdiction, page number, and paragraph/clause indices.
+Ingest registered PDFs into citation-ready chunks.jsonl with source provenance.
+Each chunk carries its document ID, page and chunk indices, source URL, hash,
+issuer, language, retrieval date, and provenance notes from data/sources.csv.
 """
 
 import csv
@@ -105,7 +106,16 @@ def process_document(row: Dict[str, str]) -> List[Dict[str, Any]]:
                 "total_pages": total_pages,
                 "chunk_index": chunk_idx + 1,
                 "text": chunk_content,
-                "source_file": file_path
+                "source_file": file_path,
+                "source_url": row.get("source_url", ""),
+                "source_issuer": row.get("issuer", ""),
+                "source_sha256": row.get("sha256", ""),
+                "source_retrieved": row.get("retrieved", ""),
+                "source_language": row.get("language", ""),
+                "source_official_language": row.get("official_language", ""),
+                "source_binding": row.get("binding", ""),
+                "source_in_force_from": row.get("in_force_from", ""),
+                "source_notes": row.get("notes", "")
             })
 
     doc.close()

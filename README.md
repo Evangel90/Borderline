@@ -88,6 +88,10 @@ the local service and timeout).
 The `RUN` value must be new each time; existing run IDs are immutable and the
 engine refuses to append to them. The supplied policy chunks are checked in;
 agent prompts and retrieved excerpts are sent to OpenRouter when a drill runs.
+Each `packs/*/chunks.jsonl` record retains its source URL, issuer, registered
+file path and SHA-256, retrieval date, language, legal status, and provenance
+notes. A decision's cited chunk ID therefore resolves to both an exact page
+and its source record; `data/sources.csv` remains the register of record.
 Use `DRILL_ARGS=--include-optional-events` with `make drill` to include the
 judge-injected reserve event.
 `vendor/ITUAIReadiness` contains the [ITU reference
