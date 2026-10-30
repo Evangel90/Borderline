@@ -5,13 +5,14 @@
 **Team:** [add team members]  
 **Repository:** [Borderline on GitHub](https://github.com/Evangel90/Borderline)
 
-> Draft status: this report reflects the staged-scenario implementation in
-> commit `d26df0a` and subsequent runtime review. The first expanded remote run
-> stopped during step 4 after nine decisions when an agent returned a citation
-> outside its supplied evidence. The partial log's hash chain verifies, but the
-> run has no completed gap record. Citation retry and event-specific action
-> limits are being added; rerun before treating this scenario as evaluated.
-> Legal-source review and the six-gap analysis remain in progress.
+> Draft status: the expanded scenario has been attempted twice. The first
+> remote run (`borderline-eight-stage-20261030-1`) stopped during step 4 after
+> nine decisions on an invalid citation. The second run
+> (`borderline-eight-stage-20261030-2`) logged 25 decisions through step 6 and part of step 7, then stopped
+> when OpenRouter's 50-request daily free limit was exhausted. Its partial hash
+> chain verifies, but there is no completed gap record. The scenario still
+> needs a complete run, citation relevance review, legal-source review, and
+> the six-gap analysis.
 
 ## 1. Overall introduction
 
@@ -113,8 +114,12 @@ escalation. Static checks confirmed that the intent parses, all declared
 participants have profiles, each participant has an explicit view, and all
 declared actions have sandbox handlers. The first OpenRouter attempt stopped
 in step 4 after nine decisions because the FDPIC agent returned a citation ID
-outside its retrieved evidence. The partial log's hash chain verifies, but no
-policy-gap record was produced and the run is not a completed evaluation.
+outside its retrieved evidence. A second attempt recorded 25 decisions through
+step 6 and part of step 7 before the daily free-model quota was exhausted. Its
+partial log's hash chain verifies, but no policy-gap record was produced and
+the run is not a completed evaluation. At least one rationale cited a source
+that does not support the asserted device-regulatory basis; citation presence
+alone is not counted as evidence quality.
 
 An earlier four-step prototype run, `or-free-20261030-5`, completed with 11
 agent decisions and a verified hash chain. That run validates the earlier

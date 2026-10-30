@@ -32,10 +32,12 @@ evidence, and audit-chain status. `make replay` and `make report-figures` are
 not implemented yet.
 
 The expanded timeline has passed static validation but is not yet verified
-end to end. The first remote attempt stopped during step 4 when the model
-returned an evidence ID outside the supplied context; its nine recorded
-decisions form a valid partial hash chain. Runtime citation recovery and
-event-specific action limits are being added before the next full run.
+end to end. A first remote attempt stopped during step 4 on an invalid evidence
+ID. A second attempt logged 25 decisions through step 6 and part of step 7,
+then stopped when OpenRouter's 50-request daily free limit was exhausted. Its
+partial hash chain verifies, but no gap record was produced. Some citations in
+the partial run also need human relevance review before being treated as
+support for legal claims.
 
 ## Layout
 
