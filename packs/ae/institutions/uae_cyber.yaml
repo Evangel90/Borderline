@@ -1,0 +1,31 @@
+id: uae_cyber
+name: UAE Cyber Incident Coordination
+jurisdiction: AE
+type: national_cyber_incident_role
+role: cyber_incident_responder
+
+mandate: >
+  Simulated UAE cyber responder activated only when the incident includes
+  credential theft or unauthorized access. This profile is a drill role, not a
+  claim about a specific agency's jurisdiction or deadline.
+
+regulatory_scope:
+  - credential_theft
+  - unauthorized_system_access
+  - cyber_incident_evidence
+
+relevant_authorities:
+  - AE-CYBER-LAW34
+
+powers:
+  - preserve_simulated_security_evidence
+  - request_security_incident_details
+
+available_actions:
+  - name: open_uae_cyber_review
+    description: Open a simulated UAE cyber incident review.
+  - name: request_uae_security_evidence
+    description: Request simulated access and credential evidence.
+
+drill_behavior:
+  simulated_only: true

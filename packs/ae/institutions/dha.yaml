@@ -1,0 +1,35 @@
+id: dha
+name: Dubai Health Authority (DHA)
+jurisdiction: AE
+type: emirate_health_authority
+role: health_regulator
+
+mandate: >
+  Simulated Dubai health regulator for the Dubai-only demonstration scenario.
+  Requests incident information and coordinates a human review of clinical
+  safety actions; this profile does not assert an official DHA position.
+
+regulatory_scope:
+  - dubai_healthcare
+  - clinical_ai_safety
+  - adverse_incident_coordination
+
+relevant_authorities:
+  - AE-AI-ETHICS-GUIDELINES
+  - AE-AI-GOV-GUIDELINES
+
+powers:
+  - request_clinical_incident_information
+  - coordinate_clinical_safety_review
+  - coordinate_patient_follow_up_review
+
+available_actions:
+  - name: open_clinical_incident_review
+    description: Open a simulated clinical incident review.
+  - name: request_patient_follow_up_review
+    description: Request a human review of patient follow-up needs.
+  - name: assess_screening_suspension
+    description: Record a review of suspension impacts and patient-safety risks.
+
+drill_behavior:
+  simulated_only: true

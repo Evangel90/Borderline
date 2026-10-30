@@ -2,6 +2,7 @@
 
 INTENT ?= retinopathy-ae-ch
 RUN ?=
+DRILL_ARGS ?=
 PYTHON ?= $(CURDIR)/.venv/bin/python
 ITU_SIM := vendor/ITUAIReadiness/simulation
 PDF ?= $(CURDIR)/$(ITU_SIM)/server/knowledge/InputDocs/AI_Use_Cases/T-REC-Y.3172-201906-I!!PDF-E.pdf
@@ -20,7 +21,7 @@ ingest:
 	$(PYTHON) scripts/ingest.py
 
 drill:
-	$(PYTHON) scripts/run_drill.py --intent $(INTENT) $(if $(RUN),--run-id $(RUN),)
+	$(PYTHON) scripts/run_drill.py --intent $(INTENT) $(if $(RUN),--run-id $(RUN),) $(DRILL_ARGS)
 
 verify-log:
 	@if [ -z "$(RUN)" ]; then echo "Error: specify RUN=<run_id>"; exit 1; fi

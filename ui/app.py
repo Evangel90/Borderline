@@ -87,6 +87,14 @@ with timeline_tab:
             for record in step_decisions:
                 heading = f"{record.get('actor_name', record.get('actor_id', 'Agent'))} · {record.get('jurisdiction', '—')}"
                 st.markdown(f"**{heading}**")
+                if record.get("visible_event"):
+                    with st.expander("What this agent knew at this point"):
+                        st.write(record["visible_event"])
+                        if record.get("visible_payload"):
+                            st.json(record["visible_payload"])
+                        if record.get("visible_state"):
+                            st.caption("Visible prior simulation state")
+                            st.json(record["visible_state"])
                 st.write(f"Action: `{record.get('action_taken', '—')}`")
                 st.write(record.get("justification", "No justification recorded."))
                 if record.get("model_name"):

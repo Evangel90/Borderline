@@ -3,7 +3,7 @@ engine/models.py - Core data schemas for Borderline engine.
 """
 
 from typing import List, Dict, Any, Optional
-from pydantic import BaseModel, Field
+from pydantic import BaseModel, Field, model_validator
 
 
 class Chunk(BaseModel):
@@ -53,13 +53,41 @@ class BridgeConfig(BaseModel):
     liaison_gate_rules: Dict[str, GateRule]
 
 
+class AgentView(BaseModel):
+    event: str
+    payload: Dict[str, Any] = Field(default_factory=dict)
+    expected_policy_checks: List[str] = Field(default_factory=list)
+    visible_state_keys: List[str] = Field(default_factory=list)
+
+
 class StepPayload(BaseModel):
     step: int
     phase: str
+    time_offset: str = ""
     event: str
-    initiator: str
+    initiator: Optional[str] = None
     payload: Dict[str, Any]
+    participants: List[str] = Field(default_factory=list)
+    agent_views: Dict[str, AgentView] = Field(default_factory=dict)
+    gate_visible_to: List[str] = Field(default_factory=list)
+    optional: bool = False
     expected_policy_checks: List[str] = Field(default_factory=list)
+
+    @model_validator(mode="after")
+    def validate_agent_views(self) -> "StepPayload":
+        if self.participants and set(self.participants) != set(self.agent_views):
+            raise ValueError(
+                f"Step {self.step} participants and agent_views must contain the same actor IDs."
+            )
+        if len(set(self.participants)) != len(self.participants):
+            raise ValueError(f"Step {self.step} lists a participant more than once.")
+        unknown_gate_viewers = set(self.gate_visible_to) - set(self.participants)
+        if unknown_gate_viewers:
+            raise ValueError(
+                f"Step {self.step} gate_visible_to contains nonparticipants: "
+                f"{', '.join(sorted(unknown_gate_viewers))}."
+            )
+        return self
 
 
 class DrillIntent(BaseModel):
@@ -71,6 +99,20 @@ class DrillIntent(BaseModel):
     actors: Dict[str, List[str]]
     timeline: List[StepPayload]
 
+    @model_validator(mode="after")
+    def validate_timeline_actors(self) -> "DrillIntent":
+        declared = {actor_id for actors in self.actors.values() for actor_id in actors}
+        for step in self.timeline:
+            participants = set(step.participants)
+            if step.initiator:
+                participants.add(step.initiator)
+            unknown = participants - declared
+            if unknown:
+                raise ValueError(
+                    f"Step {step.step} refers to undeclared actors: {', '.join(sorted(unknown))}."
+                )
+        return self
+
 
 class DecisionLogEntry(BaseModel):
     entry_id: str
@@ -79,6 +121,9 @@ class DecisionLogEntry(BaseModel):
     actor_name: str
     jurisdiction: str
     action_taken: str
+    visible_event: Optional[str] = None
+    visible_payload: Dict[str, Any] = Field(default_factory=dict)
+    visible_state: Dict[str, Any] = Field(default_factory=dict)
     cited_clauses: List[str] = Field(default_factory=list)
     justification: str
     model_name: Optional[str] = None
@@ -96,7 +141,7 @@ class DecisionLogEntry(BaseModel):
 class AgentProposal(BaseModel):
     action: str
     rationale: str = Field(min_length=1, max_length=600)
-    cited_chunk_ids: List[str] = Field(min_length=1, max_length=4)
+    cited_chunk_ids: List[str] = Field(max_length=4)
     confidence: float = Field(ge=0, le=1)
 
 

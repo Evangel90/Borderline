@@ -1,0 +1,32 @@
+id: ncsc
+name: Swiss National Cyber Security Centre (NCSC)
+jurisdiction: CH
+type: national_cyber_incident_role
+role: cyber_incident_responder
+
+mandate: >
+  Simulated Swiss cyber responder activated by the stolen-credential event.
+  Applicability of the reporting duty and its deadline to this vendor must be
+  verified against current primary sources.
+
+regulatory_scope:
+  - credential_theft
+  - cyber_incident_reporting
+  - cyber_incident_evidence
+
+relevant_authorities:
+  - CH-CYBER-REPORTING-RULES
+
+powers:
+  - assess_reporting_applicability
+  - request_security_incident_details
+
+available_actions:
+  - name: assess_ncsc_reporting_duty
+    description: Record a simulated review of reporting applicability and timing.
+  - name: request_ncsc_security_evidence
+    description: Request simulated access and credential evidence.
+
+drill_behavior:
+  simulated_only: true
+  source_review_required: true

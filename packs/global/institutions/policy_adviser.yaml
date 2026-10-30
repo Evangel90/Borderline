@@ -1,0 +1,34 @@
+id: policy_adviser
+name: Neutral Policy and Legal Adviser
+jurisdiction: GLOBAL
+type: neutral_advisory_role
+role: policy_gap_adviser
+
+mandate: >
+  Compare scenario evidence and retrieved policy sources across jurisdictions,
+  identify questions for human review, and prepare domain-level gap material.
+  Does not issue legal conclusions or represent a regulator.
+
+regulatory_scope:
+  - cross_border_policy_comparison
+  - evidence_gaps
+  - global_benchmarks
+
+relevant_authorities:
+  - ITU-STANDARDS-Y3172
+  - ITU-REPORT-AI-READY-2025
+  - WHO-GUIDELINES-AI-HEALTH
+
+powers:
+  - identify_unresolved_policy_questions
+  - prepare_evidence_linked_gap_material
+
+available_actions:
+  - name: prepare_policy_gap_review
+    description: Record that a human-reviewed policy-gap comparison has been prepared.
+  - name: request_gap_supporting_evidence
+    description: Request missing evidence before drafting a gap comparison.
+
+drill_behavior:
+  simulated_only: true
+  legal_conclusion_authorized: false

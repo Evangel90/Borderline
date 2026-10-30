@@ -1,0 +1,35 @@
+id: screening_ai
+name: UAE Diabetic Retinopathy Screening Service
+jurisdiction: AE
+type: clinical_ai_operator
+role: deployed_health_ai_system
+
+mandate: >
+  Simulated operator of the diabetic retinopathy screening service deployed in
+  the UAE clinics in this drill. Reports model version changes and screening
+  performance signals to the responsible human clinical team.
+
+regulatory_scope:
+  - clinical_ai_deployment
+  - screening_performance
+  - patient_safety
+
+relevant_authorities:
+  - AE-AI-ETHICS-GUIDELINES
+  - WHO-GUIDELINES-AI-HEALTH
+
+powers:
+  - report_model_version_and_performance
+  - pause_synthetic_screening_service
+  - flag_cases_for_human_review
+
+available_actions:
+  - name: report_model_update
+    description: Record the deployed model version in the synthetic drill.
+  - name: pause_screening_service
+    description: Pause the simulated screening service pending human review.
+  - name: flag_cases_for_human_review
+    description: Flag a synthetic cohort for clinician review.
+
+drill_behavior:
+  simulated_only: true

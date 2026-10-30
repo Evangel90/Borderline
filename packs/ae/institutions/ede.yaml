@@ -1,0 +1,35 @@
+id: ede
+name: Emirates Drug Establishment (EDE)
+jurisdiction: AE
+type: federal_medical_products_authority
+role: medical_device_regulator
+
+mandate: >
+  Simulated UAE medical-products authority participating in device-safety
+  coordination under the project brief. Its powers and deadlines require legal
+  source review before this profile is treated as authoritative.
+
+regulatory_scope:
+  - medical_device_safety
+  - software_as_a_medical_device
+  - manufacturer_incident_evidence
+
+relevant_authorities:
+  - AE-FEDERAL-DECREE-LAW-38-2024
+
+powers:
+  - request_manufacturer_evidence
+  - assess_device_safety_action
+  - coordinate_with_health_regulator
+
+available_actions:
+  - name: request_ede_manufacturer_evidence
+    description: Request a simulated manufacturer incident evidence package.
+  - name: assess_ede_device_safety_action
+    description: Record a human-review recommendation on device safety action.
+  - name: coordinate_ede_health_review
+    description: Request simulated coordination with the emirate health regulator.
+
+drill_behavior:
+  simulated_only: true
+  source_review_required: true

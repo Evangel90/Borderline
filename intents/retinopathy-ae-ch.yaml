@@ -16,12 +16,17 @@ context:
   host_country: AE
   partner_country: CH
   description: >
-    RetinaSwiss AG (Zurich) deployed RetinaVision-DX v2.4 (SaMD) to UAE clinics operated by Emirates Health Services (EHS).
-    Following an algorithmic model update intended to improve microaneurysm detection, UAE ophthalmologists observe
-    a 23% false-negative rate for Stage 3 proliferative diabetic retinopathy on local patient demographic scans.
+    RetinaSwiss AG (Zurich) deployed RetinaVision-DX v2.4 (SaMD) to synthetic
+    clinics in Dubai. Dubai Health Authority (DHA) is the selected emirate-level
+    health regulator for this version of the drill. After a model update,
+    auditors find missed referable diabetic retinopathy cases.
 
 actors:
   ae:
+    - screening_ai
+    - dha
+    - ede
+    - uae_cyber
     - ehs            # Clinic network discovering diagnostic divergence
     - mohap          # Federal health ministry enforcing clinical AI safety
     - uae_data_office # Federal data regulator enforcing PDPL & cross-border export limits
@@ -29,47 +34,208 @@ actors:
     - retina_swiss_ag # Commercial vendor requesting telemetry and debugging data
     - swissmedic     # Swiss medical device regulator monitoring post-market vigilance
     - fodio          # Swiss Federal Data Protection Commissioner (EDÖB)
+    - ncsc
+  neutral:
+    - policy_adviser
 
 timeline:
   - step: 1
-    phase: "Detection & Anomaly Flagging"
-    event: "EHS clinicians flag a cluster of missed Stage 3 proliferative retinopathy cases across 3 Dubai & Northern Emirates clinics."
-    initiator: ehs
-    payload:
-      affected_patients: 47
-      false_negative_rate: "23.4%"
-      action: "EHS halts automated diagnosis and switches to human-in-the-loop manual review."
-    expected_policy_checks:
-      - "EHS AI Policy / ISO 42001:2023 incident escalation"
-      - "MoHAP AI in Healthcare adverse incident triage"
+    time_offset: "T+0"
+    phase: "Model update reaches the Dubai screening service"
+    event: "RetinaSwiss pushes model update v2.4 to the Dubai diabetic retinopathy screening service."
+    initiator: retina_swiss_ag
+    payload: {event_type: model_update}
+    participants: [screening_ai, retina_swiss_ag]
+    agent_views:
+      screening_ai:
+        event: "A model update v2.4 has just been deployed to your screening service."
+        payload: {model: RetinaVision-DX, version: "2.4", deployment_status: completed}
+      retina_swiss_ag:
+        event: "Your v2.4 update was pushed to the Dubai screening service."
+        payload: {model: RetinaVision-DX, version: "2.4", deployment_status: completed}
 
   - step: 2
-    phase: "Vendor Telemetry Request & Border Clash"
-    event: "RetinaSwiss AG requests immediate transfer of 500 raw high-resolution retinal fundus scans from UAE clinics to Zurich for debugging."
-    initiator: retina_swiss_ag
-    payload:
-      data_requested: "raw_patient_fundus_images"
-      claimed_purpose: "Urgent retrospective model debugging & human research analysis"
-    expected_policy_checks:
-      - "UAE PDPL Arts. 22–23: establish whether an approved adequacy route, safeguard, or statutory exception applies before transfer"
-      - "Swiss FADP Arts. 16–17 and DPO Arts. 8–9 / Annex 1: establish whether the Swiss vendor/controller makes any onward disclosure from Switzerland; the Annex 1 list alone does not decide this UAE-to-Switzerland request"
-      - "Bridge Gate: pause raw-image transfer until the applicable basis and safeguards are documented; assess any lower-data alternative without assuming it is anonymous or safe"
+    time_offset: "T+2h"
+    phase: "Clinical spot audit confirms missed referable disease"
+    event: "A spot audit finds that v2.4 missed referable retinopathy on one camera model; some patients were told they did not need referral."
+    initiator: screening_ai
+    payload: {event_type: clinical_safety_signal}
+    participants: [screening_ai, dha, ede]
+    agent_views:
+      screening_ai:
+        event: "A spot audit of your v2.4 output found missed referable retinopathy on one camera model."
+        payload: {camera_model: Cam-7, audit_result: false_negatives_confirmed, affected_patients: 47, referrals_not_made: true}
+      dha:
+        event: "Dubai clinics report missed referable disease and patients who did not receive referrals."
+        payload: {camera_model: Cam-7, audit_result: false_negatives_confirmed, affected_patients: 47, patient_follow_up_status: unknown}
+        expected_policy_checks: ["What reporting and patient follow-up duties apply to the selected Dubai health authority?"]
+      ede:
+        event: "A Dubai clinical AI service reports confirmed missed disease after a software update."
+        payload: {device: RetinaVision-DX, version: "2.4", camera_model: Cam-7, affected_patients: 47}
+        expected_policy_checks: ["Which device incident reporting and safety-action duties apply, and what primary source supports them?"]
 
   - step: 3
-    phase: "Bilateral Vigilance & Regulatory Intervention"
-    event: "MoHAP routes a formal regulatory inquiry; Swissmedic receives the report and assesses the applicable vigilance and reporting route, including MedDO Art. 66."
-    initiator: mohap
-    payload:
-      target: swissmedic
-      inquiry: "Verification of RetinaVision-DX v2.4 conformity assessment and foreign field safety actions"
-    expected_policy_checks:
-      - "MedDO SR 812.213 Art. 66: assess manufacturer reporting for incidents in Switzerland and authorized-representative trend reporting for incidents abroad"
-      - "MoHAP regulatory suspension powers: Model recall vs. rollback mandate"
+    time_offset: "T+3h"
+    phase: "Stolen vendor credentials activate cyber response"
+    event: "The vendor finds that the model update was pushed using credentials stolen from a vendor account."
+    initiator: retina_swiss_ag
+    payload: {event_type: suspected_credential_theft}
+    participants: [retina_swiss_ag, uae_cyber, ncsc]
+    agent_views:
+      retina_swiss_ag:
+        event: "Your incident team found evidence that stolen account credentials were used to push v2.4."
+        payload: {credential_status: suspected_stolen, update: "2.4", evidence_preservation: pending}
+      uae_cyber:
+        event: "A Dubai health service reports that a vendor update may have used stolen credentials."
+        payload: {affected_service_country: AE, credential_status: suspected_stolen, attribution: unconfirmed}
+        expected_policy_checks: ["Which UAE cyber provisions may apply, and what facts remain unverified?"]
+      ncsc:
+        event: "A Swiss vendor reports suspected stolen credentials used to push software to a foreign customer."
+        payload: {vendor_country: CH, credential_status: suspected_stolen, affected_customer_country: AE, attribution: unconfirmed}
+        expected_policy_checks: ["Does a current Swiss cyber reporting duty apply to this vendor, and when would its deadline begin?"]
 
   - step: 4
-    phase: "Policy Gap Output & Remediation"
-    event: "Borderline records a scenario coordination gap with supporting policy evidence."
-    initiator: engine
-    payload:
-      gap_category: "cross_border_health_data_sovereignty_vs_post_market_vigilance"
-      remediation: "Assess a regulator-coordinated evidence exchange with a lawful basis, minimum-data design, and privacy/security review"
+    time_offset: "T+4h"
+    phase: "Vendor discovers UAE health data was used for retraining"
+    event: "The vendor finds that UAE patients' retinal images stored in Switzerland were used to retrain the model."
+    initiator: retina_swiss_ag
+    payload: {event_type: secondary_health_data_use}
+    participants: [retina_swiss_ag, fodio]
+    agent_views:
+      retina_swiss_ag:
+        event: "Your review found that UAE patients' retinal images stored in Switzerland were used to retrain v2.4."
+        payload: {data_origin: AE, data_location: CH, data_type: retinal_images, use: model_retraining, identifiable_status: not_yet_assessed}
+      fodio:
+        event: "The Swiss vendor reports UAE-origin retinal images held in Switzerland were used to retrain its model."
+        payload: {data_origin: AE, processing_location: CH, data_type: retinal_images, purpose: retraining, controller_roles: unresolved}
+        expected_policy_checks: ["Which Swiss data-protection and research provisions apply, given unresolved roles and purpose?"]
+
+  - step: 5
+    time_offset: "T+6h"
+    phase: "Vendor claims a research purpose"
+    event: "The vendor says the retraining was research."
+    initiator: retina_swiss_ag
+    payload: {event_type: research_purpose_claim}
+    participants: [retina_swiss_ag, fodio, swissmedic]
+    agent_views:
+      retina_swiss_ag:
+        event: "The vendor's position is that retraining on the images was research."
+        payload: {claimed_purpose: research, identifiability: unresolved, ethics_approval: unknown}
+      fodio:
+        event: "The vendor claims research as the purpose for retraining UAE-origin images in Switzerland."
+        payload: {claimed_purpose: research, identifiability: unresolved, consent_or_other_basis: unknown}
+        expected_policy_checks: ["What evidence is needed to assess the claimed research purpose and processing basis?"]
+      swissmedic:
+        event: "The vendor says it retrained the device model for research using images associated with a safety incident."
+        payload: {claimed_purpose: research, device: RetinaVision-DX, safety_incident_open: true}
+        expected_policy_checks: ["Is the research-purpose claim separate from the device-vigilance assessment?"]
+
+  - step: 6
+    time_offset: "T+8h"
+    phase: "UAE regulators request an account of cross-border data use"
+    event: "UAE regulators ask through the MoHAP–Swissmedic liaison channel for an account of data used in the incident."
+    initiator: mohap
+    payload: {data_requested: mutual_regulatory_notification, target: swissmedic, request_type: cross_border_evidence_request}
+    participants: [mohap, uae_data_office, dha, ede, swissmedic, fodio]
+    gate_visible_to: [mohap, uae_data_office, dha, ede, swissmedic, fodio]
+    agent_views:
+      mohap:
+        event: "Prepare a formal liaison request about data transferred from the UAE and subsequent use."
+        payload: {target: swissmedic, requested_information: [data_categories, transfer_dates, recipients, purposes, safeguards], patient_data_included: false}
+        expected_policy_checks: ["Is Swissmedic the correct counterpart under the configured liaison route, and can the request proceed without patient data?"]
+      uae_data_office:
+        event: "MoHAP is preparing a liaison request about cross-border processing linked to the incident."
+        payload: {requesting_authority: mohap, purpose: establish_data_lineage, patient_data_included: false}
+      dha:
+        event: "The UAE Data Office is preparing a liaison request about patient data used in the model incident."
+        payload: {requesting_authority: uae_data_office, purpose: establish_data_lineage, patient_data_included: false}
+      ede:
+        event: "The UAE Data Office is preparing a liaison request for device-incident evidence."
+        payload: {requesting_authority: uae_data_office, purpose: device_incident_evidence, patient_data_included: false}
+      swissmedic:
+        event: "A formal UAE request is being routed to you through the configured regulator liaison channel."
+        payload: {requesting_authority: mohap, target: swissmedic, request_type: cross_border_evidence_request}
+      fodio:
+        event: "A formal UAE regulator request concerning data lineage is being routed through the simulated liaison channel."
+        payload: {requesting_authority: mohap, target: swissmedic, request_type: cross_border_evidence_request}
+
+  - step: 7
+    time_offset: "T+24h"
+    phase: "Authorities weigh suspension against continued patient risk"
+    event: "Authorities must weigh suspension, which may interrupt screening, against continued use, which risks further missed disease."
+    initiator: dha
+    payload: {event_type: suspension_decision, human_approval_required: true}
+    participants: [screening_ai, dha, ede, uae_data_office, ehs, mohap, retina_swiss_ag, swissmedic, fodio, uae_cyber, ncsc, policy_adviser]
+    agent_views:
+      screening_ai:
+        event: "Pausing screening may delay care; continued use may miss referable disease. The decision requires human review."
+        payload: {known_safety_signal: true, screening_access_impact: possible, final_suspension_authority: human_review}
+      dha:
+        event: "Review the competing patient-safety risks of pausing or continuing the Dubai screening service."
+        payload: {known_safety_signal: true, affected_patients: 47, suspension_impact: screening_delays, human_approval_required: true}
+        expected_policy_checks: ["What authority and evidence are required for suspension, and who must approve it?"]
+      ede:
+        event: "Review device-safety options and what evidence is needed before any field action."
+        payload: {known_safety_signal: true, device: RetinaVision-DX, human_approval_required: true}
+      uae_data_office:
+        event: "Review data-protection actions alongside the clinical safety response."
+        payload: {known_data_use_issue: true, clinical_suspension_decision: pending_human_review}
+      ehs:
+        event: "Clinics need a safe screening plan while authorities review the model incident."
+        payload: {known_safety_signal: true, manual_review_capacity: to_be_assessed, service_suspension_decision: pending}
+      mohap:
+        event: "Coordinate the clinical incident review with the selected Dubai health and medical-products authorities."
+        payload: {known_safety_signal: true, partner_authorities: [dha, ede], suspension_decision: pending_human_review}
+      retina_swiss_ag:
+        event: "Authorities are weighing a pause against interruption to screening; provide rollback and safety evidence."
+        payload: {model: RetinaVision-DX, version: "2.4", rollback_available: unknown, human_approval_required: true}
+      swissmedic:
+        event: "Review device-vigilance evidence and coordinate with UAE counterparts."
+        payload: {known_safety_signal: true, foreign_authority_review: requested, suspension_decision: pending}
+      fodio:
+        event: "Review unresolved processing issues while health authorities consider clinical safety action."
+        payload: {known_data_use_issue: true, processing_roles: unresolved, clinical_suspension_decision: pending}
+      uae_cyber:
+        event: "Preserve cyber findings while health authorities consider their response."
+        payload: {credential_theft_suspected: true, attribution: unconfirmed, health_decision: pending}
+      ncsc:
+        event: "Review reporting and evidence preservation alongside the device incident."
+        payload: {credential_theft_suspected: true, reporting_applicability: unresolved, health_decision: pending}
+      policy_adviser:
+        event: "Compare evidence and unresolved policy questions; do not decide whether to suspend the system."
+        payload: {known_safety_signal: true, known_data_use_issue: true, unresolved_questions: [suspension_authority, patient_follow_up, transfer_basis, reporting_deadlines]}
+        expected_policy_checks: ["Identify evidence-backed coordination gaps and conclusions needing human legal review."]
+
+  - step: 8
+    time_offset: "Reserve: judge-injected"
+    phase: "Optional escalation: patient images appear in an insurer pricing model"
+    event: "A judge injects evidence that retinal images may have appeared in an insurer's pricing model."
+    initiator: policy_adviser
+    optional: true
+    payload: {event_type: judge_injected_secondary_use}
+    participants: [screening_ai, dha, ede, uae_data_office, retina_swiss_ag, swissmedic, fodio, policy_adviser]
+    agent_views:
+      screening_ai:
+        event: "A judge alleges patient images may have been used for insurer pricing; the claim is unverified."
+        payload: {claim: insurer_pricing_use, verification_status: unverified}
+      dha:
+        event: "A judge reports possible use of patient images in insurer pricing."
+        payload: {claim: insurer_pricing_use, verification_status: unverified, requested_action: preserve_evidence}
+      ede:
+        event: "A judge reports possible secondary use of patient images in insurer pricing."
+        payload: {claim: insurer_pricing_use, verification_status: unverified, device_incident_link: unverified}
+      uae_data_office:
+        event: "A judge reports possible insurer use of patient images; the claim is unverified."
+        payload: {claim: insurer_pricing_use, verification_status: unverified, data_origin: AE}
+      retina_swiss_ag:
+        event: "A judge alleges patient images may have appeared in an insurer pricing model."
+        payload: {claim: insurer_pricing_use, verification_status: unverified, request: preserve_processing_records}
+      swissmedic:
+        event: "A judge alleges possible secondary use of images associated with a device incident."
+        payload: {claim: insurer_pricing_use, verification_status: unverified, device_safety_relevance: to_be_assessed}
+      fodio:
+        event: "A judge alleges possible insurer use of UAE-origin images processed in Switzerland."
+        payload: {claim: insurer_pricing_use, verification_status: unverified, controller_roles: unresolved}
+      policy_adviser:
+        event: "A judge-injected allegation raises a new secondary-use question; distinguish allegation from established fact."
+        payload: {claim: insurer_pricing_use, verification_status: unverified, required_next_step: evidence_collection}

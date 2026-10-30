@@ -14,6 +14,11 @@ def main():
     parser = argparse.ArgumentParser(description="Run a cross-border AI incident drill.")
     parser.add_argument("--intent", default="retinopathy-ae-ch", help="Intent filename (without extension)")
     parser.add_argument("--run-id", default=None, help="Custom run identifier")
+    parser.add_argument(
+        "--include-optional-events",
+        action="store_true",
+        help="Include reserve judge-injected events marked optional in the intent.",
+    )
     args = parser.parse_args()
 
     intent_file = f"intents/{args.intent}.yaml"
@@ -21,7 +26,7 @@ def main():
 
     try:
         orchestrator = DrillOrchestrator(intent_path=intent_file, run_id=run_id)
-        orchestrator.run()
+        orchestrator.run(include_optional=args.include_optional_events)
     except (OllamaError, ValueError) as exc:
         parser.exit(2, f"LLM runtime error: {exc}\n")
 

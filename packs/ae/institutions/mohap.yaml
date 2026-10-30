@@ -32,6 +32,8 @@ available_actions:
     description: Route a simulated regulatory notice through the configured bilateral liaison gate.
   - name: request_device_incident_report
     description: Request the manufacturer incident report through the simulated process.
+  - name: request_regulatory_evidence
+    description: Send a synthetic evidence request through the configured bilateral liaison gate.
 
 drill_behavior:
   strictness: high

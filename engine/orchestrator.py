@@ -109,7 +109,7 @@ class DrillOrchestrator:
 
     @staticmethod
     def _decision_evidence(
-        decisions: List[DecisionLogEntry], step: int, status: str,
+        decisions: List[DecisionLogEntry], step: int, status: str | None,
         actor_id: str, relevance: str,
     ) -> List[PolicyEvidence]:
         return [
@@ -119,6 +119,8 @@ class DrillOrchestrator:
                 title=f"Step {step} decision by {decision.actor_name}",
                 jurisdiction=decision.jurisdiction,
                 excerpt=(
+                    f"Visible event: {decision.visible_event}. "
+                    f"Visible facts: {decision.visible_payload}. "
                     f"{decision.action_taken}: {decision.justification} "
                     f"Gate status: {decision.gate_status}; liaison status: {decision.liaison_status}."
                 ),
@@ -126,19 +128,23 @@ class DrillOrchestrator:
             )
             for decision in decisions
             if decision.step == step
-            and decision.gate_status == status
+            and (status is None or decision.gate_status == status)
             and decision.actor_id == actor_id
         ]
 
     def _build_policy_gap(self, decisions: List[DecisionLogEntry]) -> PolicyGap:
         evidence = []
         evidence.extend(self._decision_evidence(
-            decisions, 2, "BLOCK", "uae_data_office",
-            "The run paused the raw-image transfer pending documented legal basis and safeguards."
+            decisions, 6, "ROUTE", "mohap",
+            "The run routed MoHAP's request for a cross-border account to Swissmedic through the configured liaison gate."
         ))
         evidence.extend(self._decision_evidence(
-            decisions, 3, "ROUTE", "mohap",
-            "The run routed the regulator-to-regulator notification."
+            decisions, 4, None, "retina_swiss_ag",
+            "The synthetic drill exposed this data-use fact to the vendor agent; its real-world truth is not independently established."
+        ))
+        evidence.extend(self._decision_evidence(
+            decisions, 4, None, "fodio",
+            "The synthetic drill exposed this data-use fact to the FDPIC agent; its real-world truth is not independently established."
         ))
         evidence.extend(self._retrieve_evidence(
             "AE", "AE-DATA-PDPL-2021",
@@ -155,6 +161,11 @@ class DrillOrchestrator:
             "CH", "CH-DATA-FADP",
             ["Art. 16", "disclosed abroad", "adequate level of protection", "standard contractual clauses"],
             "Swiss FADP Article 16 sets conditions for disclosures abroad by Swiss controllers; applicability depends on role and transfer direction.",
+        ))
+        evidence.extend(self._retrieve_evidence(
+            "CH", "CH-HEALTH-HRA",
+            ["further use", "health-related personal data", "research", "informed consent"],
+            "Swiss Human Research Act provisions are relevant to assessing whether the claimed research purpose applies.",
         ))
 
         # Annex 1 is a multi-page enumerated list. Retain the relevant list pages
@@ -195,20 +206,19 @@ class DrillOrchestrator:
             host_jurisdiction="AE",
             partner_jurisdiction="CH",
             friction_point=(
-                "In this run, the UAE gate blocks a request for raw retinal images and the "
-                "regulator notification is routed. The cited UAE PDPL provisions make "
-                "cross-border personal-data transfers conditional, while Swiss MedDO "
-                "Article 66 specifies reporting obligations for incidents in Switzerland "
-                "and, where required, authorized representatives report trends including "
-                "incidents abroad. The checked Swiss DPO Annex 1 list pages do not include "
-                "the UAE; that list concerns Switzerland-origin disclosures and does not "
-                "itself decide this UAE-to-Switzerland request. These sources leave "
-                "the lawful basis, minimum evidence set, and operational pathway for this "
-                "UAE incident to be established before any disclosure. This is a scenario "
-                "coordination gap, not a conclusion that the laws are incompatible."
+                "In this drill, the UAE Data Office's request for a cross-border account "
+                "is routed through the configured liaison gate. The incident facts say "
+                "UAE-origin retinal images stored in Switzerland were used to retrain the "
+                "model, while the controller roles, identifiability, and claimed research "
+                "basis remain unresolved. The UAE PDPL conditions transfers of personal "
+                "data outside the State; Swiss FADP and Human Research Act provisions "
+                "require assessment against the processing roles and purpose. The evidence "
+                "does not settle those questions or specify the minimum information needed "
+                "for regulator coordination. This is a scenario coordination gap, not a "
+                "conclusion that the laws are incompatible."
             ),
             host_citation="AE-DATA-PDPL-2021 (Arts. 22–23; chunks cited below)",
-            partner_citation="CH-HEALTH-MedDO (Art. 66), CH-DATA-FADP (Art. 16), and CH-DATA-DPO (Annex 1; chunks cited below)",
+            partner_citation="CH-DATA-FADP (Arts. 16–17), CH-HEALTH-HRA, and CH-DATA-DPO (Annex 1; chunks cited below)",
             global_benchmark=(
                 "WHO Ethics and Governance of Artificial Intelligence for Health: "
                 "federated data-sharing may maintain local control but does not by itself resolve consent concerns."
@@ -220,9 +230,11 @@ class DrillOrchestrator:
                 "assessment, not as a substitute for consent or transfer authorization."
             ),
             finding_method=(
-                "Deterministic scenario rule: connect the recorded BLOCK and ROUTE outcomes "
-                "to lexical retrieval from the UAE PDPL, Swiss MedDO, Swiss FADP / DPO, "
-                "and WHO health-AI guidance. No LLM-generated legal conclusion is used."
+                "Deterministic scenario rule: connect the recorded liaison ROUTE outcome "
+                "and step-specific agent views to lexical retrieval from the UAE PDPL, "
+                "Swiss FADP / DPO, Human Research Act, and WHO health-AI guidance. "
+                "The agents make the simulated decisions; this gap summary is compiled "
+                "separately and is not an agent's legal determination."
             ),
             limitations=(
                 "This is a synthetic drill finding, not legal advice. Retrieval is keyword-based; "
@@ -234,31 +246,29 @@ class DrillOrchestrator:
 
     def _init_agents(self) -> Dict[str, InstitutionalAgent]:
         agents = {}
-        # UAE institutions
-        for inst_file in os.listdir("packs/ae/institutions"):
-            if inst_file.endswith(".yaml"):
-                with open(os.path.join("packs/ae/institutions", inst_file)) as f:
-                    data = yaml.safe_load(f)
-                    inst = Institution(**data)
-                    agents[inst.id] = InstitutionalAgent(
-                        inst, self.chunks["AE"] + self.chunks["GLOBAL"],
-                        self.llm, self.action_executor,
-                    )
-
-        # Swiss institutions
-        for inst_file in os.listdir("packs/ch/institutions"):
-            if inst_file.endswith(".yaml"):
-                with open(os.path.join("packs/ch/institutions", inst_file)) as f:
-                    data = yaml.safe_load(f)
-                    inst = Institution(**data)
-                    agents[inst.id] = InstitutionalAgent(
-                        inst, self.chunks["CH"] + self.chunks["GLOBAL"],
-                        self.llm, self.action_executor,
-                    )
+        for pack_id, jurisdiction in (("ae", "AE"), ("ch", "CH"), ("global", "GLOBAL")):
+            institution_dir = os.path.join("packs", pack_id, "institutions")
+            if not os.path.isdir(institution_dir):
+                continue
+            for inst_file in sorted(os.listdir(institution_dir)):
+                if not inst_file.endswith(".yaml"):
+                    continue
+                with open(os.path.join(institution_dir, inst_file), encoding="utf-8") as source:
+                    inst = Institution(**yaml.safe_load(source))
+                if inst.id in agents:
+                    raise ValueError(f"Duplicate institution id '{inst.id}' across packs.")
+                jurisdiction_chunks = (
+                    self.chunks["AE"] + self.chunks["CH"] + self.chunks["GLOBAL"]
+                    if jurisdiction == "GLOBAL"
+                    else self.chunks[jurisdiction] + self.chunks["GLOBAL"]
+                )
+                agents[inst.id] = InstitutionalAgent(
+                    inst, jurisdiction_chunks, self.llm, self.action_executor
+                )
 
         return agents
 
-    def run(self) -> List[DecisionLogEntry]:
+    def run(self, include_optional: bool = False) -> List[DecisionLogEntry]:
         print(f"\n🚀 Running Cross-Border Drill: {self.intent.title}")
         print(f"📁 Output Run Directory: {self.run_dir}")
         print("=" * 60)
@@ -266,7 +276,11 @@ class DrillOrchestrator:
         all_decisions = []
 
         for step in self.intent.timeline:
+            if step.optional and not include_optional:
+                continue
             print(f"\n▶ Step {step.step}: [{step.phase}]")
+            if step.time_offset:
+                print(f"  Time: {step.time_offset}")
             print(f"  Event: {step.event}")
 
             # 1. Evaluate cross-border gate if payload involves transfer
@@ -283,42 +297,43 @@ class DrillOrchestrator:
                 )
                 print(f"  🚧 Border Gate Routing: {gate_status} ({gate_reason})")
 
-            # 2. Trigger relevant actor agents
-            # The initiator agent reacts first
-            initiator_id = step.initiator
-            active_actors = [initiator_id]
-
-            if initiator_id == "ehs":
-                active_actors.extend(["mohap", "uae_data_office"])
-            elif initiator_id == "retina_swiss_ag":
-                active_actors.extend(["uae_data_office", "fodio"])
-            elif initiator_id == "mohap":
-                active_actors.extend(["swissmedic"])
-            elif initiator_id == "engine":
-                # Step 4: Policy gap logging
-                active_actors = ["mohap", "swissmedic", "uae_data_office"]
-
+            # Each agent receives only its explicit view of this event.
+            active_actors = step.participants or ([step.initiator] if step.initiator else [])
             for actor_id in active_actors:
-                if actor_id in self.agents:
-                    agent = self.agents[actor_id]
-                    decision = agent.evaluate_step(
-                        step.step,
-                        step.event,
-                        step.payload,
-                        gate=self.gate,
-                        gate_status=gate_status,
-                        gate_reason=gate_reason,
-                        expected_policy_checks=step.expected_policy_checks,
+                if actor_id not in self.agents:
+                    raise ValueError(
+                        f"Step {step.step} names unknown participant '{actor_id}'."
                     )
-                    # Record in hash-chained log
-                    chained_entry = self.logger.append(decision.model_dump())
-                    all_decisions.append(DecisionLogEntry(**chained_entry))
-                    print(f"  🏛️  [{agent.institution.jurisdiction}] {agent.institution.id.upper()}: {decision.action_taken}")
-                    print(f"     Reason: {decision.justification}")
-                    print(f"     Cited: {', '.join(decision.cited_clauses[:2])}")
-                    print(f"     LLM: {decision.model_name} (self-reported confidence {decision.confidence})")
-                    print(f"     Tool result: {decision.tool_result}")
-                    print(f"     State changes: {decision.state_changes}")
+                view = step.agent_views.get(actor_id)
+                if view is None:
+                    raise ValueError(
+                        f"Step {step.step} is missing a private agent view for '{actor_id}'."
+                    )
+                visible_gate_status = gate_status if actor_id in step.gate_visible_to else None
+                visible_gate_reason = gate_reason if visible_gate_status else ""
+                agent = self.agents[actor_id]
+                decision = agent.evaluate_step(
+                    step.step,
+                    view.event,
+                    view.payload,
+                    gate=self.gate,
+                    gate_status=visible_gate_status,
+                    gate_reason=visible_gate_reason,
+                    expected_policy_checks=view.expected_policy_checks,
+                    visible_state={
+                        key: self.simulation_state[key]
+                        for key in view.visible_state_keys
+                        if key in self.simulation_state
+                    },
+                )
+                chained_entry = self.logger.append(decision.model_dump())
+                all_decisions.append(DecisionLogEntry(**chained_entry))
+                print(f"  🏛️  [{agent.institution.jurisdiction}] {agent.institution.id.upper()}: {decision.action_taken}")
+                print(f"     Reason: {decision.justification}")
+                print(f"     Cited: {', '.join(decision.cited_clauses[:2])}")
+                print(f"     LLM: {decision.model_name} (self-reported confidence {decision.confidence})")
+                print(f"     Tool result: {decision.tool_result}")
+                print(f"     State changes: {decision.state_changes}")
 
         # Record a scenario finding grounded in this run and retrieved source chunks.
         gap = self._build_policy_gap(all_decisions)

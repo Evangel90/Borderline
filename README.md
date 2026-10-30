@@ -1,11 +1,13 @@
 # Borderline
 
-A country-agnostic engine for cross-border AI incident drills, built for the
+A prototype for cross-border AI incident drills, built for the
 [ITU AI for Good Lab Hackathon: United Arab Emirates](https://aiforgood.itu.int/event/ai-for-good-sandbox-hackathon-united-arab-emirates/).
+The current drill is wired to UAE (AE) and Switzerland (CH); adding a new
+country pack does not yet configure a new drill automatically.
 
-Each institution is represented by an LLM-driven operator. Operators choose
-among role-authorized actions, execute those actions in the synthetic drill
-state, and cite retrieved policy chunks. A separate border gate can veto data
+Each participating role is represented by an agent. The LLM selects among
+role-authorized actions, which the sandbox records in synthetic drill state;
+agents cite retrieved policy chunks when relevant evidence is available. A separate border gate can veto data
 transfers or route regulator notifications. Decisions and tool outcomes are
 written to a hash-chained audit log.
 
@@ -18,24 +20,25 @@ model update.
 
 ## Status
 
-The four-step drill uses OpenRouter's free-model router by default to choose
-and execute role-authorized actions. Policy retrieval remains deterministic
-keyword search; there is no vector database. The checked-in scenario actions
-only change the synthetic drill state. No real clinical, regulatory, or
-data-transfer system is connected. If the configured model is unavailable, the
-drill stops; there is no scripted decision fallback. The Streamlit viewer
-displays model choices, tool outcomes, evidence, and audit-chain status.
-`make replay` and `make report-figures` are not implemented yet.
+The eight-stage timeline gives participating agents role-specific event views;
+an optional judge-injected escalation can be enabled for a run. The OpenRouter
+free-model router chooses the agents' actions. Policy retrieval remains
+deterministic keyword search; there is no vector database. The checked-in
+scenario actions only change synthetic drill state. No real clinical,
+regulatory, or data-transfer system is connected. If the configured model is
+unavailable, the drill stops; there is no scripted decision fallback. The
+Streamlit viewer displays each agent's visible facts, decisions, tool outcomes,
+evidence, and audit-chain status. `make replay` and `make report-figures` are
+not implemented yet.
 
 ## Layout
 
 ```
 packs/ae/, packs/ch/      country packs: documents/, institutions/*.yaml, chunks.jsonl
 packs/bridge/ae-ch.yaml   what links the two countries (adequacy, treaties)
-packs/global/             global benchmarks and ITU standards (chunks.jsonl)
-domains/health/           incident template
-intents/                  drill specs (the Y.3172 "ML intent")
-engine/                   Ollama operators, action sandbox, orchestrator, gates
+packs/global/             global benchmarks, neutral adviser, ITU standards
+intents/                  staged drill specs (the Y.3172 "ML intent")
+engine/                   LLM agents, action sandbox, orchestrator, gates
 audit/                    hash-chained log and verifier
 gaps/                     gap register
 data/raw/, data/sources.csv   source files and provenance register
@@ -60,7 +63,8 @@ make verify-log RUN=demo-2026-10-30
 Create an API key from [OpenRouter](https://openrouter.ai/settings/keys) and
 export it as `OPENROUTER_API_KEY`. The default model `openrouter/free` routes
 requests among available free models that support structured outputs. Free
-models have rate limits and availability can change. The drill sends its
+models have rate limits and availability can change; the selected model can
+vary between agent decisions. The drill sends its
 prompts, synthetic events, and retrieved policy excerpts to OpenRouter; do not
 include real patient or confidential data. Set `BORDERLINE_LLM_MODEL` to a
 specific model ID if needed, or `BORDERLINE_LLM_PROVIDER=ollama` to use local
@@ -68,8 +72,11 @@ Ollama instead (`BORDERLINE_OLLAMA_URL` and `BORDERLINE_LLM_TIMEOUT` configure
 the local service and timeout).
 
 The `RUN` value must be new each time; existing run IDs are immutable and the
-engine refuses to append to them. The supplied policy chunks are checked in, so
-after the model is installed the drill runs locally. `vendor/ITUAIReadiness` contains the [ITU reference
+engine refuses to append to them. The supplied policy chunks are checked in;
+agent prompts and retrieved excerpts are sent to OpenRouter when a drill runs.
+Use `DRILL_ARGS=--include-optional-events` with `make drill` to include the
+judge-injected reserve event.
+`vendor/ITUAIReadiness` contains the [ITU reference
 code](https://github.com/CrashingGuru/ITUAIReadiness) (MIT), pinned as a git
 submodule; `make itu-smoke` is optional and requires that project's dependencies
 and a locally running Ollama embedding model.
