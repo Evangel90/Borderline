@@ -2,6 +2,7 @@
 
 import re
 
+from engine.domain import passage_matches_action
 from engine.models import Chunk
 
 
@@ -23,13 +24,17 @@ NON_BINDING = {"guidance", "guidelines", "national_strategy", "framework_report"
 META_RESPONSE = re.compile(
     r"\b(?:the user (?:has provided|is asking|may be looking)|"
     r"seeking a structured summary|documents and chunks|"
-    r"your (?:question|request) asks)\b",
+    r"your (?:question|request) asks|"
+    r"provided citation ids do not support|"
+    r"citations (?:either fail relevance checks|contain invalid or irrelevant chunk ids)|"
+    r"model will update its knowledge base|"
+    r"choose a review or information.request action)\b",
     re.IGNORECASE,
 )
 
 
 def off_topic_rationale(rationale: str) -> bool:
-    """Catch clear document-assistant replies inside an institutional drill."""
+    """Catch clear document-assistant or validation-feedback replies."""
     return bool(META_RESPONSE.search(rationale))
 
 
@@ -43,6 +48,7 @@ def content_terms(value: str) -> set[str]:
 def triage_citations(
     rationale: str, action_description: str, cited_ids: list[str], chunks: dict[str, Chunk],
     actor_jurisdiction: str | None = None,
+    action_name: str | None = None,
 ) -> tuple[str, list[str]]:
     """Return warning status and IDs with no overlap or clear scope mismatch.
 
@@ -60,5 +66,6 @@ def triage_citations(
         or (asserts_legal_basis and chunks[chunk_id].source_binding in NON_BINDING)
         or (asserts_legal_basis and actor_jurisdiction is not None
             and chunks[chunk_id].jurisdiction != actor_jurisdiction)
+        or (action_name is not None and not passage_matches_action(action_name, chunks[chunk_id].text))
     ]
     return ("UNSUPPORTED" if weak else "PARTIALLY_SUPPORTED"), weak

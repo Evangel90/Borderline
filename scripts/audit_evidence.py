@@ -45,7 +45,7 @@ def audit_run(run_id: str) -> dict:
         rationale = entry.get("justification", "")
         status, weak = triage_citations(
             rationale, entry.get("action_taken", "").replace("_", " "),
-            cited_ids, chunks, entry.get("jurisdiction"),
+            cited_ids, chunks, entry.get("jurisdiction"), entry.get("action_taken"),
         )
         if off_topic_rationale(rationale):
             findings.append({"entry_id": entry["entry_id"], "issue": "off_topic_rationale"})

@@ -193,6 +193,7 @@ class InstitutionalAgent:
                 generated.cited_chunk_ids,
                 evidence_by_id,
                 self.institution.jurisdiction,
+                generated.action,
             )
             off_topic = off_topic_rationale(generated.rationale)
             if not invalid_citations and not weak_citations and not off_topic:
@@ -239,6 +240,7 @@ class InstitutionalAgent:
             proposal.cited_chunk_ids,
             evidence_by_id,
             self.institution.jurisdiction,
+            proposal.action,
         )
         if off_topic_rationale(proposal.rationale):
             evidence_status = "UNSUPPORTED"
