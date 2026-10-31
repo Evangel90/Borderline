@@ -137,6 +137,8 @@ class DecisionLogEntry(BaseModel):
     authorized_actions: List[str] = Field(default_factory=list)
     retrieved_chunk_ids: List[str] = Field(default_factory=list)
     cited_clauses: List[str] = Field(default_factory=list)
+    evidence_status: Optional[str] = None
+    evidence_note: Optional[str] = None
     justification: str
     model_name: Optional[str] = None
     tool_name: Optional[str] = None

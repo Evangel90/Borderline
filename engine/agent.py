@@ -6,6 +6,7 @@ import json
 from typing import Any, List, Optional
 
 from engine.actions import ActionExecutor
+from engine.evidence import off_topic_rationale, triage_citations
 from engine.gates import BorderGate
 from engine.llm import OllamaChatClient, OpenRouterChatClient, create_chat_client
 from engine.knowledge import KnowledgeIndex
@@ -186,17 +187,34 @@ class InstitutionalAgent:
                 chunk_id for chunk_id in generated.cited_chunk_ids
                 if chunk_id not in evidence_by_id
             ]
-            if not invalid_citations:
+            status, weak_citations = triage_citations(
+                generated.rationale,
+                declared_actions[generated.action].description,
+                generated.cited_chunk_ids,
+                evidence_by_id,
+                self.institution.jurisdiction,
+            )
+            off_topic = off_topic_rationale(generated.rationale)
+            if not invalid_citations and not weak_citations and not off_topic:
                 proposal = generated
                 break
             if attempt == 0:
                 problem = (
-                    f"The previous proposal was rejected. Invalid citation IDs: {invalid_citations}. "
+                    f"The previous proposal needs review. Invalid citation IDs: {invalid_citations}. "
+                    f"Citations failing relevance or basic source-scope checks: {weak_citations}. "
+                    f"Off-topic rationale: {off_topic}. "
                     f"Supplied citation IDs: {list(evidence_by_id)}. "
                     "Retry with only supplied IDs that genuinely support the action. "
                     "If none support it, cite none and choose a review or information-request action."
                 )
                 user = f"{user}\n\nValidation feedback: {problem}"
+            elif not invalid_citations:
+                # Preserve the selected synthetic action but abstain from citing
+                # passages that failed even this minimal relevance screen.
+                proposal = generated.model_copy(update={"cited_chunk_ids": [
+                    chunk_id for chunk_id in generated.cited_chunk_ids
+                    if chunk_id not in weak_citations and not off_topic
+                ]})
         if proposal is None:
             raise ValueError(
                 f"LLM could not return citations from supplied context for {self.institution.id}."
@@ -215,6 +233,15 @@ class InstitutionalAgent:
             f"{evidence_by_id[chunk_id].doc_id} (p. {evidence_by_id[chunk_id].page}; {chunk_id})"
             for chunk_id in proposal.cited_chunk_ids
         ]
+        evidence_status, _ = triage_citations(
+            proposal.rationale,
+            declared_actions[proposal.action].description,
+            proposal.cited_chunk_ids,
+            evidence_by_id,
+            self.institution.jurisdiction,
+        )
+        if off_topic_rationale(proposal.rationale):
+            evidence_status = "UNSUPPORTED"
         return DecisionLogEntry(
             entry_id=f"log-{step}-{self.institution.id}",
             step=step,
@@ -223,6 +250,8 @@ class InstitutionalAgent:
             jurisdiction=self.institution.jurisdiction,
             action_taken=execution.action,
             cited_clauses=citations,
+            evidence_status=evidence_status,
+            evidence_note="Lexical relevance and basic source-scope triage only; exact support and legal applicability require review.",
             justification=proposal.rationale,
             model_name=self.llm.model,
             tool_name=execution.action,

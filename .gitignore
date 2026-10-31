@@ -15,3 +15,8 @@ chromadb/
 # Drill outputs are generated locally; keep the runs directory placeholder only.
 /runs/*
 !/runs/.gitkeep
+/docs
+/AGENTS.md
+!/docs/
+/docs/*
+!/docs/HACKATHON_EXECUTION_PLAN.md

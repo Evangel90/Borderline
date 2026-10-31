@@ -1,0 +1,30 @@
+# Hackathon Execution Plan
+
+Audit date: 2026-11-01. Scope follows `docs/PRODUCT_SPEC.md` and the evaluation criteria in `AGENTS.md`.
+
+## Audit snapshot
+
+Existing strengths: institutional multi-agent drill, jurisdiction-filtered Chroma retrieval, provenance-bearing chunks, action gates, human approval path, hash-chained logs, and a reviewed seven-stage baseline (`vector-retrieval-retry-20261030-1`).
+
+Known risks from the baseline review: citation IDs are traceable but citation support is not validated; high-priority UAE institutional authorities are incomplete; gap generation remains scenario-configured; conflicting objectives and the UI are underdeveloped. The baseline review explicitly says it is not evidence of legal accuracy. No `tests/` directory was present at audit time.
+
+## Prioritized work
+
+| Priority | Task / status | Dependencies | Affected files | Acceptance criteria | Verification |
+|---|---|---|---|---|---|
+| P0 | Lexical evidence triage, citation abstention, and recorded-run audit; **implemented, semantic support validation pending** | None | `engine/evidence.py`, `engine/agent.py`, `engine/models.py`, `scripts/audit_evidence.py`, tests | Flag obvious relevance and scope mismatches, retry once, omit persistently weak citations, record uncertainty, and audit prior runs | `.venv/bin/python -m pytest -q`; `make audit-evidence RUN=vector-retrieval-retry-20261030-1` |
+| P0 | Establish reproducible baseline and test harness; **initial coverage complete** | P0 validator | `tests/`, `Makefile`, `scripts/verify_log.py` | Existing run/log remains verifiable and core safety gates have regression coverage | `make verify-log RUN=vector-retrieval-retry-20261030-1`; `.venv/bin/python -m pytest -q` |
+| P1 | Diagnostic AI governance taxonomy and incident conflict state | P0 baseline | `intents/retinopathy-ae-ch.yaml`, `engine/models.py`, `engine/orchestrator.py`, `docs/` | Scenario represents lifecycle, safety, cybersecurity, data, coordination topics; at least one decision-dependent tradeoff affects later state | Run drill; inspect event/state transitions |
+| P1 | Source provenance and mandate coverage | P0 evidence validator | `data/sources.csv`, `packs/ae/`, `packs/ch/`, `scripts/verify_sources.py` | Source status/scope/issuer and limitations are explicit; missing authority is surfaced rather than inferred | `make verify-sources`; manual source-register review |
+| P1 | Candidate gap assessment from evidence, with uncertainty | Taxonomy, provenance | `gaps/register.py`, `engine/knowledge.py`, `report/` | Findings distinguish policy, implementation, coordination, and evidence gaps; unsupported candidates can be rejected | Focused tests; run artifact review |
+| P2 | Relevant global comparison and ITU mapping | Verified evidence set | `packs/global/`, `docs/`, `report/` | Every comparison is sourced and labeled advisory/binding accurately; Y.3172 is described as adapted concepts, not conformance | Source verification; mapping review |
+| P2 | Governance-centered dashboard and demo | Evaluated outputs | `ui/app.py`, `README.md`, `report/` | Timeline, institutional decisions, conflicts, evidence limits, findings, and audit status are navigable | Launch UI; inspect evaluated run |
+| P2 | Benchmark and final submission artifacts | Stable vertical slice | `tests/`, `report/`, `docs/` | Manually reviewed questions and actual metrics/limitations; reproducible demo instructions | Benchmark command and complete drill |
+
+## Progress log
+
+- 2026-11-01: Read `AGENTS.md`, `docs/PRODUCT_SPEC.md`, and baseline review. Confirmed no top-level `tests/` directory. P0 implementation selected: add conservative lexical evidence relevance checks as an explicit warning/abstention signal, preserving citations and existing flow.
+- 2026-11-01: Added lexical citation triage, one retry on weak citations, omission of persistently weak citations, and an audit status/note. This heuristic cannot establish exact claim support, institutional mandate, or legal applicability. Added five focused tests in total. `.venv/bin/python -m pytest -q`: 5 passed. `make verify-log RUN=vector-retrieval-retry-20261030-1`: hash chain verified. `make verify-sources`: 21 source hashes verified. No new full drill or model-based citation evaluation has been run.
+- 2026-11-01: Extended triage to flag non-binding or foreign-jurisdiction sources when a rationale asserts a legal mandate, with an integration test showing retry and citation abstention. `.venv/bin/python -m pytest -q`: 7 passed. Existing baseline hash chain verified; `.venv/bin/pip check` found no broken requirements. Legal interpretation and semantic citation support remain unverified.
+- 2026-11-01: Added off-topic document-assistant response detection and a reproducible recorded-run audit command. On `vector-retrieval-retry-20261030-1`, the audit read 31 decisions and reported 14 citation review cases and one off-topic rationale (`log-1-screening_ai`). These are screening findings, not measured legal or semantic accuracy. `.venv/bin/python -m pytest -q`: 8 passed. Full revised drill remains outstanding.
+- 2026-11-01: Completed revised local Ollama drill `retinopathy-p0-20261101-2`: 31 decisions, one configured gap record, verified hash chain. Audit found eight decisions with no citation and one remaining lexical/scope citation flag. The log records 23 `PARTIALLY_SUPPORTED` and eight `INSUFFICIENT_EVIDENCE` statuses; `PARTIALLY_SUPPORTED` means only that the heuristic did not flag the citation. Manual review still found semantically weak citations, so legal and policy accuracy remain unverified. See `report/run-review-retinopathy-p0-20261101-2.md`.

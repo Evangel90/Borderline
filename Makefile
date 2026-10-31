@@ -1,4 +1,4 @@
-.PHONY: fetch verify-sources ingest index drill verify-log replay report-figures ui itu-smoke
+.PHONY: fetch verify-sources ingest index drill verify-log audit-evidence replay report-figures ui itu-smoke
 
 INTENT ?= retinopathy-ae-ch
 RUN ?=
@@ -30,6 +30,10 @@ drill:
 verify-log:
 	@if [ -z "$(RUN)" ]; then echo "Error: specify RUN=<run_id>"; exit 1; fi
 	$(PYTHON) scripts/verify_log.py --run $(RUN)
+
+audit-evidence:
+	@if [ -z "$(RUN)" ]; then echo "Error: specify RUN=<run_id>"; exit 1; fi
+	$(PYTHON) scripts/audit_evidence.py --run $(RUN)
 
 replay:
 	$(call todo,M2)
