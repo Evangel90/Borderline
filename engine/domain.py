@@ -2,6 +2,8 @@
 
 import re
 
+from engine.models import Chunk
+
 
 ACTION_TOPICS = {
     "clinical_safety": {
@@ -27,3 +29,8 @@ def passage_matches_action(action: str, passage: str) -> bool:
         if action in topic["actions"]:
             return bool(re.search(topic["passage_terms"], passage, re.IGNORECASE))
     return True
+
+
+def reference_only_for_retrieval(chunk: Chunk) -> bool:
+    """Keep archived chunks resolvable while excluding known bibliography pages."""
+    return chunk.doc_id == "AE-DHA-SENTINEL-2025" and chunk.page in {21, 22}

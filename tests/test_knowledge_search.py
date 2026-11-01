@@ -33,3 +33,14 @@ def test_hybrid_search_keeps_jurisdiction_and_document_filters():
     index.collection = Collection()
     assert [item.chunk_id for item in index.search("encryption digital evidence", ["AE"])] == ["ae"]
     assert index.search("encryption digital evidence", ["AE"], doc_id="ch") == []
+
+
+def test_known_bibliography_page_is_not_retrieved():
+    index = object.__new__(KnowledgeIndex)
+    item = chunk("bibliography", "AE", "DHA sentinel event references and safety policy")
+    item.doc_id = "AE-DHA-SENTINEL-2025"
+    item.page = 22
+    index.chunks = {"bibliography": item}
+    index.embedder = Embedder()
+    index.collection = Collection()
+    assert index.search("DHA sentinel event references", ["AE"]) == []

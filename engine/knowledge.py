@@ -13,6 +13,7 @@ from typing import Iterable
 import chromadb
 from fastembed import TextEmbedding
 
+from engine.domain import reference_only_for_retrieval
 from engine.models import Chunk
 
 
@@ -179,6 +180,7 @@ class KnowledgeIndex:
         for metadata in result["metadatas"][0]:
             chunk_id = metadata.get("chunk_id")
             if (chunk_id in self.chunks and chunk_id not in seen
+                    and not reference_only_for_retrieval(self.chunks[chunk_id])
                     and self.chunks[chunk_id].jurisdiction in jurisdictions
                     and (not doc_id or self.chunks[chunk_id].doc_id == doc_id)):
                 seen.add(chunk_id)
@@ -189,6 +191,7 @@ class KnowledgeIndex:
         allowed = [
             chunk for chunk in self.chunks.values()
             if chunk.jurisdiction in jurisdictions and (not doc_id or chunk.doc_id == doc_id)
+            and not reference_only_for_retrieval(chunk)
         ]
         terms = lambda value: {
             word for word in re.findall(r"[a-z]{3,}|[0-9]{2,}", value.lower())

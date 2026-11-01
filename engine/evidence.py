@@ -2,7 +2,7 @@
 
 import re
 
-from engine.domain import passage_matches_action
+from engine.domain import passage_matches_action, reference_only_for_retrieval
 from engine.models import Chunk
 
 
@@ -72,6 +72,7 @@ def triage_citations(
         or (asserts_legal_basis and actor_jurisdiction is not None
             and chunks[chunk_id].jurisdiction != actor_jurisdiction)
         or (action_name is not None and not passage_matches_action(action_name, chunks[chunk_id].text))
+        or reference_only_for_retrieval(chunks[chunk_id])
         or (chunks[chunk_id].doc_id == "AE-DHA-SENTINEL-2025"
             and not sentinel_confirmed
             and bool(re.search(r"\b(?:required|must|mandat\w*|obligat\w*)\b", rationale, re.IGNORECASE)))
