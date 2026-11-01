@@ -31,6 +31,7 @@ def main() -> None:
         status, weak = triage_citations(
             row["claim_focus"], decision["action_taken"].replace("_", " "),
             cited, chunks, decision["jurisdiction"], decision["action_taken"],
+            decision["actor_id"], decision.get("visible_payload"),
         )
         results.append({
             "case_id": row["case_id"], "manual": row["assessment"],

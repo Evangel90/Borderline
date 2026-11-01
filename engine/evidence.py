@@ -50,6 +50,8 @@ def triage_citations(
     rationale: str, action_description: str, cited_ids: list[str], chunks: dict[str, Chunk],
     actor_jurisdiction: str | None = None,
     action_name: str | None = None,
+    actor_id: str | None = None,
+    visible_payload: dict | None = None,
 ) -> tuple[str, list[str]]:
     """Return warning status and IDs with no overlap or clear scope mismatch.
 
@@ -60,6 +62,8 @@ def triage_citations(
         return "INSUFFICIENT_EVIDENCE", []
     claim_terms = content_terms(f"{rationale} {action_description}")
     asserts_legal_basis = bool(LEGAL_CLAIM.search(rationale))
+    sentinel_confirmed = bool((visible_payload or {}).get("sentinel_event_confirmed"))
+    own_authority_claim = bool(re.search(r"\b(?:mandate|powers?|authority)\b", rationale, re.IGNORECASE))
     weak = [
         chunk_id for chunk_id in cited_ids
         if chunk_id not in chunks
@@ -68,5 +72,10 @@ def triage_citations(
         or (asserts_legal_basis and actor_jurisdiction is not None
             and chunks[chunk_id].jurisdiction != actor_jurisdiction)
         or (action_name is not None and not passage_matches_action(action_name, chunks[chunk_id].text))
+        or (chunks[chunk_id].doc_id == "AE-DHA-SENTINEL-2025"
+            and not sentinel_confirmed
+            and bool(re.search(r"\b(?:required|must|mandat\w*|obligat\w*)\b", rationale, re.IGNORECASE)))
+        or (chunks[chunk_id].doc_id == "AE-DHA-SENTINEL-2025"
+            and actor_id in {"ede", "mohap"} and own_authority_claim)
     ]
     return ("UNSUPPORTED" if weak else "PARTIALLY_SUPPORTED"), weak

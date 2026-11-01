@@ -1,4 +1,4 @@
-.PHONY: fetch verify-sources ingest index drill verify-log audit-evidence evaluate-claims replay report-figures ui itu-smoke
+.PHONY: fetch verify-sources ingest index drill verify-log audit-evidence evaluate-claims evaluate-retrieval replay report-figures ui itu-smoke
 
 INTENT ?= retinopathy-ae-ch
 RUN ?=
@@ -37,6 +37,9 @@ audit-evidence:
 
 evaluate-claims:
 	$(PYTHON) scripts/evaluate_claim_seed.py
+
+evaluate-retrieval:
+	$(PYTHON) scripts/evaluate_retrieval.py
 
 replay:
 	$(call todo,M2)

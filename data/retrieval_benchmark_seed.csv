@@ -1,0 +1,11 @@
+case_id,question,jurisdictions,gold_chunk_ids,review_note
+R-001,Which DHA health facilities does the 2025 sentinel event standard apply to?,AE,AE-DHA-SENTINEL-2025:p10:c1,Scope passage; applicability to synthetic clinic still requires facility facts
+R-002,How does the DHA sentinel event standard define serious harm?,AE,AE-DHA-SENTINEL-2025:p8:c1,Definition passage; current scenario does not establish serious harm
+R-003,What is the DHA sentinel event standard scope for death or serious harm?,AE,AE-DHA-SENTINEL-2025:p9:c1,Scope passage distinct from a clinical follow-up obligation
+R-004,What does UAE PDPL say about personal data transfers to a country with adequate protection?,AE,AE-DATA-PDPL-2021:p24:c1,Outbound UAE transfer passage; applicability needs controller and flow facts
+R-005,What does UAE PDPL say about cross-border transfers where adequate protection is absent?,AE,AE-DATA-PDPL-2021:p24:c2,Article 23 passage; not a regulator liaison authorization
+R-006,Where does UAE cybercrime law define encryption and digital evidence?,AE,AE-CYBER-LAW34:p6:c2,Glossary passage; not cyber responder mandate
+R-007,What does Swiss FADP Article 16 say about transfers of personal data abroad?,CH,CH-DATA-FADP:p7:c1,Transfer direction and applicable actor still require analysis
+R-008,Which Swiss MedDO provision gives Swissmedic access to medical devices information system records?,CH,CH-HEALTH-MedDO:p35:c1,Art 87 information-system access; not vendor retraining basis
+R-009,What WHO guidance discusses AI errors caused by incomplete training data or software mistakes?,GLOBAL,WHO-GUIDELINES-AI-HEALTH:p92:c1,Advisory AI health risk discussion; not domestic law
+R-010,What WHO guidance discusses re-identification risks in health AI datasets?,GLOBAL,WHO-GUIDELINES-AI-HEALTH:p163:c1,Privacy passage; not missed-referral follow-up authority

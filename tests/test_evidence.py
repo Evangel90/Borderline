@@ -54,3 +54,21 @@ def test_action_topic_rejects_generic_data_passage_even_with_word_overlap():
     )
     assert status == "UNSUPPORTED"
     assert weak == ["c1"]
+
+
+def test_dha_sentinel_source_requires_scope_for_asserted_duty():
+    source = chunk("The DHA sentinel event standard requires patient follow-up review.")
+    source.doc_id = "AE-DHA-SENTINEL-2025"
+    source.source_binding = "standard"
+    claim = "Patient follow-up is required under the DHA sentinel event standard"
+    assert triage_citations(claim, "Review patient follow-up", ["c1"], {"c1": source},
+                            "AE", None, "dha", {})[0] == "UNSUPPORTED"
+    assert triage_citations(claim, "Review patient follow-up", ["c1"], {"c1": source},
+                            "AE", None, "dha", {"sentinel_event_confirmed": True})[0] == "PARTIALLY_SUPPORTED"
+
+
+def test_dha_sentinel_source_does_not_establish_ede_mandate():
+    source = chunk("Health facilities should review patient safety incidents.")
+    source.doc_id = "AE-DHA-SENTINEL-2025"
+    assert triage_citations("EDE mandate covers patient safety review", "Review patient safety",
+                            ["c1"], {"c1": source}, "AE", None, "ede", {})[0] == "UNSUPPORTED"

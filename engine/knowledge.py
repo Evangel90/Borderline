@@ -5,6 +5,9 @@ from __future__ import annotations
 import hashlib
 import json
 import os
+import re
+import math
+from collections import Counter
 from typing import Iterable
 
 import chromadb
@@ -17,6 +20,8 @@ DEFAULT_MODEL = "sentence-transformers/paraphrase-multilingual-MiniLM-L12-v2"
 COLLECTION_NAME = "policy_chunks_v1"
 WINDOW_CHARS = 420
 WINDOW_OVERLAP = 80
+SEARCH_STOPWORDS = {"what", "which", "where", "does", "about", "from", "with",
+                    "the", "and", "for", "into", "that", "this", "say", "under"}
 
 
 class KnowledgeIndex:
@@ -169,14 +174,47 @@ class KnowledgeIndex:
             where=where,
             include=["metadatas"],
         )
-        matches = []
+        vector_rank = []
         seen = set()
         for metadata in result["metadatas"][0]:
             chunk_id = metadata.get("chunk_id")
-            if chunk_id in self.chunks and chunk_id not in seen:
+            if (chunk_id in self.chunks and chunk_id not in seen
+                    and self.chunks[chunk_id].jurisdiction in jurisdictions
+                    and (not doc_id or self.chunks[chunk_id].doc_id == doc_id)):
                 seen.add(chunk_id)
-                matches.append(self.chunks[chunk_id])
-                if len(matches) == top_k:
-                    break
-        return matches
+                vector_rank.append(chunk_id)
+
+        # Rare matching terms help exact article and definition questions that
+        # semantic embeddings can place below the vector candidate cutoff.
+        allowed = [
+            chunk for chunk in self.chunks.values()
+            if chunk.jurisdiction in jurisdictions and (not doc_id or chunk.doc_id == doc_id)
+        ]
+        terms = lambda value: {
+            word for word in re.findall(r"[a-z]{3,}|[0-9]{2,}", value.lower())
+            if word not in SEARCH_STOPWORDS
+        }
+        query_terms = terms(query)
+        documents = {chunk.chunk_id: terms(f"{chunk.title} {chunk.text}") for chunk in allowed}
+        frequencies = Counter(term for words in documents.values() for term in words)
+        lexical_rank = sorted(
+            allowed,
+            key=lambda chunk: (
+                -sum(
+                    math.log1p((len(allowed) + 1) / (frequencies[term] + 1))
+                    for term in query_terms & documents[chunk.chunk_id]
+                ),
+                chunk.chunk_id,
+            ),
+        )
+        lexical_ids = [
+            chunk.chunk_id for chunk in lexical_rank
+            if query_terms & documents[chunk.chunk_id]
+        ][:max(top_k * 8, top_k)]
+        ranks = {}
+        for candidates, weight in ((vector_rank, 1.0), (lexical_ids, 1.5)):
+            for rank, chunk_id in enumerate(candidates, 1):
+                ranks[chunk_id] = ranks.get(chunk_id, 0) + weight / (20 + rank)
+        ordered = sorted(ranks, key=lambda chunk_id: (-ranks[chunk_id], chunk_id))
+        return [self.chunks[chunk_id] for chunk_id in ordered[:top_k]]
 
