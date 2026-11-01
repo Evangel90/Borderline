@@ -91,6 +91,7 @@ class InstitutionalAgent:
             "Choose exactly one action from the available_actions list in this event view for the runtime to execute through the sandbox tool. "
             "Do not claim an action succeeded if the tool result later vetoes it. The border gate is mandatory. "
             "Do not invent legal rules, facts, or citations. Cite only supplied chunk IDs that support your action. "
+            "Check each source's scope and source_notes before asserting an obligation; if the incident facts do not establish applicability, say so. "
             "If none of the supplied chunks supports your decision, cite none and request review or information. "
             "Expected policy checks are questions to consider, not authority or evidence by themselves. "
             "If evidence is incomplete, choose a review, pause, or information-request action. "
@@ -126,6 +127,7 @@ class InstitutionalAgent:
                     "source_issuer": chunk.source_issuer,
                     "source_language": chunk.source_language,
                     "source_binding": chunk.source_binding,
+                    "source_notes": chunk.source_notes,
                     "source_sha256": chunk.source_sha256,
                     "text": " ".join(chunk.text.split())[:900],
                 }
