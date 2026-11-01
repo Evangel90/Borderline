@@ -18,6 +18,16 @@ class RepeatingLLM:
         )
 
 
+class OffTopicLLM(RepeatingLLM):
+    def generate(self, *_args):
+        self.calls += 1
+        return AgentProposal(
+            action="prepare_policy_gap_review",
+            rationale="The user has provided documents and chunks for a summary.",
+            cited_chunk_ids=[], confidence=0.9,
+        )
+
+
 def test_agent_retries_and_abstains_from_unrelated_citation():
     institution = Institution(
         id="test_clinic", name="Synthetic clinic", jurisdiction="AE", type="provider",
@@ -37,3 +47,23 @@ def test_agent_retries_and_abstains_from_unrelated_citation():
     assert decision.action_taken == "request_manual_review"
     assert decision.cited_clauses == []
     assert decision.evidence_status == "INSUFFICIENT_EVIDENCE"
+
+
+def test_off_topic_explanation_falls_back_to_available_review_action():
+    institution = Institution(
+        id="adviser", name="Synthetic adviser", jurisdiction="GLOBAL", type="adviser",
+        role="adviser", mandate="Review evidence", powers=[],
+        available_actions=[
+            AvailableAction(name="prepare_policy_gap_review", description="Prepare comparison"),
+            AvailableAction(name="request_gap_supporting_evidence", description="Request evidence"),
+        ],
+    )
+    llm = OffTopicLLM()
+    agent = InstitutionalAgent(institution, [], llm=llm)
+    decision = agent.evaluate_step(1, "Review incident evidence", {}, gate=None)
+    assert llm.calls == 2
+    assert decision.action_taken == "request_gap_supporting_evidence"
+    assert decision.cited_clauses == []
+    assert decision.confidence == 0.0
+    assert decision.rationale_quality == "FALLBACK_REVIEW_REQUIRED"
+    assert "Human review" in decision.justification

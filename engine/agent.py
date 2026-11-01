@@ -175,6 +175,7 @@ class InstitutionalAgent:
             output_schema["properties"]["cited_chunk_ids"]["maxItems"] = 0
         evidence_by_id = {chunk.chunk_id: chunk for chunk in evidence}
         proposal = None
+        rationale_quality = "MODEL_EXPLANATION"
         for attempt in range(2):
             generated = self.llm.generate(system, user, AgentProposal, output_schema)
             if not isinstance(generated, AgentProposal):
@@ -201,12 +202,10 @@ class InstitutionalAgent:
                 break
             if attempt == 0:
                 problem = (
-                    f"The previous proposal needs review. Invalid citation IDs: {invalid_citations}. "
-                    f"Citations failing relevance or basic source-scope checks: {weak_citations}. "
-                    f"Off-topic rationale: {off_topic}. "
-                    f"Supplied citation IDs: {list(evidence_by_id)}. "
-                    "Retry with only supplied IDs that genuinely support the action. "
-                    "If none support it, cite none and choose a review or information-request action."
+                    "Revise the decision for this visible incident event. Explain the selected "
+                    "institutional action using incident facts. Cite only passages directly relevant "
+                    "to that action; cite none if evidence is insufficient. When available, choose "
+                    "an information request or human review for unresolved authority."
                 )
                 user = f"{user}\n\nValidation feedback: {problem}"
             elif not invalid_citations:
@@ -216,6 +215,20 @@ class InstitutionalAgent:
                     chunk_id for chunk_id in generated.cited_chunk_ids
                     if chunk_id not in weak_citations and not off_topic
                 ]})
+                if off_topic:
+                    fallback = next((name for name in (
+                        "request_manual_review", "request_gap_supporting_evidence"
+                    ) if name in allowed_action_names), generated.action)
+                    proposal = proposal.model_copy(update={
+                        "action": fallback,
+                        "rationale": (
+                            "Model explanation failed incident relevance screening. "
+                            "Human review of the visible event and available evidence is required."
+                        ),
+                        "cited_chunk_ids": [],
+                        "confidence": 0.0,
+                    })
+                    rationale_quality = "FALLBACK_REVIEW_REQUIRED"
         if proposal is None:
             raise ValueError(
                 f"LLM could not return citations from supplied context for {self.institution.id}."
@@ -254,6 +267,7 @@ class InstitutionalAgent:
             cited_clauses=citations,
             evidence_status=evidence_status,
             evidence_note="Lexical relevance and basic source-scope triage only; exact support and legal applicability require review.",
+            rationale_quality=rationale_quality,
             justification=proposal.rationale,
             model_name=self.llm.model,
             tool_name=execution.action,
