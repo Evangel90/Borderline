@@ -16,7 +16,8 @@ STOPWORDS = {
 
 LEGAL_CLAIM = re.compile(
     r"\b(?:law|legal(?:ly)?|statut(?:e|ory)|regulat(?:ion|ory)|mandat(?:e|ed)|"
-    r"obligat(?:ion|ed)|authorit(?:y|ies)|must report|required to report)\b",
+    r"obligat(?:ion|ed)|authorit(?:y|ies)|dut(?:y|ies)|powers?|"
+    r"must report|required to report)\b",
     re.IGNORECASE,
 )
 NON_BINDING = {"guidance", "guidelines", "national_strategy", "framework_report",

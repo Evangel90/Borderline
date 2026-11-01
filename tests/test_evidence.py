@@ -34,6 +34,10 @@ def test_advisory_and_foreign_sources_do_not_support_legal_claim_in_triage():
     claim = "The regulator is legally mandated to monitor clinical screening safety"
     assert triage_citations(claim, "Review safety", ["c1"], {"c1": advisory}, "AE")[0] == "UNSUPPORTED"
     assert triage_citations(claim, "Review safety", ["c1"], {"c1": foreign}, "AE")[0] == "UNSUPPORTED"
+    assert triage_citations(
+        "The guidance establishes a vendor duty to monitor clinical screening safety",
+        "Review safety", ["c1"], {"c1": advisory}, "AE",
+    )[0] == "UNSUPPORTED"
 
 
 def test_document_assistant_response_is_flagged():
