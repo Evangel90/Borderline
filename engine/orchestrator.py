@@ -18,6 +18,7 @@ from engine.knowledge import KnowledgeIndex
 from engine.llm import create_chat_client
 from audit.hasher import HashChainedLogger
 from gaps.register import GapRegister
+from gaps.candidates import evidence_sharing_trigger
 
 
 class DrillOrchestrator:
@@ -141,40 +142,44 @@ class DrillOrchestrator:
             and decision.actor_id == actor_id
         ]
 
-    def _build_policy_gap(self, decisions: List[DecisionLogEntry]) -> PolicyGap:
+    def _build_policy_gap(self, decisions: List[DecisionLogEntry]) -> PolicyGap | None:
+        trigger = evidence_sharing_trigger(decisions)
+        if trigger is None:
+            return None
+        secondary_decision, route_decision = trigger
         evidence = []
         evidence.extend(self._decision_evidence(
-            decisions, 6, "ROUTE", "mohap",
+            decisions, route_decision.step, "ROUTE", route_decision.actor_id,
             "The run routed MoHAP's request for a cross-border account to Swissmedic through the configured liaison gate."
         ))
         evidence.extend(self._decision_evidence(
-            decisions, 4, None, "retina_swiss_ag",
+            decisions, secondary_decision.step, None, secondary_decision.actor_id,
             "The synthetic drill exposed this data-use fact to the vendor agent; its real-world truth is not independently established."
         ))
         evidence.extend(self._decision_evidence(
-            decisions, 4, None, "fodio",
+            decisions, secondary_decision.step, None, "fodio",
             "The synthetic drill exposed this data-use fact to the FDPIC agent; its real-world truth is not independently established."
         ))
         evidence.extend(self._retrieve_evidence(
             "AE", "AE-DATA-PDPL-2021",
             ["adequate level of protection", "transferred outside the State", "approved by the Office"],
-            "UAE PDPL Articles 22–23 set conditions and exceptions for transfers outside the State.",
+            "Candidate passage for outbound UAE transfer scope; exact support and applicability unreviewed.",
             limit=2,
         ))
         evidence.extend(self._retrieve_evidence(
             "CH", "CH-HEALTH-MedDO",
             ["Art. 66", "Reporting obligation", "serious incidents", "occurred in Switzerland"],
-            "Swiss MedDO Article 66 specifies device incident reporting duties and territorial scope.",
+            "Candidate medical-device reporting passage; territorial and product scope unreviewed.",
         ))
         evidence.extend(self._retrieve_evidence(
             "CH", "CH-DATA-FADP",
             ["Art. 16", "disclosed abroad", "adequate level of protection", "standard contractual clauses"],
-            "Swiss FADP Article 16 sets conditions for disclosures abroad by Swiss controllers; applicability depends on role and transfer direction.",
+            "Candidate Swiss disclosure provision; controller role and transfer direction unreviewed.",
         ))
         evidence.extend(self._retrieve_evidence(
             "CH", "CH-HEALTH-HRA",
             ["further use", "health-related personal data", "research", "informed consent"],
-            "Swiss Human Research Act provisions are relevant to assessing whether the claimed research purpose applies.",
+            "Candidate research provision; application to this vendor processing is unreviewed.",
         ))
 
         # Annex 1 is a multi-page enumerated list. Retain the relevant list pages
@@ -204,34 +209,25 @@ class DrillOrchestrator:
         evidence.extend(self._retrieve_evidence(
             "GLOBAL", "WHO-GUIDELINES-AI-HEALTH",
             ["federated data-sharing", "maintaining local control", "informed consent", "secondary uses"],
-            "WHO notes that federated sharing can preserve local control but does not itself resolve consent concerns.",
+            "Candidate advisory comparison; relevance to this data flow requires review.",
             required_terms=["federated data-sharing", "maintaining local control"],
         ))
 
         return PolicyGap(
             gap_id="GAP-HEALTH-001",
-            category="Health data transfer and medical device incident reporting",
-            title="Cross-border evidence sharing and vigilance coordination",
+            category="EVIDENCE_DEFICIENCY",
+            title="Unresolved evidence-sharing and incident-coordination question",
             host_jurisdiction="AE",
             partner_jurisdiction="CH",
             friction_point=(
-                "In this drill, the UAE Data Office's request for a cross-border account "
-                "is routed through the configured liaison gate. The incident facts say "
-                "UAE-origin retinal images stored in Switzerland were used to retrain the "
-                "model, while the controller roles, identifiability, and claimed research "
-                "basis remain unresolved. The UAE PDPL conditions transfers of personal "
-                "data outside the State; Swiss FADP and Human Research Act provisions "
-                "require assessment against the processing roles and purpose. The evidence "
-                "does not settle those questions or specify the minimum information needed "
-                "for regulator coordination. This is a scenario coordination gap, not a "
-                "conclusion that the laws are incompatible."
+                "The synthetic vendor recorded UAE-origin retinal images used for model retraining, "
+                "and a simulated regulator request was routed for an account of that use. "
+                "Controller roles, identifiability, processing basis, and the route's authority "
+                "remain unresolved. These missing facts prevent a supported policy-gap conclusion."
             ),
-            host_citation="AE-DATA-PDPL-2021 (Arts. 22–23; chunks cited below)",
-            partner_citation="CH-DATA-FADP (Arts. 16–17), CH-HEALTH-HRA, and CH-DATA-DPO (Annex 1; chunks cited below)",
-            global_benchmark=(
-                "WHO Ethics and Governance of Artificial Intelligence for Health: "
-                "federated data-sharing may maintain local control but does not by itself resolve consent concerns."
-            ),
+            host_citation="Candidate UAE passages are listed below; exact support is unverified.",
+            partner_citation="Candidate Swiss passages are listed below; exact support is unverified.",
+            global_benchmark="WHO guidance is an advisory comparison candidate, subject to passage-level review.",
             remediation_recommendation=(
                 "Define a regulator-approved incident exchange protocol that specifies the "
                 "reporting route, lawful transfer basis, minimum necessary evidence, and "
@@ -239,12 +235,9 @@ class DrillOrchestrator:
                 "assessment, not as a substitute for consent or transfer authorization."
             ),
             finding_method=(
-                "Deterministic scenario rule: connect the recorded liaison ROUTE outcome "
-                "and step-specific agent views to jurisdiction- and document-scoped vector "
-                "retrieval, then rank candidates using configured legal terms from the UAE "
-                "PDPL, Swiss FADP / DPO, Human Research Act, and WHO health-AI guidance. "
-                "The agents make the simulated decisions; this gap summary is compiled "
-                "separately and is not an agent's legal determination."
+                "An observed secondary-use action and an observed routed evidence request trigger "
+                "this question. Jurisdiction- and document-scoped retrieval supplies candidate passages; "
+                "their exact support has not been validated."
             ),
             limitations=(
                 "This is a synthetic drill finding, not legal advice. Vector similarity and "
@@ -254,6 +247,15 @@ class DrillOrchestrator:
                 "application to a real incident require human review."
             ),
             evidence=evidence,
+            assessment_status="INSUFFICIENT_EVIDENCE",
+            trigger_entry_ids=[secondary_decision.entry_id, route_decision.entry_id],
+            missing_evidence=[
+                "Verified controller and processor roles",
+                "Identifiability and provenance of the retinal images",
+                "Applicable processing and transfer basis",
+                "Authority for the configured liaison route",
+                "Passage-level support and institutional applicability review",
+            ],
         )
 
     def _init_agents(self) -> Dict[str, InstitutionalAgent]:
@@ -349,12 +351,16 @@ class DrillOrchestrator:
                 print(f"     Tool result: {decision.tool_result}")
                 print(f"     State changes: {decision.state_changes}")
 
-        # Record a scenario finding grounded in this run and retrieved source chunks.
+        # Record only a triggered candidate question, with explicit evidence status.
         gap = self._build_policy_gap(all_decisions)
-        self.gap_register.record_gap(gap)
+        if gap is not None:
+            self.gap_register.record_gap(gap)
         print("\n" + "=" * 60)
         print(f"✅ Drill Completed! Logged {len(all_decisions)} decisions to {self.logger.log_path}")
-        print(f"✅ Recorded Policy Gap to {self.gap_register.gaps_path}")
+        if gap is not None:
+            print(f"✅ Recorded evidence-limited candidate to {self.gap_register.gaps_path}")
+        else:
+            print("ℹ️  No evidence-sharing candidate was triggered")
         print(f"🔒 Final Hash: {self.logger.latest_hash}")
 
         return all_decisions

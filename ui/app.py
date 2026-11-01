@@ -83,7 +83,7 @@ if valid_chain:
 else:
     st.error(f"Audit chain failed · {chain_message} (entry {broken_index})")
 
-timeline_tab, gaps_tab, audit_tab = st.tabs(["Incident timeline", "Policy gaps", "Audit log"])
+timeline_tab, gaps_tab, audit_tab = st.tabs(["Incident timeline", "Governance questions", "Audit log"])
 
 with timeline_tab:
     st.subheader("Incident timeline")
@@ -212,12 +212,19 @@ with timeline_tab:
                     st.rerun()
 
 with gaps_tab:
-    st.subheader("Recorded policy gaps")
+    st.subheader("Governance questions and evidence status")
     if not gaps:
-        st.info("This run has no policy-gap records.")
+        st.info("This run has no triggered governance question records.")
     for gap in gaps:
         st.markdown(f"### {gap.get('title', gap.get('gap_id', 'Policy gap'))}")
         st.caption(f"{gap.get('category', 'Uncategorized')} · {gap.get('host_jurisdiction', '—')} ↔ {gap.get('partner_jurisdiction', '—')}")
+        st.write(f"Evidence status: **{gap.get('assessment_status', 'UNASSESSED_LEGACY')}**")
+        if gap.get("trigger_entry_ids"):
+            st.caption("Triggered by: " + ", ".join(gap["trigger_entry_ids"]))
+        if gap.get("missing_evidence"):
+            st.markdown("**Evidence still needed**")
+            for item in gap["missing_evidence"]:
+                st.write(f"• {item}")
         st.write(gap.get("friction_point", "No friction point recorded."))
         left, right = st.columns(2)
         with left:
@@ -226,22 +233,22 @@ with gaps_tab:
         with right:
             st.markdown("**Partner references**")
             st.write(gap.get("partner_citation", "—"))
-        st.markdown("**Global benchmark**")
+        st.markdown("**Global comparison candidate**")
         st.write(gap.get("global_benchmark", "—"))
-        st.markdown("**Suggested remediation**")
+        st.markdown("**Provisional improvement to examine**")
         st.write(gap.get("remediation_recommendation", "—"))
         st.markdown("**How to read this finding**")
         st.info(
             "The agents make the decisions shown in the incident timeline. "
-            "This gap summary is assembled separately from scenario rules and "
-            "retrieved policy sources; it is not an agent's legal determination."
+            "This assessment is assembled separately from observed run actions and "
+            "candidate policy passages. Its status states whether the evidence supports a conclusion."
         )
         with st.expander("Technical method"):
             st.write(gap.get("finding_method", "Not recorded."))
         st.caption(gap.get("limitations", "Limitations not recorded."))
 
         evidence = gap.get("evidence", [])
-        st.markdown(f"**Supporting evidence ({len(evidence)})**")
+        st.markdown(f"**Candidate passages and run records ({len(evidence)})**")
         if not evidence:
             st.info("No supporting evidence references were recorded for this finding.")
         for item in evidence:

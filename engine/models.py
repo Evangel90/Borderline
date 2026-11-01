@@ -184,3 +184,6 @@ class PolicyGap(BaseModel):
     finding_method: str
     limitations: str
     evidence: List[PolicyEvidence] = Field(default_factory=list)
+    assessment_status: str = "UNASSESSED_LEGACY"
+    trigger_entry_ids: List[str] = Field(default_factory=list)
+    missing_evidence: List[str] = Field(default_factory=list)
