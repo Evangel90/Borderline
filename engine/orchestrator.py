@@ -8,7 +8,7 @@ import os
 import yaml
 from typing import Dict, List, Any
 from engine.models import (
-    DrillIntent, Institution, Chunk, BridgeConfig, DecisionLogEntry,
+    DrillIntent, Institution, Chunk, BridgeConfig, DecisionLogEntry, StepPayload,
     PolicyEvidence, PolicyGap,
 )
 from engine.gates import BorderGate
@@ -18,10 +18,14 @@ from engine.knowledge import KnowledgeIndex
 from engine.llm import create_chat_client
 from audit.hasher import HashChainedLogger
 from gaps.register import GapRegister
-from gaps.candidates import evidence_sharing_trigger
+from gaps.candidates import assess_clinical_conflict, evidence_sharing_trigger
 
 
 class DrillOrchestrator:
+    @staticmethod
+    def _step_enabled(step: StepPayload, state: Dict[str, Any]) -> bool:
+        return all(state.get(key) == value for key, value in step.requires_state.items())
+
     def __init__(self, intent_path: str, run_id: str):
         self.intent_path = intent_path
         self.run_id = run_id
@@ -258,6 +262,54 @@ class DrillOrchestrator:
             ],
         )
 
+    @staticmethod
+    def _build_clinical_assessment(decisions: List[DecisionLogEntry]) -> PolicyGap:
+        result = assess_clinical_conflict(decisions)
+        by_id = {item.entry_id: item for item in decisions}
+        evidence = [
+            PolicyEvidence(
+                source_type="run_log",
+                source_ref=entry_id,
+                title=f"Step {by_id[entry_id].step} decision by {by_id[entry_id].actor_name}",
+                jurisdiction=by_id[entry_id].jurisdiction,
+                excerpt=(
+                    f"Visible event: {by_id[entry_id].visible_event}. "
+                    f"Visible facts: {by_id[entry_id].visible_payload}. "
+                    f"Selected action: {by_id[entry_id].action_taken}."
+                ),
+                relevance="Observed synthetic fact or action used to test the clinical safety tradeoff.",
+            )
+            for entry_id in result.trigger_entry_ids
+        ]
+        return PolicyGap(
+            gap_id="CLINICAL-CONFLICT-001",
+            category=result.category,
+            title="Diagnostic safety versus screening access",
+            host_jurisdiction="AE",
+            partner_jurisdiction="N/A",
+            friction_point=(
+                "Confirmed synthetic false negatives and a clinic halt recommendation coexist with "
+                "possible screening delays. The safe operational choice remains unresolved."
+                if result.category == "OBJECTIVE_CONFLICT" else
+                "The recorded facts or response do not establish the proposed pause-versus-access conflict."
+            ),
+            host_citation="Run facts and actions are listed below; applicable clinical authority is unreviewed.",
+            partner_citation="Not applicable to this clinical operations question.",
+            global_benchmark="No global comparison has been validated for this candidate.",
+            remediation_recommendation=(
+                "Assess manual screening capacity, patient follow-up, and rollback safety before "
+                "a human approves any operational intervention."
+                if result.category != "NO_GAP_IDENTIFIED" else
+                "No gap recommendation from this rejected hypothesis."
+            ),
+            finding_method="Deterministic test of recorded safety signal, access impact, and clinic action.",
+            limitations="Synthetic operational assessment; no policy duty or suspension authority is established.",
+            evidence=evidence,
+            assessment_status=result.assessment_status,
+            trigger_entry_ids=list(result.trigger_entry_ids),
+            missing_evidence=list(result.missing_evidence),
+        )
+
     def _init_agents(self) -> Dict[str, InstitutionalAgent]:
         agents = {}
         for pack_id, jurisdiction in (("ae", "AE"), ("ch", "CH"), ("global", "GLOBAL")):
@@ -292,6 +344,9 @@ class DrillOrchestrator:
 
         for step in self.intent.timeline:
             if step.optional and not include_optional:
+                continue
+            if not self._step_enabled(step, self.simulation_state):
+                print(f"  ↪ Skipping conditional step {step.step}: required state not present")
                 continue
             print(f"\n▶ Step {step.step}: [{step.phase}]")
             if step.time_offset:
@@ -352,15 +407,15 @@ class DrillOrchestrator:
                 print(f"     State changes: {decision.state_changes}")
 
         # Record only a triggered candidate question, with explicit evidence status.
-        gap = self._build_policy_gap(all_decisions)
-        if gap is not None:
-            self.gap_register.record_gap(gap)
+        candidates = [self._build_clinical_assessment(all_decisions)]
+        sharing_candidate = self._build_policy_gap(all_decisions)
+        if sharing_candidate is not None:
+            candidates.append(sharing_candidate)
+        for candidate in candidates:
+            self.gap_register.record_gap(candidate)
         print("\n" + "=" * 60)
         print(f"✅ Drill Completed! Logged {len(all_decisions)} decisions to {self.logger.log_path}")
-        if gap is not None:
-            print(f"✅ Recorded evidence-limited candidate to {self.gap_register.gaps_path}")
-        else:
-            print("ℹ️  No evidence-sharing candidate was triggered")
+        print(f"✅ Recorded {len(candidates)} governance assessments to {self.gap_register.gaps_path}")
         print(f"🔒 Final Hash: {self.logger.latest_hash}")
 
         return all_decisions

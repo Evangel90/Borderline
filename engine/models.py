@@ -82,6 +82,7 @@ class StepPayload(BaseModel):
     gate_visible_to: List[str] = Field(default_factory=list)
     optional: bool = False
     expected_policy_checks: List[str] = Field(default_factory=list)
+    requires_state: Dict[str, Any] = Field(default_factory=dict)
 
     @model_validator(mode="after")
     def validate_agent_views(self) -> "StepPayload":
