@@ -40,6 +40,17 @@ def test_advisory_and_foreign_sources_do_not_support_legal_claim_in_triage():
     )[0] == "UNSUPPORTED"
 
 
+def test_advisory_passage_cannot_establish_compliance_for_clinic_action():
+    advisory = chunk("Clinical AI design should consider provider context and human resources.")
+    advisory.source_binding = "guidance"
+    status, weak = triage_citations(
+        "WHO guidance on provider context and human resources makes manual review "
+        "necessary to ensure clinic safety and compliance",
+        "Request manual review", ["c1"], {"c1": advisory}, "AE", "request_manual_review",
+    )
+    assert (status, weak) == ("UNSUPPORTED", ["c1"])
+
+
 def test_document_assistant_response_is_flagged():
     assert off_topic_rationale("The user has provided a set of documents and chunks for summary")
     assert off_topic_rationale("The provided citation IDs do not support the action. The model will update its knowledge base.")
@@ -72,3 +83,36 @@ def test_dha_sentinel_source_does_not_establish_ede_mandate():
     source.doc_id = "AE-DHA-SENTINEL-2025"
     assert triage_citations("EDE mandate covers patient safety review", "Review patient safety",
                             ["c1"], {"c1": source}, "AE", None, "ede", {})[0] == "UNSUPPORTED"
+
+
+def test_general_ai_review_does_not_screen_as_patient_case_review_support():
+    passage = chunk(
+        "AI technology should be subject to regular technical review after clinical deployment."
+    )
+    status, weak = triage_citations(
+        "False negatives justify human review of affected cases",
+        "Flag cases for human review", ["c1"], {"c1": passage},
+        "AE", "flag_cases_for_human_review",
+    )
+    assert (status, weak) == ("UNSUPPORTED", ["c1"])
+
+
+def test_sentinel_definition_does_not_screen_as_follow_up_support():
+    passage = chunk("A sentinel event is a serious incident causing patient harm.")
+    passage.doc_id = "AE-DHA-SENTINEL-2025"
+    status, weak = triage_citations(
+        "Request patient follow-up after missed referral",
+        "Request patient follow-up review", ["c1"], {"c1": passage},
+        "AE", "request_patient_follow_up_review", "dha", {},
+    )
+    assert (status, weak) == ("UNSUPPORTED", ["c1"])
+
+
+def test_patient_follow_up_passage_remains_a_candidate():
+    passage = chunk("Clinicians should arrange patient follow-up for missed referrals.")
+    status, weak = triage_citations(
+        "Request patient follow-up after missed referral",
+        "Request patient follow-up review", ["c1"], {"c1": passage},
+        "AE", "request_patient_follow_up_review", "dha", {},
+    )
+    assert (status, weak) == ("PARTIALLY_SUPPORTED", [])

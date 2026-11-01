@@ -22,9 +22,20 @@ ACTION_TOPICS = {
     },
 }
 
+CASE_FOLLOW_UP_TERMS = re.compile(
+    r"\b(?:patient follow.up|follow.up (?:of )?patients?|missed referrals?|"
+    r"false.negatives?|case review|patient cohort|continuity of care|"
+    r"(?:follow.up|recall|contact).{0,40}(?:patients?|cases?|referrals?)|"
+    r"(?:patients?|cases?|referrals?).{0,40}(?:follow.up|recall|contact)|"
+    r"review.{0,40}(?:affected|missed|screened|referred) patients?)\b",
+    re.IGNORECASE,
+)
+
 
 def passage_matches_action(action: str, passage: str) -> bool:
     """Return whether a passage has a specific term for a mapped action topic."""
+    if action in {"flag_cases_for_human_review", "request_patient_follow_up_review"}:
+        return bool(CASE_FOLLOW_UP_TERMS.search(passage))
     for topic in ACTION_TOPICS.values():
         if action in topic["actions"]:
             return bool(re.search(topic["passage_terms"], passage, re.IGNORECASE))

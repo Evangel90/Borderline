@@ -16,7 +16,7 @@ STOPWORDS = {
 
 LEGAL_CLAIM = re.compile(
     r"\b(?:law|legal(?:ly)?|statut(?:e|ory)|regulat(?:ion|ory)|mandat(?:e|ed)|"
-    r"obligat(?:ion|ed)|authorit(?:y|ies)|dut(?:y|ies)|powers?|"
+    r"obligat(?:ion|ed)|authorit(?:y|ies)|dut(?:y|ies)|powers?|compli(?:ance|ant)|"
     r"must report|required to report)\b",
     re.IGNORECASE,
 )

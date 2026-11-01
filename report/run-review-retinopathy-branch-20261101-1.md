@@ -8,4 +8,6 @@ The two governance assessments were `CLINICAL-CONFLICT-001` (`OBJECTIVE_CONFLICT
 
 The retrospective evidence audit found 12 no-citation decisions and no other current lexical or scope screening flags. This screening cannot establish exact citation support, institutional mandate, or legal applicability. A focused test checks that the conditional step is disabled without the required state; the full run exercised the enabled branch. No full counterfactual drill exercised the disabled branch.
 
+After the run, a stricter patient-case/follow-up topic check flagged two additional citations for review: `log-2-screening_ai` (general WHO AI oversight text used for patient case review) and `log-2-dha` (a DHA sentinel-event definition used for follow-up). The original recorded decisions are unchanged. These are retrospective screening flags, not adjudicated legal conclusions.
+
 Verification: `.venv/bin/python -m pytest -q` reported 22 passed; `make verify-log RUN=retinopathy-branch-20261101-1` passed; `make audit-evidence RUN=retinopathy-branch-20261101-1` reported the counts above.
