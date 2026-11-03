@@ -11,7 +11,7 @@ standard_alignment:
     src: "Synthetic staged incident facts and registered policy-source records."
     collector: "Source ingestion and hybrid lexical/vector evidence retrieval."
     pre_processor: "PDF text/OCR extraction, passage chunking, and provenance metadata."
-    model: "Configured LLM proposes a permitted synthetic drill action with a concise rationale."
+    model: "Configured AI agent proposes a permitted synthetic drill action with a concise rationale."
     policy: "Institution action allow-lists, citation triage, cross-border gates, and human-approval state."
     distributor: "Orchestrator dispatches the selected action to a synthetic action handler."
     sink: "Synthetic state changes and recorded tool outcomes; no external system is connected."

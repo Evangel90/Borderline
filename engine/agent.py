@@ -1,4 +1,4 @@
-"""LLM-driven institutional operators with bounded synthetic action tools."""
+"""AI agents acting for institutions with bounded synthetic action tools."""
 
 from __future__ import annotations
 
@@ -178,7 +178,7 @@ class InstitutionalAgent:
         visible_state: Optional[dict[str, Any]] = None,
         allowed_actions: Optional[List[str]] = None,
     ) -> DecisionLogEntry:
-        """Ask the LLM for an action, validate it, and execute it in the sandbox."""
+        """Ask the AI agent for an action, validate it, and execute it in the sandbox."""
         evidence = self.search_knowledge(
             self._keywords(event, payload, self.institution),
             query_context=f"{event} {json.dumps(payload, ensure_ascii=False)}",
@@ -216,10 +216,10 @@ class InstitutionalAgent:
         for attempt in range(2):
             generated = self.llm.generate(system, user, AgentProposal, output_schema)
             if not isinstance(generated, AgentProposal):
-                raise ValueError(f"LLM returned an invalid proposal for {self.institution.id}.")
+                raise ValueError(f"AI agent returned an invalid proposal for {self.institution.id}.")
             if generated.action not in set(allowed_action_names):
                 raise ValueError(
-                    f"LLM proposed unavailable action '{generated.action}' for {self.institution.id}."
+                    f"AI agent proposed unavailable action '{generated.action}' for {self.institution.id}."
                 )
             explicit_citations = [
                 chunk_id for chunk_id in evidence_by_id if chunk_id in generated.rationale
@@ -315,7 +315,7 @@ class InstitutionalAgent:
                     rationale_quality = "FALLBACK_REVIEW_REQUIRED"
         if proposal is None:
             raise ValueError(
-                f"LLM could not return citations from supplied context for {self.institution.id}."
+                f"AI agent could not return citations from supplied context for {self.institution.id}."
             )
 
         if self.institution.id == "ede" and proposal.action == "request_ede_manufacturer_evidence":

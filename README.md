@@ -5,7 +5,7 @@ A prototype for cross-border AI incident drills, built for the
 The current drill is wired to UAE (AE) and Switzerland (CH); adding a new
 country pack does not yet configure a new drill automatically.
 
-Each participating role is represented by an agent. The LLM selects among
+Each participating role is represented by an AI agent. The agent selects among
 role-authorized actions, which the sandbox records in synthetic drill state;
 agents cite retrieved policy chunks when relevant evidence is available. A separate border gate can veto data
 transfers or route regulator notifications. Decisions and tool outcomes are
@@ -58,7 +58,7 @@ packs/ae/, packs/ch/      country packs: documents/, institutions/*.yaml, chunks
 packs/bridge/ae-ch.yaml   what links the two countries (adequacy, treaties)
 packs/global/             global benchmarks, neutral adviser, ITU standards
 intents/                  staged drill specs (the Y.3172 "ML intent")
-engine/                   LLM agents, action sandbox, orchestrator, gates
+engine/                   AI agents, action sandbox, orchestrator, gates
 audit/                    hash-chained log and verifier
 gaps/                     gap register
 data/raw/, data/sources.csv   source files and provenance register
@@ -144,7 +144,7 @@ Run from the repo root.
 | `make verify-sources` | Re-hash sources and flag any change |
 | `make ingest` | Rebuild provenance-bearing chunks and update the local vector index |
 | `make index` | Build or update the local Chroma index from existing chunks |
-| `make drill INTENT=retinopathy-ae-ch` | Run the LLM-driven drill; requires a configured model provider and API key for OpenRouter |
+| `make drill INTENT=retinopathy-ae-ch` | Run the AI-agent drill; requires a configured model provider and API key for OpenRouter |
 | `make verify-log RUN=<run_id>` | Check the hash chain; name the first broken entry |
 | `make replay RUN=<run_id>` | Not implemented yet |
 | `make report-figures RUN=<run_id>` | Not implemented yet |
@@ -153,7 +153,7 @@ Run from the repo root.
 ## Scope and limitations
 
 This is a synthetic policy-drill prototype, not a clinical tool or legal
-opinion. The LLM chooses from actions declared in each institution profile;
+opinion. Each AI agent chooses from actions declared in its institution profile;
 Python validates the chosen action and runs a corresponding sandbox tool. The
 border gate has veto authority over transfers and external notifications. These
 tools only update in-memory drill state and the local audit log. The model's

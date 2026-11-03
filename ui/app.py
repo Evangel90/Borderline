@@ -42,7 +42,7 @@ def available_runs() -> list[str]:
 
 
 st.title("🧭 Borderline")
-st.caption("Cross-border AI incident drill review · LLM-driven choices, simulated tool actions · Synthetic scenario")
+st.caption("Cross-border AI incident drill review · AI-agent decisions, simulated tool actions · Synthetic scenario")
 
 runs = available_runs()
 if not runs:
@@ -107,7 +107,7 @@ with timeline_tab:
                 st.write(f"Action: `{record.get('action_taken', '—')}`")
                 st.write(record.get("justification", "No justification recorded."))
                 if record.get("model_name"):
-                    st.caption(f"LLM: {record['model_name']} · self-reported confidence {record.get('confidence', '—')}")
+                    st.caption(f"Agent model: {record['model_name']} · self-reported confidence {record.get('confidence', '—')}")
                 if record.get("tool_result"):
                     st.write(f"Tool outcome: {record['tool_result']}")
                 if record.get("state_changes"):

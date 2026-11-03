@@ -402,7 +402,7 @@ class DrillOrchestrator:
                 print(f"  🏛️  [{agent.institution.jurisdiction}] {agent.institution.id.upper()}: {decision.action_taken}")
                 print(f"     Reason: {decision.justification}")
                 print(f"     Cited: {', '.join(decision.cited_clauses[:2])}")
-                print(f"     LLM: {decision.model_name} (self-reported confidence {decision.confidence})")
+                print(f"     Agent model: {decision.model_name} (self-reported confidence {decision.confidence})")
                 print(f"     Tool result: {decision.tool_result}")
                 print(f"     State changes: {decision.state_changes}")
 

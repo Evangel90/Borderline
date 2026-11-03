@@ -33,7 +33,7 @@ Y.3172 defines an ML pipeline and management/orchestration functions for future 
 | SRC | Synthetic incident facts plus registered source PDFs and their metadata. | No patient images, live clinic data or device telemetry enter the drill. |
 | C | Source ingestion and hybrid lexical/vector retrieval in `engine/knowledge.py`. | The active pipeline is local and does not use a distributed ITU-hosted KB. |
 | PP | PDF text/OCR extraction, chunking and provenance metadata. | Arabic OCR/extraction and English translation passages require human review for consequential interpretation. |
-| M | Configured LLM (`qwen3:8b` in the latest local run) proposes an action and structured explanation. | No model fine-tuning; current changes need a post-change run; no clinical performance is measured. |
+| M | Configured AI agent, backed by `qwen3:8b` in the latest local run, proposes an action and structured explanation. | No model fine-tuning; no clinical performance is measured. |
 | P | Role/action allow-lists, citation triage, bridge/gate checks and human-approval state. | Not a general Y.3172 policy node; legal logic remains incomplete and some gates are configured rules. |
 | D / SINK | Orchestrator dispatches the chosen action to a synthetic action handler, which records state and outcome. | No real clinical action, API, device or regulator message is executed. |
 | MLFO / Sandbox | `engine/orchestrator.py` sequences agents and events; local run runtime contains synthetic state. | Staged times are labels, not a clock; no hosted ITU sandbox run is evidenced. |
