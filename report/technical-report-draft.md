@@ -1,223 +1,83 @@
-# Borderline: Cross-Border AI Incident Drill Engine
+# AI for Good Sandbox Hackathon — Borderline
 
-**ITU AI for Good Lab Hackathon: United Arab Emirates**  
-**Technical report — working draft, 30 October 2026**  
-**Team:** [add team members]  
-**Repository:** [Borderline on GitHub](https://github.com/Evangel90/Borderline)
+**Team:** [confirm team name] · **Solution:** Borderline · **Team leader:** [add] · **Members:** [add]
+**Contact:** [add] · **GitHub:** https://github.com/Evangel90/Borderline
+**Status:** submission draft for the 10 November 2026 deadline; integrated run complete, but five-page rendered layout, team/contact fields and final citation review remain outstanding.
 
-> Draft status: the latest vector-retrieval run
-> (`vector-retrieval-retry-20261030-1`) completed all seven default stages with
-> 31 decisions and a generated gap register. Its hash chain and citation links
-> verify, but review found an off-topic rationale and multiple unsupported
-> citations. It demonstrates index integration and audit tracing, not legal
-> accuracy. See the [run review](run-review-vector-retrieval-retry-20261030-1.md).
-> The earlier human-gate run recorded an EHS pause recommendation pending
-> human approval; the simulated service was not paused and no approval has
-> been recorded. The country source collection and six-gap analysis remain
-> incomplete.
+## Introduction
 
-## 1. Overall introduction
+Borderline is an AI Diagnostic Safety and Governance Stress-Testing Platform. It simulates failures in deployed AI diagnostic systems and examines how healthcare providers, technology vendors, regulators and other institutions respond under their respective responsibilities. The UAE–Switzerland diabetic-retinopathy scenario is the evaluated hackathon use case. Borderline uses specialized LLM agents, a provenance-bearing policy knowledge base, staged events and synthetic action tools to identify unresolved safety, implementation and coordination questions. The system does not control real clinical systems, make patient decisions or issue legal opinions.
 
-Borderline is a prototype for running cross-border AI incident drills. It
-represents institutions and other participating roles as agents. For each
-event, an agent receives a role-specific view, retrieves policy excerpts,
-selects one action allowed by its profile, and gives a short rationale. A
-Python sandbox records the simulated action; a configured bridge gate can
-block or route selected data and regulator-channel actions. Decisions, the
-agent's visible event facts, citations, tool outcomes, and state changes are
-written to a hash-chained log.
+The product explores an **agentic** diagnostic workflow: a screening agent analyzes a retinal image, records a result, prepares or routes referrals for positive/uncertain cases, and can close a negative task. In the fictional scenario, negative results were not routinely reviewed by a clinician before a no-referral message. The drill asks what evidence and governance controls should follow when a model/workflow update is associated with missed referable disease.
 
-The current demonstration is wired to the United Arab Emirates and
-Switzerland. It uses synthetic facts and simulated actions only. It does not
-connect to clinics, regulators, vendors, or patient systems. The engine is not
-yet country-plug-in complete: loading a new country pack alone does not make
-that country's agents and bridge rules run automatically.
+## Use case and requirements
 
-## 2. Use case
+The synthetic incident begins with RetinaVision-DX v2.4, a fictional Swiss-vendor diabetic-retinopathy screening system deployed to fictional Dubai clinics. An audit identifies 47 missed referable cases on Cam-7; follow-up status is unknown. Later events introduce suspected stolen vendor credentials, secondary use of UAE-origin retinal images for retraining, a claimed research purpose, a regulator evidence request and a safety-versus-access decision. Information is released over eight stages and agent views are role-specific. An optional reserve event is available.
 
-The drill concerns a Swiss vendor's diabetic-retinopathy screening model,
-deployed in synthetic Dubai clinics. Dubai Health Authority is the selected
-emirate-level health authority for this version. A model update is followed by
-an audit that finds missed referable disease. Later events introduce suspected
-stolen vendor credentials, use of UAE-origin retinal images held in
-Switzerland for model retraining, a research-purpose claim, a regulator
-information request, and a decision about suspension versus continued
-screening. A reserve event alleges that patient images appeared in an insurer's
-pricing model.
+The product dossier includes a fabricated EDE classification letter establishing medical-equipment/SaMD classification **only inside the drill**, and a fictional manufacturer corrective-action plan marked submitted but not completed. Real-world product classification, marketing authorization, device risk class, legal marketing-rights holder, clinic licensing, actual report/case predicates, remediation results and patient follow-up remain unknown. No model should infer those facts. The purpose is to test the simulated system's response, not to represent an actual manufacturer or EDE decision.
 
-All people, patient counts, incidents, and events in the drill are synthetic.
-The eight events are staged from T+0 to T+24 hours, with the judge-injected
-event disabled by default. Each participating agent receives an explicit
-event view. Facts are recorded in the decision log so reviewers can inspect
-what each agent saw.
+Use-case requirements are to: (1) retrieve relevant, traceable UAE, Swiss and global sources; (2) release events progressively with incomplete and unevenly distributed facts; (3) represent different institutional roles and permitted actions; (4) preserve uncertainty and require human approval for consequential simulated decisions; (5) identify evidence and governance gaps; and (6) expose a reproducible decision trace. The current prototype partially meets these requirements. Actions only alter synthetic state; the human-approval form is local and unauthenticated.
 
-## 3. Use-case requirements
+## Mapping to ITU-T Y.3172 and AI Readiness Framework 2.0
 
-The prototype is intended to demonstrate: progressive incident events;
-institution-specific roles and action permissions; role-specific information
-access; evidence retrieval from country and global policy chunks; a cross-border
-policy gate; simulated actions; and reviewable run records. The current
-implementation meets these requirements partially. In particular, the gate
-uses configured rules rather than a complete three-part legal-basis,
-transfer-rules, and counterpart assessment. The new eight-stage timeline has
-not yet been run end to end against the remote model.
+Y.3172 is an architectural reference for ML in future networks. Borderline adapts its pipeline vocabulary to a healthcare governance simulation; it is **not a telecom implementation and does not claim formal Y.3172 conformance**. Y.3172 describes pipeline components including SRC, C, PP, M, P, D and SINK, plus management/orchestration and sandbox functions ([ITU-T Y.3172](https://www.itu.int/rec/T-REC-Y.3172-201906-I/en)).
 
-## 4. Mapping to ITU-T Y.3172
+| Pipeline concept | Borderline component and scenario requirement | Local policy / source connection |
+| --- | --- | --- |
+| ML Intent | `intents/retinopathy-ae-ch.yaml` defines actors, staged events, agent views, actions and expected checks. | Scenario maps requirements to registered UAE/Swiss roles and applicable-source checks. |
+| SRC | Synthetic clinical events and registered source documents; no patient images or live telemetry. | UAE Federal Decree-Law No. 38/2024; DHA AI and referral policies; Swiss MedDO, FADP and cyber-reporting materials. |
+| C | Source ingestion and hybrid lexical/vector retrieval in the local knowledge index. | `data/sources.csv` preserves issuer, source status, language, URL/path, hash and scope notes. |
+| PP | PDF extraction/OCR, chunking, language and provenance metadata. | Arabic materials are included; Arabic text controls where the official portal says so. Translation/OCR needs human review for consequential interpretation. |
+| M | Configured LLM proposes one role-authorized action and a concise rationale. | WHO health-AI guidance and relevant local policy excerpts are retrieval aids; they are not automatically binding. |
+| P | Institution action allow-lists, evidence triage, cross-border gate and human-approval state. | UAE/Swiss legal predicates and source scope are checked separately; current gates are partial/configured and not a complete legal engine. |
+| D / SINK | Orchestrator dispatches the action to a synthetic handler and records its result/state change. | No real regulator message, clinical order, referral, model rollback or data transfer occurs. |
+| MLFO / Sandbox | Orchestrator releases events and runs agents in an isolated local drill. | Local synthetic sandbox only; no hosted or distributed ITU Sandbox deployment is evidenced. |
 
-This is an architectural mapping, not a claim of full Y.3172 conformance.
+The ITU AI Readiness Framework 2.0 uses six factors and 13 dimensions. Borderline reports qualitative relevance, not national readiness scores ([ITU AI Readiness Report 2.0](https://www.itu.int/epublications/publication/ai-ready-analysis-towards-a-standardized-readiness-framework)). The ITU reference ingestion path was smoke-run on Y.3172: 50 source chunks and 19 framework definitions entered a separate local index. The production drill still uses Borderline's own local hybrid index; no ITU-hosted deployment is available in the evidence.
 
-| Y.3172-related concept       | Borderline prototype                                                                                                                                               | Current limit                                                                                                                                    |
-| ---------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------ | ------------------------------------------------------------------------------------------------------------------------------------------------ |
-| ML intent                    | YAML drill intent defines the use case, stages, participants, and private agent views.                                                                             | The engine is currently wired to AE–CH files and identifiers.                                                                                   |
-| ML collector / preprocessing | Registered source PDFs are extracted into provenance-bearing chunks; the current code indexes them in local persistent Chroma using multilingual embeddings. | The index is local and not an integrated distributed knowledge base hosted in the ITU Sandbox; retrieval quality still needs scenario evaluation. |
-| Policy node                  | AE–CH bridge YAML contains transfer and regulator-route rules.                                                                                                    | Rules are static and do not yet execute and record each of the three policy checks separately.                                                   |
-| ML function orchestrator     | Python releases timeline stages and invokes declared participants.                                                                                                 | Timing is a staged label, not a simulated clock; no dynamic event scheduler or judge UI exists.                                                  |
-| Model / agents               | Local Ollama `qwen3:8b` produced structured agent proposals for the completed evaluation run.                                                                    | No LoRA fine-tune or event-tagging model is implemented; model output still needs evidence and legal review.                                     |
-| Sandbox                      | Action handlers update synthetic state and return tool outcomes. A clinic-pause recommendation now waits for a separate human decision in the Streamlit review UI. | Human approval is local and unauthenticated; it changes only displayed synthetic state and does not control a real system.                       |
-| Audit                        | JSONL decisions are hash-chained and independently verifiable; current decisions record retrieved chunk IDs as well as citations.                               | The log records concise rationales, not private chain-of-thought; embedding queries, match scores, and liaison message traces are not recorded. |
+| Readiness dimension | Borderline mapping and current limit |
+| --- | --- |
+| 1 Data/model Marketplace | Policy knowledge base only; no data/model marketplace or patient dataset. |
+| 2 Generated Content Marketplace | No generated-content ecosystem; rationales are logged outputs only. |
+| 3 Cross-domain correlation analysis | Health, vendor, cyber and data actors interact; no correlation analytics are implemented. |
+| 4 Contextualization and Regional Impact | Dubai/UAE use case with Swiss vendor and country packs; no local stakeholder impact study. |
+| 5 AI Integration in Workflows | Referral and clinic workflow modeled; no hospital-system integration. |
+| 6 Human Interface | Streamlit viewer/review form; accessibility, Arabic UI and usability not evaluated. |
+| 7 Strategy Alignment | UAE/Swiss materials are in the knowledge base; no outcome/KPI alignment assessment. |
+| 8 Collaboration with AI | Simulated human review/approval; unauthenticated and not measured. |
+| 9 Impacts of Humans in AI Integration | Safety/access tradeoff modeled with synthetic facts; no measured patient or workforce impact. |
+| 10 AI & Policies | Core focus; source mapping exists but legal applicability and gap claims need review. |
+| 11 AI for Inclusion | No subgroup, gender, disability or language-access evaluation. |
+| 12 Granular Priorities | Retinopathy/Dubai priority is explicit; no fine-tuning or evolving local-priority mechanism. |
+| 13 Digital Infrastructure | Cameras/cloud are assumptions; compute, connectivity, device distribution and energy are not measured. |
 
-## 5. Mapping to the ITU AI Readiness Framework 2.0
+The six factors map as follows: **Data**—provenance-tracked policy sources, but no open clinical data or data-quality assessment; **Research**—simulated roles, but no expert validation collaboration; **Deployment Support**—local prototype, without clinic or hosted-sandbox deployment; **Standards**—traceability and conceptual Y.3172 mapping, without conformance review; **Open source and Code**—public repository and pinned ITU reference submodule, with no integrated shared KB contribution; **Sandbox Environments**—synthetic isolated scenarios, not ITU-hosted. Full traceability and limitations are in [`docs/HACKATHON_CRITERIA_AUDIT.md`](../docs/HACKATHON_CRITERIA_AUDIT.md).
 
-Borderline addresses contextualization through UAE and Swiss source packs and
-role profiles; cross-domain analysis through health, data protection, device
-safety, and cyber roles; open-source management through a public code
-repository; and human interaction through review-oriented simulated actions.
-These are design aims with partial implementation. The free-model router is a
-remote service and does not guarantee one pinned model across decisions. The
-prototype has no fine-tuning workflow, enforced human-approval step, measured
-energy profile, or formal social-inclusion evaluation. These areas require
-implementation or evidence before claiming completion.
+## Local policy mapping and knowledge base
 
-## 6. Local policy mapping
+The knowledge base registers 31 source records and a linked OCR derivative; all 32 tracked source/extraction artifacts pass `make verify-sources`. The current AE, CH and global packs contain 1,859 chunks. UAE materials include the medical-products law in Arabic and official English translation, EDE establishment/pharmacovigilance materials, the DHA AI-health, referral and sentinel-event policies, the health-ICT law, data protection and cybersecurity sources. Swiss materials include the Medical Devices Ordinance, Therapeutic Products Act, Human Research Act, FADP/DPO and cybersecurity reporting sources. WHO guidance, ITU-T Y.3172, ITU AI Readiness 2.0, the UN AI governance report and G7 code provide global context. Provenance and limits are recorded in [`data/sources.csv`](../data/sources.csv).
 
-The source register and chunks currently include UAE AI strategy and charter
-materials, AI ethics guidance, the Personal Data Protection Law, Dubai data
-exchange law, and federal cybercrime legislation. Swiss materials include the
-Federal Act on Data Protection and its Ordinance, Medical Devices Ordinance,
-Therapeutic Products Act, and Human Research Act. WHO health-AI guidance and
-ITU materials are included in the global pack. Provenance is recorded in
-[`data/sources.csv`](../data/sources.csv); source hashes can be checked with
-`make verify-sources`.
+The source register does not mean all relevant law is complete or applicable. UAE ICT health implementing/exemption documents are not yet archived in the local pack; the DPO Annex 1 snapshot needs currency review; Swiss cyber reporting depends on entity scope; and Arabic OCR/translation lacks human Arabic review. Article 68(7) and 70(2) in the EDE pathway remain conditional on separate statutory facts. The latest drill cites the English translation at `AE-FEDERAL-DECREE-LAW-38-2024-EN:p54:c2` and `:p56:c2`; the Arabic original controls. The EDE evidence request is a simulated fact-finding step, not an asserted legal duty.
 
-The collection is incomplete for the proposed scenario. Federal Law No. 2 of
-2019 on ICT in Health is now registered and ingested; its English PDF was
-obtained from ISAHD, a platform managed by the Dubai Health Authority, and
-checked against the official UAE Legislation portal. The portal states that
-the Arabic text prevails. The executive regulation ([Cabinet Resolution No. 32
-of 2020](https://uaelegislation.gov.ae/en/legislations/1444), official UAE
-Legislation record and download) and the 2021 exemption resolution ([MoHAP
-Ministerial Resolution No. 51](https://mohap.gov.ae/en/w/ministerial-decree-no.-51-of-the-year-2021-regarding-cases-in-which-health-data-and-information-may-be-stored-or-transferred-outside-the-country),
-official MoHAP record; its official attachment is
-[here](https://uaephl.mohap.gov.ae/admin/Attachment/Download?id=8e6c0280-78fc-4b4f-bdb4-2637c2909b38&response=download))
-have been located and their contents reviewed, but the PDF downloads remain
-unavailable from this environment (UAE Legislation returns HTTP 403 and the
-MoHAP attachment host times out). They are therefore not yet in the source
-register or chunks. Archive and hash the official PDFs before treating these
-rules as evidence in a drill. Primary materials supporting EDE's role and
-relevant DHA materials remain outstanding. The Swiss Information Security
-Act reporting amendment, Cybersecurity Ordinance, and official BACS fact sheet
-are now registered and ingested. NCSC guidance limits mandatory reporting to
-entities in the statutory scope; the drill must not assume the Swiss vendor is
-covered without an applicability determination. The updated run's step-3
-rationale still has a citation mismatch for its Art. 74b reference, as recorded
-in [`run-review-local-qwen3-cyber-scope-20261030-1.md`](run-review-local-qwen3-cyber-scope-20261030-1.md).
-The DPO Annex 1 text in the repository is noted as a checked-in 2023 version
-and must be checked for currency. Agent profiles marked
-`source_review_required` are placeholders for simulation until this work is
-done. The project does not issue legal advice or determine how these rules
-apply to a real incident.
+## Evaluation scenario and preliminary results
 
-## 7. Evaluation scenario and prototype evidence
+The final integrated run is `retinopathy-final-itu-criteria-20261103-4`, using local `qwen3:8b`: 32 decisions, two governance assessments, all actions authorized, and a verified hash chain. EDE's three manufacturer-evidence decisions cite the passages containing Articles 68(7) and 70(2), state that predicates are unverified, and cap confidence at 0.5. The assessments (diagnostic safety versus screening access; cross-border evidence/coordination) are both `INSUFFICIENT_EVIDENCE`, not proven policy gaps. The current ten-question retrieval seed reaches the exact passage in top six for 9/10 questions; it is curated, not a general accuracy measure.
 
-The current intent contains eight staged events and an optional reserve
-escalation. Static checks confirmed that the intent parses, all declared
-participants have profiles, each participant has an explicit view, and all
-declared actions have sandbox handlers. The expanded run
-`local-qwen3-human-gate-20261030-1` completed all seven default stages with 31 decisions
-from 12 agents; the optional reserve escalation was not enabled. The run
-generated a policy-gap record and its 31-entry hash chain verifies. The log
-contains 23 decisions with citations. The step-6 gate result was visible to
-six agents, while two actions were recorded on the simulated liaison route; no
-external message or data was sent. Review found all 31 actions allowed by
-their event views and institution profiles, and all logged payloads matched
-the assigned private views. Citation membership did not guarantee support:
-the NCSC's cyber-reporting assessment cited Swiss medical-device provisions,
-and EDE cited a UAE data-protection preamble for a device-evidence request.
-The earlier run `local-qwen3-20261030-1` recorded the AI as paused without
-approval. In the latest run, EHS recorded a recommendation only, leaving the
-simulated service unpaused pending a separate local human decision. That
-approval is not yet recorded.
-That earlier run's engineering review is in
-[`run-review-local-qwen3-20261030-1.md`](run-review-local-qwen3-20261030-1.md).
-A later run, `local-qwen3-cyber-scope-20261030-1`, completed with 31 decisions
-and a verified hash chain after the Swiss cyber sources and NCSC scope
-instructions were added. Its step-3 rationale correctly leaves the vendor's
-mandatory reporting status unestablished, but cites a chunk that does not
-support its Art. 74b reference. The step-7 NCSC decision also treats scope as
-unresolved. See
-[`run-review-local-qwen3-cyber-scope-20261030-1.md`](run-review-local-qwen3-cyber-scope-20261030-1.md).
-The newest run improves this one issue but is not submission-ready evidence
-for legal accuracy, human oversight, or a complete liaison policy check.
-The subsequent run `local-qwen3-uae-law-scope-20261030-1` completed with 31
-decisions and a verified hash chain after the ICT Health Law was ingested.
-The Data Office cited Article 13 in step 7 but not at the earlier step-6
-review, and the missing exemption resolution prevents a complete assessment.
-Its review is in
-[`run-review-local-qwen3-uae-law-scope-20261030-1.md`](run-review-local-qwen3-uae-law-scope-20261030-1.md).
+The run audit found 14 decisions without citations and two DHA citations flagged for review (`log-2-dha`, `log-6-dha`). Both are screened `UNSUPPORTED`: the cited referral policy gives scope and continuity-of-care context, but does not establish an AI-specific incident duty or that the clinics are DHA-licensed. The rollback decision is recorded as a proposal pending human approval, with rollback availability and safety unverified and no irrelevant WHO citation. See the [run review](run-review-retinopathy-final-itu-criteria-20261103-4.md). The concise logged rationale, source references, actions, tool outcomes and hash chain provide a structured decision trace; private model chain-of-thought is not requested or stored. The report still needs a rendered page-count check and passage-level review of policy-gap comparisons.
 
-An earlier four-step prototype run, `or-free-20261030-5`, completed with 11
-agent decisions and a verified hash chain. That run validates the earlier
-action-selection, gate, and logging path; it does not evaluate the expanded
-scenario or its private-view behavior. The two incomplete OpenRouter attempts
-are retained as historical records.
+## Policy and standards gaps identified from mapping
 
-The persistent Chroma index and multilingual embedding retrieval were added
-after the saved 30 October evaluation runs. Those historical runs used the
-previous lexical retrieval implementation and do not contain retrieved-chunk
-IDs. The expanded drill has since completed against the current index as
-`vector-retrieval-retry-20261030-1`. Its engineering review verified all
-retrieval/citation links and agent-view/action boundaries, but found that
-several cited passages do not support the associated rationale and one
-rationale is off-topic. Improve retrieval and evidence checks, then rerun before
-using any output as submission evidence. The review is in
-[`run-review-vector-retrieval-retry-20261030-1.md`](run-review-vector-retrieval-retry-20261030-1.md).
+The current evidence supports **questions for validation**, not conclusions that UAE, Swiss or international law has a gap:
 
-## 8. Candidate policy and standards gaps
+1. **Post-update diagnostic safety controls:** the synthetic incident exposes missing release/change records, Cam-7 validation, rollback verification, clinician-review thresholds and completed follow-up evidence. WHO guidance calls for safety/quality controls in practice and continuous assessment of AI applications (`WHO-GUIDELINES-AI-HEALTH:p13:c1`, `:p14:c1`; advisory, not binding law). Local policy applicability and the responsible authority for each control need confirmation.
+2. **Incident-related health-data reuse and exchange:** controller roles, identifiability, purpose/legal basis, transfer route and minimum necessary evidence remain unknown. UAE (`AE-DATA-PDPL-2021`, `AE-HEALTH-ICT-LAW-2019`) and Swiss (`CH-DATA-FADP`, `CH-DATA-DPO`) privacy sources plus WHO's discussion of secondary health-data use and consent (`WHO-GUIDELINES-AI-HEALTH:p103:c1`, `:p160:c1`; advisory) are relevant, but no lawful-basis or transfer conclusion is made. A protocol specifying decision owners, required records and privacy/security review is a candidate operational response.
+3. **Safety versus access:** 47 synthetic missed cases create a safety concern while stopping screening may delay access. Manual screening capacity, patient follow-up and rollback safety are unverified. The drill supports a human review question, not a specific suspension decision or legal power.
 
-The repository currently records one scenario-specific gap concerning
-cross-border evidence sharing and vigilance coordination. The six items below
-are **candidate themes from the project brief**, not yet six findings supported
-by a completed mapping and run:
+The final submission must attach passage-level local and global citations to each gap comparison, label binding law separately from advisory guidance, and preserve each unresolved fact. Do not report the old six candidate themes as established findings. The integrated drill is complete; next render and edit this report to no more than five pages, complete the passage-level review and fill in team/contact fields. Demo video is optional for initial submission and required if shortlisted.
 
-1. Unclear lead authority when a foreign AI vendor's update harms patients.
-   Global comparison candidate: GDPR lead supervisory authority and IMDRF
-   regulator information exchange.
-2. Unclear classification of health-data retraining as research, treatment,
-   or a new purpose. Global comparison candidate: EU AI Act data-governance
-   duties.
-3. Model updates may reach patients without a fresh review. Global comparison
-   candidate: US FDA predetermined change-control plans for AI devices; verify
-   current status before use.
-4. No clear fast legal route for cross-border regulator sharing of health
-   evidence. Global comparison candidate: Council of Europe Convention 108+
-   cooperation; verify each country's status and applicability.
-5. Unclear duty to inform patients when an AI screening tool errs in care.
-   Global comparison candidate: EU AI Act deployer information duty.
-6. Authority may be split across emirate, federal, free-zone, and cantonal
-   structures. Global comparison candidate: EU NIS2 single-point-of-contact
-   model.
+## References
 
-Each candidate needs a sourced local-policy mapping, a checked global example,
-and evidence from a run whose cited passages have been reviewed for support
-before it is reported as a finding.
-
-## Submission checklist
-
-- [ ] Complete legal-source verification and update the source register/chunks.
-- [X] Run the expanded scenario with local `qwen3:8b` and verify the audit chain.
-- [X] Review agent visibility, action permissions, citations, and gate outcomes; findings recorded in the run review.
-- [ ] Develop and evidence the six domain-level gap comparisons.
-- [ ] Confirm team details and final report layout against the official template.
-- [ ] Add report references and stay within the five-page maximum.
-- [ ] Optional: record a demo video of no more than seven minutes; shortlisted
-  teams will need one.
+- ITU AI for Good Lab Hackathon: UAE requirements, evaluation criteria, report template and FAQ: https://aiforgood.itu.int/event/ai-for-good-sandbox-hackathon-united-arab-emirates/
+- ITU-T Y.3172, *Architectural framework for machine learning in future networks including IMT-2020*: https://www.itu.int/rec/T-REC-Y.3172-201906-I/en
+- ITU, *AI Ready — Analysis Towards a Standardized Readiness Framework, Report 2.0*: https://www.itu.int/epublications/publication/ai-ready-analysis-towards-a-standardized-readiness-framework
+- Source manifest: [`data/sources.csv`](../data/sources.csv). Run review: [`final integrated run`](run-review-retinopathy-final-itu-criteria-20261103-4.md); earlier EDE review: [`EDE citation review`](run-review-retinopathy-ede-citations-20261103-4.md); criteria audit: [`criteria audit`](../docs/HACKATHON_CRITERIA_AUDIT.md).
