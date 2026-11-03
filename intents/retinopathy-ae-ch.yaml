@@ -5,11 +5,18 @@ version: "1.0.0"
 # ITU-T Y.3172 Standard Mapping
 standard_alignment:
   itu_recommendation: "ITU-T Y.3172"
+  adaptation_note: "Healthcare governance simulation inspired by pipeline concepts; not a telecom implementation or conformance claim."
   components:
-    ml_intent: "Automated diabetic retinopathy screening and triage in primary clinics"
-    ml_collector: "Telemetry and diagnostic feedback from point-of-care ophthalmic scanners"
-    policy_node: "Cross-border regulatory liaison channel (packs/bridge/ae-ch.yaml)"
-    sandbox: "Borderline isolated multi-agent drill execution runtime"
+    ml_intent: "Evaluate institutional responses to a synthetic diabetic-retinopathy AI incident."
+    src: "Synthetic staged incident facts and registered policy-source records."
+    collector: "Source ingestion and hybrid lexical/vector evidence retrieval."
+    pre_processor: "PDF text/OCR extraction, passage chunking, and provenance metadata."
+    model: "Configured LLM proposes a permitted synthetic drill action with a concise rationale."
+    policy: "Institution action allow-lists, citation triage, cross-border gates, and human-approval state."
+    distributor: "Orchestrator dispatches the selected action to a synthetic action handler."
+    sink: "Synthetic state changes and recorded tool outcomes; no external system is connected."
+    ml_function_orchestrator: "engine/orchestrator.py releases stages and invokes role-specific agents."
+    sandbox: "Borderline local isolated multi-agent drill execution runtime."
 
 context:
   domain: health
@@ -22,9 +29,11 @@ context:
     notifications through clinic systems; negative results are assumed to close
     without routine clinician review. After a model and workflow-agent update,
     auditors find missed referable diabetic retinopathy cases. The product
-    concept is a scenario assumption only. Clinic licensing, actual product
-    specifications, UAE medical-product classification and marketing status,
-    and the incident's medical-product reporting category remain unknown. See
+    a fabricated EDE classification letter establishes the fictional
+    product's classification only within the drill. It has no real-world
+    effect. Real product specifications/classification, clinic licensing,
+    UAE marketing authorization, and the incident's medical-product reporting
+    category remain unverified. See
     report/synthetic-product-dossier-retinavision-dx.md.
 
 actors:

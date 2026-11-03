@@ -24,7 +24,7 @@ The system does not prescribe, diagnose other eye diseases, or perform treatment
 - The vendor says v2.4 included a model update and workflow-agent changes. The exact change record, validation evidence, release approval, rollback readiness, and affected date range are unavailable.
 - Stolen vendor credentials were reportedly used during an update operation. Attribution, access scope, and whether the actor changed model weights, workflow rules, or both are unconfirmed.
 - The vendor says it retrained the model for research using images associated with a safety incident. The lawful basis, data fields, consent/notice, transfer path, access log, and actual training use are unverified.
-- Serious patient harm has not been confirmed. The product's UAE classification, marketing authorization, legal marketing-rights holder, clinic licenses, and the status of any Article 68(3) report or Article 70(1) condition remain unknown.
+- Serious patient harm has not been confirmed. Outside this fictional drill, product classification is unknown. Within the drill, the fabricated classification letter establishes classification only; marketing authorization, legal marketing-rights holder, clinic licenses, and the status of any Article 68(3) report or Article 70(1) condition remain unknown.
 
 ## Fictional EDE classification letter (scenario fact)
 

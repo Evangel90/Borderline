@@ -282,11 +282,12 @@ class InstitutionalAgent:
                 )
                 user = f"{user}\n\nValidation feedback: {problem}"
             elif not invalid_citations:
-                # Preserve the selected synthetic action but abstain from citing
-                # passages that failed even this minimal relevance screen.
+                # Keep source IDs explicitly named in the rationale visible so
+                # reviewers can inspect them; triage marks weak support UNSUPPORTED.
                 proposal = generated.model_copy(update={"cited_chunk_ids": [
                     chunk_id for chunk_id in generated.cited_chunk_ids
-                    if chunk_id not in weak_citations and not off_topic
+                    if (chunk_id not in weak_citations or chunk_id in explicit_citations)
+                    and not off_topic
                 ]})
                 if legal_claim_without_citation or source_claim_without_citation:
                     proposal = proposal.model_copy(update={
@@ -336,6 +337,33 @@ class InstitutionalAgent:
                     "confidence": min(proposal.confidence, 0.5),
                 })
                 rationale_quality = "RULE_CONSTRAINED_EXPLANATION"
+
+        if self.institution.id == "dha" and proposal.action == "request_patient_follow_up_review":
+            referral_policy_id = "AE-DHA-REFERRAL-2022:p1:c2"
+            if referral_policy_id in evidence_by_id:
+                proposal = proposal.model_copy(update={
+                    "rationale": (
+                        "This drill records a patient follow-up review as a fact-finding step. The DHA "
+                        "Patient Referral and Inter-Facility Transfer Policy sets minimum referral requirements "
+                        "for DHA-licensed facilities and addresses continuity of care. This clinic's license "
+                        "and case-specific duties are unverified, so this decision does not assert a legal mandate."
+                    ),
+                    "cited_chunk_ids": [referral_policy_id],
+                    "confidence": min(proposal.confidence, 0.5),
+                })
+                rationale_quality = "RULE_CONSTRAINED_EXPLANATION"
+
+        if self.institution.id == "retina_swiss_ag" and proposal.action == "initiate_model_rollback":
+            proposal = proposal.model_copy(update={
+                "rationale": (
+                    "This drill records a rollback request for human review after the reported safety signal. "
+                    "The case view does not confirm rollback availability or its safety. No rollback is "
+                    "asserted as completed or legally required; human approval remains required."
+                ),
+                "cited_chunk_ids": [],
+                "confidence": min(proposal.confidence, 0.5),
+            })
+            rationale_quality = "RULE_CONSTRAINED_EXPLANATION"
 
         execution = self.action_executor.execute(
             self.institution,
