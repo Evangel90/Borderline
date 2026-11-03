@@ -43,9 +43,31 @@ def verify_sources(csv_path="data/sources.csv"):
             else:
                 print(f"✅ [OK] {doc_id} -> {rel_file}")
 
+            extraction_file = (row.get("extraction_file") or "").strip()
+            extraction_sha = (row.get("extraction_sha256") or "").strip()
+            if extraction_file:
+                checked_count += 1
+                if not os.path.exists(extraction_file):
+                    print(f"❌ [MISSING OCR] {doc_id}: file not found at '{extraction_file}'")
+                    all_passed = False
+                else:
+                    with open(extraction_file, "rb") as derived:
+                        actual_extraction_sha = hashlib.sha256(derived.read()).hexdigest()
+                    if not extraction_sha:
+                        print(f"⚠️  [NO OCR HASH] {doc_id}: '{extraction_file}' has no SHA-256")
+                        all_passed = False
+                    elif actual_extraction_sha.lower() != extraction_sha.lower():
+                        print(
+                            f"❌ [OCR MISMATCH] {doc_id}: expected "
+                            f"{extraction_sha[:10]}..., got {actual_extraction_sha[:10]}..."
+                        )
+                        all_passed = False
+                    else:
+                        print(f"✅ [OK OCR] {doc_id} -> {extraction_file}")
+
     print("-" * 50)
     if all_passed:
-        print(f"All {checked_count} tracked source documents verified successfully!")
+        print(f"All {checked_count} tracked source and extraction artifacts verified successfully!")
         return 0
     else:
         print(f"Verification failed on one or more documents.")

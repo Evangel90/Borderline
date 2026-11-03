@@ -14,6 +14,10 @@ from typing import List, Dict, Any
 import pymupdf
 
 
+ARABIC_RE = re.compile(r"[\u0600-\u06ff]")
+MIN_ARABIC_DOCUMENT_CHARS = 100
+
+
 def clean_text(text: str) -> str:
     """Normalize whitespace and strip unprintable characters."""
     # Replace multiple whitespace/newlines with a single space or normalized paragraph breaks
@@ -80,19 +84,37 @@ def process_document(row: Dict[str, str]) -> List[Dict[str, Any]]:
     title = row["title"]
     jurisdiction = row["jurisdiction"]
     file_path = row["file"]
+    extraction_path = row.get("extraction_file") or file_path
+
+    if (row.get("retrieval_excluded") or "").strip().lower() in {"1", "true", "yes"}:
+        print(f"⏭️  Excluding {doc_id} from retrieval by source-register policy.")
+        return []
 
     if not os.path.exists(file_path):
         print(f"⚠️  Skipping missing file: {file_path}")
         return []
 
     print(f"📄 Ingesting {doc_id} ({jurisdiction}): {os.path.basename(file_path)}")
-    doc = pymupdf.open(file_path)
+    if not os.path.exists(extraction_path):
+        print(f"⚠️  Skipping {doc_id}: extraction file not found at {extraction_path}")
+        return []
+
+    doc = pymupdf.open(extraction_path)
     total_pages = len(doc)
     doc_chunks = []
 
-    for page_num in range(total_pages):
-        page = doc[page_num]
-        raw_text = page.get_text()
+    page_texts = [page.get_text() for page in doc]
+    if row.get("language", "").lower() == "ar":
+        arabic_chars = sum(len(ARABIC_RE.findall(text)) for text in page_texts)
+        if arabic_chars < MIN_ARABIC_DOCUMENT_CHARS:
+            print(
+                f"⚠️  Skipping {doc_id}: Arabic extraction produced only "
+                f"{arabic_chars} Arabic characters across {total_pages} pages; OCR required."
+            )
+            doc.close()
+            return []
+
+    for page_num, raw_text in enumerate(page_texts):
         page_chunks = chunk_page_text(raw_text)
 
         for chunk_idx, chunk_content in enumerate(page_chunks):
