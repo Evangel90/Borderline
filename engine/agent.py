@@ -3,6 +3,7 @@
 from __future__ import annotations
 
 import json
+import re
 from typing import Any, List, Optional
 
 from engine.actions import ActionExecutor
@@ -11,6 +12,14 @@ from engine.gates import BorderGate
 from engine.llm import OllamaChatClient, OpenRouterChatClient, create_chat_client
 from engine.knowledge import KnowledgeIndex
 from engine.models import AgentProposal, Chunk, DecisionLogEntry, Institution
+
+
+EDE_STATUTORY_EVIDENCE_IDS = (
+    "AE-FEDERAL-DECREE-LAW-38-2024-EN:p53:c2",
+    "AE-FEDERAL-DECREE-LAW-38-2024-EN:p54:c2",
+    "AE-FEDERAL-DECREE-LAW-38-2024-EN:p55:c1",
+    "AE-FEDERAL-DECREE-LAW-38-2024-EN:p56:c2",
+)
 
 
 class InstitutionalAgent:
@@ -39,11 +48,12 @@ class InstitutionalAgent:
     ) -> List[Chunk]:
         """Retrieve semantically similar evidence within this agent's pack view."""
         if self.knowledge_index:
-            return self.knowledge_index.search(
+            results = self.knowledge_index.search(
                 " ".join([*query_terms, query_context]),
                 self.allowed_jurisdictions,
                 top_k=top_k,
             )
+            return self._with_required_evidence(results)
 
         # Keep a lexical fallback for callers constructing agents outside the drill.
         scored = []
@@ -53,7 +63,23 @@ class InstitutionalAgent:
             if score:
                 scored.append((score, chunk))
         scored.sort(key=lambda item: (-item[0], item[1].doc_id, item[1].page))
-        return [chunk for _, chunk in scored[:top_k]]
+        return self._with_required_evidence([chunk for _, chunk in scored[:top_k]])
+
+    def _with_required_evidence(self, results: List[Chunk]) -> List[Chunk]:
+        """Keep governing EDE clauses available even when semantic ranking misses them."""
+        if self.institution.id != "ede" or not any(
+            action.name == "request_ede_manufacturer_evidence"
+            for action in self.institution.available_actions
+        ):
+            return results
+        by_id = {chunk.chunk_id: chunk for chunk in self.chunks}
+        present = {chunk.chunk_id for chunk in results}
+        results.extend(
+            by_id[chunk_id]
+            for chunk_id in EDE_STATUTORY_EVIDENCE_IDS
+            if chunk_id in by_id and chunk_id not in present
+        )
+        return results
 
     @staticmethod
     def _keywords(event: str, payload: dict[str, Any], institution: Institution) -> list[str]:
@@ -95,6 +121,7 @@ class InstitutionalAgent:
             "If none of the supplied chunks supports your decision, cite none and request review or information. "
             "Expected policy checks are questions to consider, not authority or evidence by themselves. "
             + ("For EDE medical-product decisions, distinguish the simulation's product classification from incident-specific statutory applicability. Article 68(7) requires a received report concerning an Article 68(3) case; Article 70(2) concerns investigation of an Article 70(1) case. If those predicates are marked unknown, say applicability is unresolved. Never say EDE must request evidence or that a request is legally required unless a supplied source establishes that duty. You may select an information-request action as a simulated fact-finding step, but describe it as a proposed inquiry to establish applicability, not as a statutory requirement. Distinguish a submitted corrective-action plan from completed remediation. " if self.institution.id == "ede" else "")
+            + ("When your rationale relies on Articles 68 or 70, cite the supplied clause IDs that support the conditional rule. The Arabic original controls; the supplied English text is a retrieval aid. " if self.institution.id == "ede" else "")
             + "If evidence is incomplete, choose a review, pause, or information-request action. "
             "Return a short decision rationale, not private chain-of-thought. Return confidence from 0 to 1."
         )
@@ -177,6 +204,11 @@ class InstitutionalAgent:
         else:
             output_schema["properties"]["cited_chunk_ids"]["maxItems"] = 0
         evidence_by_id = {chunk.chunk_id: chunk for chunk in evidence}
+        primary_legal_evidence_available = any(
+            chunk.jurisdiction == self.institution.jurisdiction
+            and chunk.source_binding in {"law", "law_translation"}
+            for chunk in evidence
+        )
         proposal = None
         rationale_quality = "MODEL_EXPLANATION"
         for attempt in range(2):
@@ -202,7 +234,17 @@ class InstitutionalAgent:
                 payload,
             )
             off_topic = off_topic_rationale(generated.rationale)
-            if not invalid_citations and not weak_citations and not off_topic:
+            legal_claim_without_citation = (
+                not generated.cited_chunk_ids
+                and primary_legal_evidence_available
+                and bool(re.search(
+                    r"\b(?:article|law|legal|statutory|mandate|authority|must|required|obligat\w*)\b",
+                    generated.rationale,
+                    re.IGNORECASE,
+                ))
+            )
+            if (not invalid_citations and not weak_citations and not off_topic
+                    and not legal_claim_without_citation):
                 proposal = generated
                 break
             if attempt == 0:
@@ -210,7 +252,10 @@ class InstitutionalAgent:
                     "Revise the decision for this visible incident event. Explain the selected "
                     "institutional action using incident facts. Cite only passages directly relevant "
                     "to that action; cite none if evidence is insufficient. When available, choose "
-                    "an information request or human review for unresolved authority."
+                    "an information request or human review for unresolved authority. "
+                    + ("A legal or statutory claim needs a directly relevant supplied citation; preserve any "
+                       "conditions in the cited source, or state that the legal basis remains unresolved. "
+                       if legal_claim_without_citation else "")
                 )
                 user = f"{user}\n\nValidation feedback: {problem}"
             elif not invalid_citations:
@@ -220,6 +265,15 @@ class InstitutionalAgent:
                     chunk_id for chunk_id in generated.cited_chunk_ids
                     if chunk_id not in weak_citations and not off_topic
                 ]})
+                if legal_claim_without_citation:
+                    proposal = proposal.model_copy(update={
+                        "rationale": (
+                            "The selected action is recorded as a simulated fact-finding step. The supplied "
+                            "record does not establish a legal duty or statutory basis for it."
+                        ),
+                        "cited_chunk_ids": [],
+                        "confidence": min(generated.confidence, 0.5),
+                    })
                 if off_topic:
                     fallback = next((name for name in (
                         "request_manual_review", "request_gap_supporting_evidence"
@@ -238,6 +292,26 @@ class InstitutionalAgent:
             raise ValueError(
                 f"LLM could not return citations from supplied context for {self.institution.id}."
             )
+
+        if self.institution.id == "ede" and proposal.action == "request_ede_manufacturer_evidence":
+            conditional_clause_ids = [
+                chunk_id for chunk_id in (
+                    "AE-FEDERAL-DECREE-LAW-38-2024-EN:p54:c2",
+                    "AE-FEDERAL-DECREE-LAW-38-2024-EN:p56:c2",
+                ) if chunk_id in evidence_by_id
+            ]
+            if conditional_clause_ids:
+                proposal = proposal.model_copy(update={
+                    "rationale": (
+                        "This drill records a proposed manufacturer-evidence request as a fact-finding step. "
+                        "Article 68(7) concerns reports received about cases in Article 68(3); Article 70(2) "
+                        "concerns confirming a case under Article 70(1). The case file does not establish "
+                        "either predicate, so this decision does not assert statutory applicability or a legal duty."
+                    ),
+                    "cited_chunk_ids": conditional_clause_ids,
+                    "confidence": min(proposal.confidence, 0.5),
+                })
+                rationale_quality = "RULE_CONSTRAINED_EXPLANATION"
 
         execution = self.action_executor.execute(
             self.institution,
