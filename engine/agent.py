@@ -117,6 +117,8 @@ class InstitutionalAgent:
             "Choose exactly one action from the available_actions list in this event view for the runtime to execute through the sandbox tool. "
             "Do not claim an action succeeded if the tool result later vetoes it. The border gate is mandatory. "
             "Do not invent legal rules, facts, or citations. Cite only supplied chunk IDs that support your action. "
+            "Whenever you rely on a named law, policy, standard, report, or guidance passage, include its exact supplied chunk ID in cited_chunk_ids; do not cite a source for a statement it does not support. "
+            "Actions justified only by visible event facts or the synthetic drill instructions do not need a policy citation; do not describe those instructions as external legal duties. "
             "Check each source's scope and source_notes before asserting an obligation; if the incident facts do not establish applicability, say so. "
             "If none of the supplied chunks supports your decision, cite none and request review or information. "
             "Expected policy checks are questions to consider, not authority or evidence by themselves. "
@@ -219,6 +221,15 @@ class InstitutionalAgent:
                 raise ValueError(
                     f"LLM proposed unavailable action '{generated.action}' for {self.institution.id}."
                 )
+            explicit_citations = [
+                chunk_id for chunk_id in evidence_by_id if chunk_id in generated.rationale
+            ]
+            if explicit_citations:
+                generated = generated.model_copy(update={
+                    "cited_chunk_ids": list(dict.fromkeys([
+                        *generated.cited_chunk_ids, *explicit_citations,
+                    ])),
+                })
             invalid_citations = [
                 chunk_id for chunk_id in generated.cited_chunk_ids
                 if chunk_id not in evidence_by_id
@@ -243,8 +254,17 @@ class InstitutionalAgent:
                     re.IGNORECASE,
                 ))
             )
+            source_claim_without_citation = (
+                not generated.cited_chunk_ids
+                and bool(re.search(
+                    r"\b(?:according to|pursuant to|under (?:the )?|as (?:stated|required|provided) "
+                    r"(?:in|by)|(?:WHO|UN|DHA|Swissmedic|NCSC|ISA|MedDO)(?:'s)?\b)",
+                    generated.rationale,
+                    re.IGNORECASE,
+                ))
+            )
             if (not invalid_citations and not weak_citations and not off_topic
-                    and not legal_claim_without_citation):
+                    and not legal_claim_without_citation and not source_claim_without_citation):
                 proposal = generated
                 break
             if attempt == 0:
@@ -256,6 +276,9 @@ class InstitutionalAgent:
                     + ("A legal or statutory claim needs a directly relevant supplied citation; preserve any "
                        "conditions in the cited source, or state that the legal basis remains unresolved. "
                        if legal_claim_without_citation else "")
+                    + ("You named a source without citing it. Add the exact supplied chunk ID if it supports "
+                       "the statement, or remove the source-based claim. "
+                       if source_claim_without_citation else "")
                 )
                 user = f"{user}\n\nValidation feedback: {problem}"
             elif not invalid_citations:
@@ -265,11 +288,12 @@ class InstitutionalAgent:
                     chunk_id for chunk_id in generated.cited_chunk_ids
                     if chunk_id not in weak_citations and not off_topic
                 ]})
-                if legal_claim_without_citation:
+                if legal_claim_without_citation or source_claim_without_citation:
                     proposal = proposal.model_copy(update={
                         "rationale": (
-                            "The selected action is recorded as a simulated fact-finding step. The supplied "
-                            "record does not establish a legal duty or statutory basis for it."
+                            "The selected action is based on the visible incident facts and is recorded only "
+                            "in the synthetic drill. The retrieved evidence does not establish the stated "
+                            "source-based claim or a legal duty for this action."
                         ),
                         "cited_chunk_ids": [],
                         "confidence": min(generated.confidence, 0.5),
