@@ -1,7 +1,7 @@
 [project]
 name = "borderline"
 version = "0.0.1"
-description = "LLM-driven multi-agent engine for cross-border AI incident drills"
+description = "Bounded AI agents for cross-border AI incident drills"
 readme = "README.md"
 license = "MIT"
 requires-python = ">=3.11,<3.12"
