@@ -94,7 +94,8 @@ class InstitutionalAgent:
             "Check each source's scope and source_notes before asserting an obligation; if the incident facts do not establish applicability, say so. "
             "If none of the supplied chunks supports your decision, cite none and request review or information. "
             "Expected policy checks are questions to consider, not authority or evidence by themselves. "
-            "If evidence is incomplete, choose a review, pause, or information-request action. "
+            + ("For EDE medical-product decisions, distinguish the simulation's product classification from incident-specific statutory applicability. Article 68(7) requires a received report concerning an Article 68(3) case; Article 70(2) concerns investigation of an Article 70(1) case. If those predicates are marked unknown, say applicability is unresolved. Never say EDE must request evidence or that a request is legally required unless a supplied source establishes that duty. You may select an information-request action as a simulated fact-finding step, but describe it as a proposed inquiry to establish applicability, not as a statutory requirement. Distinguish a submitted corrective-action plan from completed remediation. " if self.institution.id == "ede" else "")
+            + "If evidence is incomplete, choose a review, pause, or information-request action. "
             "Return a short decision rationale, not private chain-of-thought. Return confidence from 0 to 1."
         )
         user = {
