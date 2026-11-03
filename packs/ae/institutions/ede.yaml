@@ -6,8 +6,15 @@ role: medical_device_regulator
 
 mandate: >
   Simulated UAE medical-products authority participating in device-safety
-  coordination under the project brief. Its powers and deadlines require legal
-  source review before this profile is treated as authoritative.
+  coordination under the project brief. In this fictional drill, a mock EDE
+  letter classifies RetinaVision-DX as regulated medical equipment / SaMD and
+  records no UAE marketing authorization. This is a simulation fact only.
+  Federal Decree-Law No. 38 of 2024, Article 68(7), ties investigation and
+  information requests to received reports concerning Article 68(3) cases;
+  Article 70(2) ties them to investigation of Article 70(1) cases. The report
+  and case predicates remain unverified. Classification alone does not establish
+  either pathway. Do not turn a discretionary power into a mandatory duty, and
+  do not treat the submitted corrective-action plan as completed remediation.
 
 regulatory_scope:
   - medical_device_safety
@@ -15,7 +22,10 @@ regulatory_scope:
   - manufacturer_incident_evidence
 
 relevant_authorities:
-  - AE-FEDERAL-DECREE-LAW-38-2024
+  - AE-FEDERAL-DECREE-LAW-28-2023-EDE-AR
+  - AE-FEDERAL-DECREE-LAW-38-2024-AR
+  - AE-FEDERAL-DECREE-LAW-38-2024-EN
+  - AE-EDE-PHARMACOVIGILANCE-GUIDELINE-AR
 
 powers:
   - request_manufacturer_evidence
@@ -24,7 +34,7 @@ powers:
 
 available_actions:
   - name: request_ede_manufacturer_evidence
-    description: Request a simulated manufacturer incident evidence package.
+    description: Request a simulated manufacturer evidence package; do not claim a statutory basis unless its specific predicates are established.
   - name: assess_ede_device_safety_action
     description: Record a human-review recommendation on device safety action.
   - name: coordinate_ede_health_review

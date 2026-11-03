@@ -36,7 +36,7 @@ def clinical_decision(entry_id, actor_id, action, payload):
 
 def test_clinical_hypothesis_rejected_without_failure_signal():
     result = assess_clinical_conflict([clinical_decision(
-        "clinic", "ehs", "recommend_clinic_ai_halt", {"known_safety_signal": True}
+        "clinic", "dubai_clinic_operator", "recommend_clinic_ai_halt", {"known_safety_signal": True}
     )])
     assert result.category == "NO_GAP_IDENTIFIED"
     assert result.assessment_status == "REJECTED_HYPOTHESIS"
@@ -47,7 +47,7 @@ def test_clinical_conflict_depends_on_clinic_choice_and_missing_capacity():
                                {"audit_result": "false_negatives_confirmed"})
     access = clinical_decision("access", "dha", "assess_screening_suspension",
                                {"suspension_impact": "screening_delays"})
-    clinic = clinical_decision("clinic", "ehs", "recommend_clinic_ai_halt",
+    clinic = clinical_decision("clinic", "dubai_clinic_operator", "recommend_clinic_ai_halt",
                                {"known_safety_signal": True,
                                 "manual_review_capacity": "to_be_assessed"})
     result = assess_clinical_conflict([signal, access, clinic])

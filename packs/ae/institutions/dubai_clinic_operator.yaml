@@ -1,23 +1,23 @@
-id: ehs
-name: Emirates Health Services (EHS)
+id: dubai_clinic_operator
+name: Synthetic Dubai Clinic Operator
 jurisdiction: AE
-type: public_health_provider_network
+type: synthetic_clinical_operator
 role: health_delivery_and_clinical_operator
 
 mandate: >
-  Leading public health provider in the Northern Emirates operating clinics and hospitals.
-  First regional healthcare entity certified to ISO 42001:2023 (AI Management System).
-  Deploys clinical AI tools (e.g. diabetic retinopathy screening, Amal assistant) at point-of-care.
+  Synthetic operator for the Dubai clinics in this drill. It can record clinic
+  recommendations and request human clinical review. Its DHA licensing status,
+  manual screening capacity, and patient follow-up procedures remain unverified;
+  this profile does not represent a real provider or establish regulatory powers.
 
 regulatory_scope:
   - clinical_ai_deployment
   - patient_safety
-  - iso_42001_compliance
   - model_monitoring_and_drift_detection
 
 relevant_authorities:
-  - AE-HEALTH-9.5 # EHS AI Policy and ISO 42001:2023 Certification
-  - AE-HEALTH-9.3 # MoHAP AI in Healthcare Guidelines
+  - AE-DHA-AI-HEALTH-2021
+  - AE-DHA-REFERRAL-2022
 
 powers:
   - recommend_halt_of_clinic_level_ai_inference_for_human_review

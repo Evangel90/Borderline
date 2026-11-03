@@ -20,6 +20,8 @@ model update.
 
 ## Status
 
+The latest completed local drill is `retinopathy-agentic-classification-20261103-1` (32 decisions, two evidence-limited assessments, verified hash chain). It uses a simulation-only fictional EDE classification letter and manufacturer corrective-action plan. Manual review found that the EDE agent overstated the conditional Article 68/70 powers despite those predicates remaining unverified. See the [latest run review](report/run-review-retinopathy-agentic-classification-20261103-1.md), [synthetic product dossier](report/synthetic-product-dossier-retinavision-dx.md), and [machine-assisted Arabic passage review](report/arabic-ede-passage-review-20261103.md). This remains a synthetic prototype and has not established legal accuracy or real-world applicability.
+
 The timeline gives participating agents role-specific event views; an optional
 judge-injected escalation can be enabled for a run. The latest expanded run,
 `vector-retrieval-retry-20261030-1`, used local Ollama `qwen3:8b` and the
@@ -37,7 +39,7 @@ decision fallback. The Streamlit viewer displays each agent's visible facts,
 decisions, tool outcomes, evidence, and audit-chain status. `make replay` and
 `make report-figures` are not implemented yet.
 
-An EHS clinic-pause choice records a recommendation. The Streamlit viewer has
+A synthetic Dubai clinic-operator pause choice records a recommendation. The Streamlit viewer has
 a separate human review form; approval updates only the synthetic display
 state and is recorded in a separate hash-chained `human_approvals/log.jsonl`.
 Approver labels are self-entered and unauthenticated; no real clinic or system
@@ -104,6 +106,19 @@ Each `packs/*/chunks.jsonl` record retains its source URL, issuer, registered
 file path and SHA-256, retrieval date, language, legal status, and provenance
 notes. A decision's cited chunk ID therefore resolves to both an exact page
 and its source record; `data/sources.csv` remains the register of record.
+Arabic PDFs with usable embedded text are ingested directly and searched with
+the multilingual embedding model. Registered Arabic scans or PDFs with broken
+font extraction are skipped with an `OCR required` warning instead of adding
+corrupted text. An English translation may be registered as a separate source
+for retrieval assistance; the Arabic original remains controlling where the
+official source says so.
+For a reviewed OCR derivative, set `extraction_file` in `data/sources.csv`; the
+chunk provenance continues to point to the immutable original and its hash.
+Create a searchable derivative with `scripts/ocr_pdf.py` and manually inspect
+important passages because OCR can alter Arabic letters, spacing, and numbers.
+Set `retrieval_excluded` for a registered source that is intentionally outside
+the current drill; its original and hash remain verifiable without entering the
+policy pack or search index.
 Use `DRILL_ARGS=--include-optional-events` with `make drill` to include the
 judge-injected reserve event.
 `vendor/ITUAIReadiness` contains the [ITU reference

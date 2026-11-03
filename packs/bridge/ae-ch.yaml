@@ -8,7 +8,7 @@ parties:
     regulators:
       health: mohap
       data: uae_data_office
-      provider: ehs
+      provider: dubai_clinic_operator
   partner_state:
     code: CH
     regulators:

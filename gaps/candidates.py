@@ -33,7 +33,7 @@ def assess_clinical_conflict(decisions: list[DecisionLogEntry]) -> ClinicalConfl
     if signal is None:
         return ClinicalConflictResult("NO_GAP_IDENTIFIED", "REJECTED_HYPOTHESIS", (), ())
 
-    clinic = next((item for item in decisions if item.actor_id == "ehs"
+    clinic = next((item for item in decisions if item.actor_id == "dubai_clinic_operator"
                    and item.visible_payload.get("known_safety_signal")), None)
     access = next((item for item in decisions
                    if item.visible_payload.get("suspension_impact") == "screening_delays"

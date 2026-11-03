@@ -194,7 +194,9 @@ class KnowledgeIndex:
             and not reference_only_for_retrieval(chunk)
         ]
         terms = lambda value: {
-            word for word in re.findall(r"[a-z]{3,}|[0-9]{2,}", value.lower())
+            word for word in re.findall(
+                r"[a-z]{3,}|[\u0600-\u06ff]{3,}|[0-9]{2,}", value.lower()
+            )
             if word not in SEARCH_STOPWORDS
         }
         query_terms = terms(query)

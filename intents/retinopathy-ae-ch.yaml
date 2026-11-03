@@ -16,10 +16,16 @@ context:
   host_country: AE
   partner_country: CH
   description: >
-    RetinaSwiss AG (Zurich) deployed RetinaVision-DX v2.4 (SaMD) to synthetic
-    clinics in Dubai. Dubai Health Authority (DHA) is the selected emirate-level
-    health regulator for this version of the drill. After a model update,
-    auditors find missed referable diabetic retinopathy cases.
+    RetinaSwiss AG (Zurich) deployed the fictional agentic screening product
+    RetinaVision-DX v2.4 to synthetic clinics in Dubai. It analyzes retinal
+    images, creates screening results, and can route referrals and patient
+    notifications through clinic systems; negative results are assumed to close
+    without routine clinician review. After a model and workflow-agent update,
+    auditors find missed referable diabetic retinopathy cases. The product
+    concept is a scenario assumption only. Clinic licensing, actual product
+    specifications, UAE medical-product classification and marketing status,
+    and the incident's medical-product reporting category remain unknown. See
+    report/synthetic-product-dossier-retinavision-dx.md.
 
 actors:
   ae:
@@ -27,7 +33,7 @@ actors:
     - dha
     - ede
     - uae_cyber
-    - ehs            # Clinic network discovering diagnostic divergence
+    - dubai_clinic_operator # Synthetic Dubai clinic operator; licensing unverified
     - mohap          # Federal health ministry enforcing clinical AI safety
     - uae_data_office # Federal data regulator enforcing PDPL & cross-border export limits
   ch:
@@ -68,12 +74,12 @@ timeline:
         payload: {camera_model: Cam-7, audit_result: false_negatives_confirmed, affected_patients: 47, referrals_not_made: true}
       dha:
         event: "Dubai clinics report missed referable disease and patients who did not receive referrals."
-        payload: {camera_model: Cam-7, audit_result: false_negatives_confirmed, affected_patients: 47, patient_follow_up_status: unknown}
+        payload: {camera_model: Cam-7, audit_result: false_negatives_confirmed, affected_patients: 47, patient_follow_up_status: unknown, dha_facility_license_status: unverified, serious_harm_confirmed: false}
         expected_policy_checks: ["What reporting and patient follow-up duties apply to the selected Dubai health authority?"]
       ede:
         event: "A Dubai clinical AI service reports confirmed missed disease after a software update."
-        payload: {device: RetinaVision-DX, version: "2.4", camera_model: Cam-7, affected_patients: 47}
-        expected_policy_checks: ["Which device incident reporting and safety-action duties apply, and what primary source supports them?"]
+        payload: {device: RetinaVision-DX, version: "2.4", camera_model: Cam-7, affected_patients: 47, scenario_product_classification: "EDE-classified medical equipment / SaMD (fictional letter; established within drill)", uae_marketing_authorization: "none recorded in fictional case file", device_risk_class: unverified, marketing_rights_holder_authorization: unverified, manufacturer_corrective_action_plan: "submitted; completion unverified", article_68_report_status: unverified, article_70_case_status: unverified, serious_harm_confirmed: false}
+        expected_policy_checks: ["Treat the fictional EDE classification letter as a drill fact. Do not treat it as real. Distinguish classification from marketing authorization and from the separate Article 68 or 70 incident predicates."]
 
   - step: 3
     time_offset: "T+3h"
@@ -170,7 +176,7 @@ timeline:
     event: "Authorities must weigh suspension, which may interrupt screening, against continued use, which risks further missed disease."
     initiator: dha
     payload: {event_type: suspension_decision, human_approval_required: true}
-    participants: [screening_ai, dha, ede, uae_data_office, ehs, mohap, retina_swiss_ag, swissmedic, fodio, uae_cyber, ncsc, policy_adviser]
+    participants: [screening_ai, dha, ede, uae_data_office, dubai_clinic_operator, mohap, retina_swiss_ag, swissmedic, fodio, uae_cyber, ncsc, policy_adviser]
     agent_views:
       screening_ai:
         event: "Pausing screening may delay care; continued use may miss referable disease. The decision requires human review."
@@ -181,11 +187,12 @@ timeline:
         expected_policy_checks: ["What authority and evidence are required for suspension, and who must approve it?"]
       ede:
         event: "Review device-safety options and what evidence is needed before any field action."
-        payload: {known_safety_signal: true, device: RetinaVision-DX, human_approval_required: true}
+        payload: {known_safety_signal: true, device: RetinaVision-DX, human_approval_required: true, scenario_product_classification: "EDE-classified medical equipment / SaMD (fictional letter)", uae_marketing_authorization: "none recorded in fictional case file", device_risk_class: unverified, manufacturer_corrective_action_plan: "submitted; completion unverified", article_68_report_status: unverified, article_70_case_status: unverified}
+        expected_policy_checks: ["Use the fictional classification as a drill fact only. Determine separately whether the Article 68 report or Article 70 case predicates are established, and distinguish the manufacturer's submitted plan from verified completion."]
       uae_data_office:
         event: "Review data-protection actions alongside the clinical safety response."
         payload: {known_data_use_issue: true, clinical_suspension_decision: pending_human_review}
-      ehs:
+      dubai_clinic_operator:
         event: "Clinics need a safe screening plan while authorities review the model incident."
         payload: {known_safety_signal: true, manual_review_capacity: to_be_assessed, service_suspension_decision: pending, human_approval_required: true}
         expected_policy_checks: ["Record a recommendation only; who must approve a service pause and how will that decision be documented?"]
@@ -218,11 +225,11 @@ timeline:
     phase: "Clinic requests capacity review after halt recommendation"
     event: "A clinic halt recommendation is pending human approval; manual screening capacity remains unverified."
     requires_state: {clinic_ai_halt_recommendation: human_approval_required}
-    initiator: ehs
+    initiator: dubai_clinic_operator
     payload: {event_type: clinical_capacity_review, human_approval_required: true}
-    participants: [ehs]
+    participants: [dubai_clinic_operator]
     agent_views:
-      ehs:
+      dubai_clinic_operator:
         event: "Your halt recommendation is pending human approval. Request a review of manual screening capacity and patient follow-up before a decision."
         payload: {manual_review_capacity: to_be_assessed, patient_follow_up_plan: unconfirmed, service_suspension_decision: pending_human_review}
         visible_state_keys: [clinic_ai_halt_recommendation]
