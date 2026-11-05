@@ -1,4 +1,4 @@
-"""Streamlit viewer for saved Borderline incident drill runs."""
+"""Plain-language Streamlit viewer for saved Borderline governance drills."""
 
 from __future__ import annotations
 
@@ -16,6 +16,25 @@ from audit.hasher import HashChainedLogger  # noqa: E402
 
 
 st.set_page_config(page_title="Borderline | Drill Review", page_icon="🧭", layout="wide")
+
+PRIMARY_RUN = "retinopathy-evidence-packet-20261105-1"
+
+
+def plain_label(value: object) -> str:
+    """Render machine-readable status values as judge-friendly text."""
+    return str(value or "Not recorded").replace("_", " ").title()
+
+
+def step_summary(step: int) -> tuple[str, str]:
+    """Explain the flagship scenario without requiring the intent YAML."""
+    summaries = {
+        1: ("Service proposed", "A Dubai clinic considers a Swiss cloud screening service. It is not active."),
+        2: ("Data flow reviewed", "The team identifies what would travel from the UAE to Zurich and what would return."),
+        3: ("Evidence missing", "The clinic asks for the records needed to assess the proposed service."),
+        4: ("Safeguards reviewed", "The team records retention, access, workflow and transfer questions before activation."),
+        5: ("Vendor packet received", "Six fictional vendor exhibits arrive. Their receipt is not approval."),
+    }
+    return summaries.get(step, (f"Scenario step {step}", "Role-specific agents recorded their simulated review actions."))
 
 
 def read_jsonl(path: Path) -> list[dict]:
@@ -42,14 +61,15 @@ def available_runs() -> list[str]:
 
 
 st.title("🧭 Borderline")
-st.caption("Cross-border AI incident drill review · AI-agent decisions, simulated tool actions · Synthetic scenario")
+st.caption("A plain-language review of a fictional cross-border diagnostic-AI proposal")
 
 runs = available_runs()
 if not runs:
     st.info("No saved runs found. Run `make drill INTENT=retinopathy-ae-ch RUN=<new-run-id>` first.")
     st.stop()
 
-selected_run = st.sidebar.selectbox("Drill run", runs)
+default_index = runs.index(PRIMARY_RUN) if PRIMARY_RUN in runs else 0
+selected_run = st.sidebar.selectbox("Choose a saved case", runs, index=default_index)
 run_dir = RUNS_DIR / selected_run
 
 try:
@@ -71,25 +91,79 @@ steps = sorted({record.get("step", 0) for record in decisions})
 actors = {record.get("actor_id") for record in decisions}
 blocked = len({record.get("step") for record in decisions if record.get("gate_status") == "BLOCK" or record.get("liaison_status") == "BLOCK"})
 routed = len({record.get("step") for record in decisions if record.get("gate_status") == "ROUTE" or record.get("liaison_status") == "ROUTE"})
+primary_assessment = gaps[0] if gaps else {}
+assessment_status = primary_assessment.get("assessment_status", "UNASSESSED")
+missing_evidence = primary_assessment.get("missing_evidence", [])
+
+st.sidebar.markdown("---")
+st.sidebar.markdown("**How to read this page**")
+st.sidebar.write("Start with the decision below. Then follow the evidence journey. The technical audit is last.")
+st.sidebar.caption("Everything shown is a synthetic hackathon scenario. No real patient, clinic, vendor or approval is represented.")
+
+st.markdown("### The decision in this case")
+if assessment_status == "READY_FOR_HUMAN_REVIEW":
+    st.success("**Ready for accountable human review — not ready to activate.**")
+else:
+    st.warning(f"**{plain_label(assessment_status)}**")
+st.write(primary_assessment.get(
+    "conclusion",
+    "This saved case has no deployment assessment yet.",
+))
+
+with st.expander("What is Borderline reviewing?", expanded=True):
+    st.write(
+        "A fictional Dubai clinic is considering RetinaVision-DX, a Swiss cloud service that screens retinal images for diabetic retinopathy. "
+        "Borderline does not diagnose patients or approve the service. It helps the clinic keep an accountable record of what must be reviewed before deployment."
+    )
+    st.markdown("**Proposed information flow**")
+    st.code("Dubai clinic → encrypted retinal image + pseudonymous ID + camera metadata → Zurich compute\nZurich compute → image-quality result + screening/referral recommendation → Dubai clinic", language=None)
 
 metric_cols = st.columns(4)
-metric_cols[0].metric("Scenario steps", len(steps))
-metric_cols[1].metric("Agent decisions", len(decisions))
-metric_cols[2].metric("Institutional actors", len(actors))
-metric_cols[3].metric("Transfer blocks / routes", f"{blocked} / {routed}")
+metric_cols[0].metric("Current outcome", plain_label(assessment_status))
+metric_cols[1].metric("Review steps", len(steps))
+metric_cols[2].metric("Recorded agent actions", len(decisions))
+metric_cols[3].metric("Simulated actors", len(actors))
 
 if valid_chain:
-    st.success(f"Audit chain verified · {chain_message}")
+    st.caption(f"✓ Decision record integrity checked: {chain_message}")
 else:
     st.error(f"Audit chain failed · {chain_message} (entry {broken_index})")
 
-timeline_tab, gaps_tab, audit_tab = st.tabs(["Incident timeline", "Governance questions", "Audit log"])
+overview_tab, timeline_tab, record_tab, audit_tab = st.tabs([
+    "1. What still needs a person?",
+    "2. Evidence journey",
+    "3. Agent record",
+    "4. Audit & technical detail",
+])
+
+with overview_tab:
+    st.subheader("What remains before this fictional service could be activated?")
+    if missing_evidence:
+        for item in missing_evidence:
+            st.markdown(f"- {item}")
+    else:
+        st.info("No remaining-evidence items were recorded for this saved case.")
+    st.markdown("### Why the outcome is deliberately limited")
+    st.info(
+        "The vendor has supplied fictional documents. Borderline records that they are available for review; it does not decide that they are true, sufficient, lawful, clinically safe or approved. A responsible person must make that decision."
+    )
+    if primary_assessment:
+        st.markdown("### The recorded governance finding")
+        st.write(primary_assessment.get("friction_point", "No friction point recorded."))
+        st.caption(f"Finding type: {plain_label(primary_assessment.get('finding_class'))}")
+        st.markdown("**Suggested next action**")
+        st.write(primary_assessment.get("remediation_recommendation", "No next action recorded."))
+        st.caption(primary_assessment.get("limitations", ""))
 
 with timeline_tab:
-    st.subheader("Incident timeline")
+    st.subheader("How the evidence journey unfolded")
+    st.caption("Open a step to see which simulated actors saw which facts and what they did. This is a saved record, not a live clinical workflow.")
     for step in steps:
         step_decisions = [record for record in decisions if record.get("step") == step]
-        with st.expander(f"Step {step} · {len(step_decisions)} decisions", expanded=True):
+        title, description = step_summary(step)
+        with st.expander(f"Step {step}: {title}", expanded=True):
+            st.write(description)
+            st.caption(f"{len(step_decisions)} recorded agent actions")
             for record in step_decisions:
                 heading = f"{record.get('actor_name', record.get('actor_id', 'Agent'))} · {record.get('jurisdiction', '—')}"
                 st.markdown(f"**{heading}**")
@@ -104,7 +178,7 @@ with timeline_tab:
                         if record.get("authorized_actions"):
                             st.caption("Actions available to this agent for this event")
                             st.write(", ".join(record["authorized_actions"]))
-                st.write(f"Action: `{record.get('action_taken', '—')}`")
+                st.write(f"**Recorded action:** {plain_label(record.get('action_taken'))}")
                 st.write(record.get("justification", "No justification recorded."))
                 if record.get("model_name"):
                     st.caption(f"Agent model: {record['model_name']} · self-reported confidence {record.get('confidence', '—')}")
@@ -122,6 +196,7 @@ with timeline_tab:
                     st.caption(f"Border gate: {gate_status} · {record.get('gate_reason', '')}")
                 st.divider()
 
+with record_tab:
     st.subheader("Human approval queue")
     st.caption(
         "Agents can recommend a simulated service pause. Only a recorded human "
@@ -211,15 +286,15 @@ with timeline_tab:
                     })
                     st.rerun()
 
-with gaps_tab:
-    st.subheader("Governance questions and evidence status")
+    st.subheader("Detailed finding and supporting records")
+    st.caption("This section is for a reviewer who wants the source and run-record detail behind the plain-language outcome.")
     if not gaps:
         st.info("This run has no triggered governance question records.")
     for gap in gaps:
         st.markdown(f"### {gap.get('title', gap.get('gap_id', 'Policy gap'))}")
         st.caption(f"{gap.get('category', 'Uncategorized')} · {gap.get('host_jurisdiction', '—')} ↔ {gap.get('partner_jurisdiction', '—')}")
-        st.write(f"Evidence status: **{gap.get('assessment_status', 'UNASSESSED_LEGACY')}**")
-        st.write(f"Finding class: **{gap.get('finding_class', 'UNCLASSIFIED_LEGACY')}**")
+        st.write(f"Evidence status: **{plain_label(gap.get('assessment_status', 'UNASSESSED_LEGACY'))}**")
+        st.write(f"Finding class: **{plain_label(gap.get('finding_class', 'UNCLASSIFIED_LEGACY'))}**")
         st.info(gap.get("conclusion", "No conclusion recorded."))
         if gap.get("trigger_entry_ids"):
             st.caption("Triggered by: " + ", ".join(gap["trigger_entry_ids"]))
@@ -262,8 +337,8 @@ with gaps_tab:
                 st.markdown("> " + item.get("excerpt", "No excerpt recorded."))
 
 with audit_tab:
-    st.subheader("Hash-chained decisions")
-    st.caption("The chain makes edits detectable; it is not signed or externally anchored.")
+    st.subheader("Audit and technical detail")
+    st.caption("The hash chain makes edits to the saved decision record detectable. It is not a clinical record, signature system or external approval.")
     st.dataframe(
         [
             {
