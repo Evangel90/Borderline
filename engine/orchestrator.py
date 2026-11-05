@@ -18,7 +18,11 @@ from engine.knowledge import KnowledgeIndex
 from engine.llm import create_chat_client
 from audit.hasher import HashChainedLogger
 from gaps.register import GapRegister
-from gaps.candidates import assess_clinical_conflict, evidence_sharing_trigger
+from gaps.candidates import (
+    assess_clinical_conflict,
+    assess_deployment_readiness,
+    evidence_sharing_trigger,
+)
 
 
 class DrillOrchestrator:
@@ -252,6 +256,11 @@ class DrillOrchestrator:
             ),
             evidence=evidence,
             assessment_status="INSUFFICIENT_EVIDENCE",
+            finding_class="EVIDENCE_LIMITED_CANDIDATE",
+            conclusion=(
+                "The observed simulated events justify a coordination question, but do not "
+                "support a conclusion that a policy, legal, or standards gap exists."
+            ),
             trigger_entry_ids=[secondary_decision.entry_id, route_decision.entry_id],
             missing_evidence=[
                 "Verified controller and processor roles",
@@ -263,8 +272,107 @@ class DrillOrchestrator:
         )
 
     @staticmethod
+    def _build_deployment_readiness_assessment(
+        decisions: List[DecisionLogEntry],
+    ) -> PolicyGap | None:
+        result = assess_deployment_readiness(decisions)
+        if result is None:
+            return None
+        packet_received = result.assessment_status == "READY_FOR_HUMAN_REVIEW"
+        by_id = {item.entry_id: item for item in decisions}
+        evidence = [
+            PolicyEvidence(
+                source_type="run_log",
+                source_ref=entry_id,
+                title=f"Step {by_id[entry_id].step} decision by {by_id[entry_id].actor_name}",
+                jurisdiction=by_id[entry_id].jurisdiction,
+                excerpt=(
+                    f"Visible event: {by_id[entry_id].visible_event}. "
+                    f"Visible facts: {by_id[entry_id].visible_payload}. "
+                    f"Selected action: {by_id[entry_id].action_taken}."
+                ),
+                relevance="Observed synthetic deployment-review fact or action.",
+            )
+            for entry_id in result.trigger_entry_ids
+        ]
+        return PolicyGap(
+            gap_id="DEPLOYMENT-READINESS-001",
+            category="OPERATIONAL_EVIDENCE_DEFICIENCY",
+            title=(
+                "Vendor evidence received; remote screening awaits accountable review"
+                if packet_received else
+                "Remote screening deployment is pending missing vendor evidence"
+            ),
+            host_jurisdiction="AE",
+            partner_jurisdiction="CH",
+            friction_point=(
+                "The fictional vendor supplied the requested validation, release, rollback, "
+                "software-component and subprocessor exhibits. The clinic must now complete "
+                "human review, workflow fit and transfer safeguards before activation."
+                if packet_received else
+                "The proposed UAE-to-Switzerland screening flow has an identified data path, "
+                "but the fictional vendor has not supplied the validation, release, rollback, "
+                "software-component and subprocessor records needed for accountable review."
+            ),
+            host_citation="This assessment records scenario facts and simulated actions; it does not assert a UAE legal duty.",
+            partner_citation="This assessment records scenario facts and simulated actions; it does not assert a Swiss legal duty.",
+            global_benchmark="No global policy comparison is claimed until a passage-level comparison is reviewed.",
+            remediation_recommendation=(
+                "Keep activation pending accountable human review. Review the supplied packet, "
+                "confirm workflow fit and transfer safeguards, then document the activation decision."
+                if packet_received else
+                "Keep activation pending accountable human review. Obtain and review the listed "
+                "vendor records, then document the transfer, clinical-workflow and access decisions."
+            ),
+            finding_method=(
+                "Deterministic check for a proposed transfer review, a clinic review, an "
+                "initially incomplete packet, and any later supplied vendor exhibits."
+            ),
+            limitations=(
+                "The conclusion is limited to fictional scenario exhibits and does not establish "
+                "legal applicability, real-world product quality, or a policy-gap conclusion."
+            ),
+            evidence=evidence,
+            assessment_status=result.assessment_status,
+            finding_class=result.finding_class,
+            conclusion=(
+                "The simulated clinic has received the requested vendor exhibits and can move to "
+                "accountable human review; receipt does not approve activation or establish a legal duty."
+                if packet_received else
+                "The simulated clinic has a concrete reason to keep activation pending: specified "
+                "vendor evidence is missing. This does not establish that a policy or law has a gap."
+            ),
+            trigger_entry_ids=list(result.trigger_entry_ids),
+            missing_evidence=list(result.missing_evidence),
+        )
+
+    @staticmethod
     def _build_clinical_assessment(decisions: List[DecisionLogEntry]) -> PolicyGap:
         result = assess_clinical_conflict(decisions)
+        if result.category == "NO_GAP_IDENTIFIED":
+            finding_class = "REJECTED_HYPOTHESIS"
+            conclusion = (
+                "The recorded run does not establish the proposed diagnostic-safety versus "
+                "screening-access conflict. No policy-gap conclusion is made."
+            )
+        elif result.category == "OBJECTIVE_CONFLICT" and result.missing_evidence:
+            finding_class = "OPERATIONAL_DECISION_WITH_EVIDENCE_GAPS"
+            conclusion = (
+                "The run establishes a simulated operational tradeoff. Missing operational "
+                "facts prevent a recommendation or a policy-gap conclusion."
+            )
+        elif result.category == "OBJECTIVE_CONFLICT":
+            finding_class = "OPERATIONAL_DECISION_READY_FOR_HUMAN_REVIEW"
+            conclusion = (
+                "The run establishes a simulated operational tradeoff ready for accountable "
+                "human review. It does not establish a policy or legal gap."
+            )
+        else:
+            finding_class = "EVIDENCE_LIMITED_CANDIDATE"
+            conclusion = (
+                "The run raises a candidate operational or coordination question, but the "
+                "available facts do not support a policy-gap conclusion."
+            )
         by_id = {item.entry_id: item for item in decisions}
         evidence = [
             PolicyEvidence(
@@ -306,6 +414,8 @@ class DrillOrchestrator:
             limitations="Synthetic operational assessment; no policy duty or suspension authority is established.",
             evidence=evidence,
             assessment_status=result.assessment_status,
+            finding_class=finding_class,
+            conclusion=conclusion,
             trigger_entry_ids=list(result.trigger_entry_ids),
             missing_evidence=list(result.missing_evidence),
         )
@@ -407,7 +517,10 @@ class DrillOrchestrator:
                 print(f"     State changes: {decision.state_changes}")
 
         # Record only a triggered candidate question, with explicit evidence status.
-        candidates = [self._build_clinical_assessment(all_decisions)]
+        deployment_assessment = self._build_deployment_readiness_assessment(all_decisions)
+        candidates = [deployment_assessment] if deployment_assessment else [
+            self._build_clinical_assessment(all_decisions)
+        ]
         sharing_candidate = self._build_policy_gap(all_decisions)
         if sharing_candidate is not None:
             candidates.append(sharing_candidate)

@@ -353,6 +353,54 @@ class InstitutionalAgent:
                 })
                 rationale_quality = "RULE_CONSTRAINED_EXPLANATION"
 
+        if proposal.action == "request_manual_review":
+            proposal = proposal.model_copy(update={
+                "rationale": (
+                    "This drill records a request for human review because the visible scenario "
+                    "facts leave deployment evidence unresolved. It does not assert that a cited "
+                    "strategy, policy, or law creates a clinic duty."
+                ),
+                "cited_chunk_ids": [],
+                "confidence": min(proposal.confidence, 0.5),
+            })
+            rationale_quality = "RULE_CONSTRAINED_EXPLANATION"
+
+        if proposal.action in {"report_model_update", "confirm_model_deployment"}:
+            proposal = proposal.model_copy(update={
+                "rationale": (
+                    "This drill records the proposed model version and deployment status in "
+                    "synthetic state. It does not assert a regulatory mandate, compliance "
+                    "determination, or completed real-world deployment."
+                ),
+                "cited_chunk_ids": [],
+                "confidence": min(proposal.confidence, 0.5),
+            })
+            rationale_quality = "RULE_CONSTRAINED_EXPLANATION"
+
+        if proposal.action == "request_gap_supporting_evidence":
+            proposal = proposal.model_copy(update={
+                "rationale": (
+                    "This drill records a request for the missing vendor evidence identified "
+                    "in the scenario. It does not assert that any retrieved source creates a "
+                    "specific legal or policy duty."
+                ),
+                "cited_chunk_ids": [],
+                "confidence": min(proposal.confidence, 0.5),
+            })
+            rationale_quality = "RULE_CONSTRAINED_EXPLANATION"
+
+        if self.institution.id == "dha" and proposal.action == "open_clinical_incident_review":
+            proposal = proposal.model_copy(update={
+                "rationale": (
+                    "This drill records a simulated clinical review of the proposed service because "
+                    "validation and workflow evidence remain incomplete. It does not assert a DHA "
+                    "legal mandate, facility-specific duty, or approval decision."
+                ),
+                "cited_chunk_ids": [],
+                "confidence": min(proposal.confidence, 0.5),
+            })
+            rationale_quality = "RULE_CONSTRAINED_EXPLANATION"
+
         if self.institution.id == "retina_swiss_ag" and proposal.action == "initiate_model_rollback":
             proposal = proposal.model_copy(update={
                 "rationale": (

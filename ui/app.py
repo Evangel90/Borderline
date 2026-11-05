@@ -219,6 +219,8 @@ with gaps_tab:
         st.markdown(f"### {gap.get('title', gap.get('gap_id', 'Policy gap'))}")
         st.caption(f"{gap.get('category', 'Uncategorized')} · {gap.get('host_jurisdiction', '—')} ↔ {gap.get('partner_jurisdiction', '—')}")
         st.write(f"Evidence status: **{gap.get('assessment_status', 'UNASSESSED_LEGACY')}**")
+        st.write(f"Finding class: **{gap.get('finding_class', 'UNCLASSIFIED_LEGACY')}**")
+        st.info(gap.get("conclusion", "No conclusion recorded."))
         if gap.get("trigger_entry_ids"):
             st.caption("Triggered by: " + ", ".join(gap["trigger_entry_ids"]))
         if gap.get("missing_evidence"):

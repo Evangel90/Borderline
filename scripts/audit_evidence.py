@@ -52,7 +52,11 @@ def audit_run(run_id: str) -> dict:
             findings.append({"entry_id": entry["entry_id"], "issue": "off_topic_rationale"})
         if weak:
             findings.append({"entry_id": entry["entry_id"], "issue": "citation_needs_review", "chunk_ids": weak})
-        if status == "INSUFFICIENT_EVIDENCE":
+        fact_only_synthetic_action = (
+            entry.get("rationale_quality") == "RULE_CONSTRAINED_EXPLANATION"
+            and not cited_ids
+        )
+        if status == "INSUFFICIENT_EVIDENCE" and not fact_only_synthetic_action:
             findings.append({"entry_id": entry["entry_id"], "issue": "no_citation"})
     return {
         "run_id": run_id,

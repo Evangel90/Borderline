@@ -186,5 +186,7 @@ class PolicyGap(BaseModel):
     limitations: str
     evidence: List[PolicyEvidence] = Field(default_factory=list)
     assessment_status: str = "UNASSESSED_LEGACY"
+    finding_class: str = "UNCLASSIFIED_LEGACY"
+    conclusion: str = "No conclusion recorded."
     trigger_entry_ids: List[str] = Field(default_factory=list)
     missing_evidence: List[str] = Field(default_factory=list)
