@@ -1,6 +1,6 @@
 # Borderline
 
-A prototype for cross-border AI incident drills, built for the
+A prototype for policy-grounded deployment and incident drills, built for the
 [ITU AI for Good Lab Hackathon: United Arab Emirates](https://aiforgood.itu.int/event/ai-for-good-sandbox-hackathon-united-arab-emirates/).
 The current drill is wired to UAE (AE) and Switzerland (CH); adding a new
 country pack does not yet configure a new drill automatically.
@@ -11,16 +11,29 @@ agents cite retrieved policy chunks when relevant evidence is available. A separ
 transfers or route regulator notifications. Decisions and tool outcomes are
 written to a hash-chained audit log.
 
-The demo drill pairs the UAE (host) with Switzerland in healthcare: a Swiss
-vendor's AI diabetic retinopathy screening tool fails in UAE clinics after a
-model update.
+The flagship use case is a fictional Dubai clinic deciding whether to deploy
+RetinaVision-DX, a Swiss-vendor, cloud-connected AI service for diabetic-
+retinopathy screening. In the scenario, the clinic encrypts retinal images and
+sends them to a vendor-operated compute environment in Switzerland; the clinic
+does not host the model weights. The service returns an image-quality result,
+screening result and referral recommendation to the clinic. Image retention,
+support-log retention, vendor access and any subprocessors are explicit
+questions for the pre-deployment review. A later model-update incident is a
+stress test of that approved workflow, not the product's sole use case.
 
 > All scenario data is synthetic. Agent roles are simulated and never represent
 > any authority's official position.
 
+The UAE, Swiss and global policy materials are a local, provenance-bearing
+prototype knowledge base. They are not complete legal collections and are not
+hosted by ITU. Publication in the ITU AI for Good Lab would be a possible
+hackathon outcome, not a current project status.
+See the [use-case and knowledge-base contribution note](report/USE_CASE_AND_KB_CONTRIBUTION.md)
+for the scenario assumptions, intended reviewer output and claim discipline.
+
 ## Status
 
-The latest completed local drill is `retinopathy-final-itu-criteria-20261103-4` (32 decisions, two evidence-limited assessments, verified hash chain). It uses a simulation-only fictional EDE classification letter and manufacturer corrective-action plan. EDE manufacturer-evidence decisions carry conditional Article 68(7) and 70(2) citations. The full-run audit found 14 decisions without citations and two DHA citations that fail the support screen; details and limits are in the [run review](report/run-review-retinopathy-final-itu-criteria-20261103-4.md). The technical-report draft and full hackathon criteria crosswalk are also available in [the report](report/technical-report-draft.md) and [criteria audit](docs/HACKATHON_CRITERIA_AUDIT.md). This remains a synthetic prototype and has not established legal accuracy or real-world applicability.
+The latest primary local drill is `retinopathy-evidence-packet-20261105-1` (22 decisions, verified hash chain and no automated citation-screening findings). It first records missing vendor evidence, then supplies six fictional vendor exhibits and reaches `READY_FOR_HUMAN_REVIEW`: human review, clinic workflow fit, and transfer safeguards remain required before activation. The record is simulation evidence only; it does not establish legal accuracy, product quality or real-world applicability. The earlier `retinopathy-final-itu-criteria-20261103-4` incident run predates the revised explicit pre-deployment data-flow scenario. The technical-report draft and full hackathon criteria crosswalk are available in [the report](report/technical-report-draft.md) and [criteria audit](docs/HACKATHON_CRITERIA_AUDIT.md).
 
 The timeline gives participating agents role-specific event views; an optional
 judge-injected escalation can be enabled for a run. The latest expanded run,
