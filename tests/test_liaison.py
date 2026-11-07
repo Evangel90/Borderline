@@ -515,6 +515,9 @@ def test_ai_reviewer_sees_full_passages_and_is_restricted_to_shown_chunk_ids():
     assert schema is LiaisonReview
     allowed = output_schema["$defs"]["LiaisonQuote"]["properties"]["chunk_id"]["enum"]
     assert sorted(allowed) == sorted(c.chunk_id for c in index.chunks)
+    answer_schema = output_schema["$defs"]["LiaisonAnswer"]
+    assert answer_schema["properties"]["quotes"]["minItems"] == 1
+    assert "quotes" in answer_schema["required"]
     passages = json.loads(user)["passages"]
     assert passages[0]["text"] == " ".join(CH_BASIS.text.split())  # not truncated
     assert "not legal conclusions" in system

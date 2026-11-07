@@ -42,6 +42,22 @@ class OllamaChatClient:
         self.base_url = os.environ.get("BORDERLINE_OLLAMA_URL", "http://127.0.0.1:11434").rstrip("/")
         self.model = os.environ.get("BORDERLINE_LLM_MODEL", "qwen3:8b")
         self.timeout = float(os.environ.get("BORDERLINE_LLM_TIMEOUT", "180"))
+        # Ollama's default context window (often 4096 tokens) silently drops the start of longer
+        # prompts. Ask for an explicit window and refuse prompts that would not fit it.
+        self.num_ctx = int(os.environ.get("BORDERLINE_OLLAMA_NUM_CTX", "16384"))
+
+    # Conservative estimate: about 2.5 characters per token (Arabic and JSON tokenise densely).
+    CHARS_PER_TOKEN = 2.5
+    RESERVED_OUTPUT_TOKENS = 1024
+
+    def check_prompt_fits(self, system_prompt: str, user_prompt: str, output_schema: dict) -> None:
+        chars = len(system_prompt) + len(user_prompt) + len(json.dumps(output_schema))
+        estimate = int(chars / self.CHARS_PER_TOKEN)
+        if estimate + self.RESERVED_OUTPUT_TOKENS > self.num_ctx:
+            raise OllamaError(
+                f"Prompt of about {estimate} tokens does not fit the {self.num_ctx}-token context window "
+                "(set BORDERLINE_OLLAMA_NUM_CTX higher); refusing to let Ollama truncate it silently."
+            )
 
     def generate(
         self,
@@ -51,16 +67,18 @@ class OllamaChatClient:
         output_schema: dict | None = None,
     ) -> BaseModel:
         """Return one Pydantic-validated response using Ollama JSON-schema mode."""
+        output_schema = output_schema or schema.model_json_schema()
+        self.check_prompt_fits(system_prompt, user_prompt, output_schema)
         body = {
             "model": self.model,
             "messages": [
                 {"role": "system", "content": system_prompt},
                 {"role": "user", "content": user_prompt},
             ],
-            "format": output_schema or schema.model_json_schema(),
+            "format": output_schema,
             "stream": False,
             "think": False,
-            "options": {"temperature": 0},
+            "options": {"temperature": 0, "num_ctx": self.num_ctx},
         }
         request = Request(
             f"{self.base_url}/api/chat",

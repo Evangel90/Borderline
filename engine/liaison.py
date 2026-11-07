@@ -144,9 +144,13 @@ class LiaisonReviewer:
         answer["answer"]["enum"] = sorted(LIAISON_ANSWERS)
         answer["gap_type"] = {"anyOf": [{"type": "string", "enum": list(LIAISON_GAP_TYPES)},
                                         {"type": "null"}]}
+        # Every answer must carry a quote (design rule 2), so the schema requires one; the code
+        # check still rejects any quote that is not verbatim. With no passages, none is possible.
+        schema["$defs"]["LiaisonAnswer"]["required"] = ["answer", "reason", "quotes", "gap_type"]
         quote = schema["$defs"]["LiaisonQuote"]["properties"]["chunk_id"]
         if evidence:
             quote["enum"] = [chunk.chunk_id for chunk in evidence]
+            answer["quotes"]["minItems"] = 1
         else:
             answer["quotes"]["maxItems"] = 0
         return schema
