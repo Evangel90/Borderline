@@ -53,6 +53,7 @@ liaison:
   counterparts:
     - [mohap, swissmedic]
     - [uae_data_office, fodio]
+    - [ede, swissmedic]
   request_types:
     cross_border_evidence_request:
       answer: UNCLEAR

@@ -179,3 +179,31 @@ def test_evaluate_step_puts_check_passages_in_the_model_prompt():
     shown = [item["chunk_id"] for item in json.loads(agent.llm.users[0])["evidence"]]
     assert shown == ["MAIN-HIT", "CHECK-HIT"]
     assert decision.retrieved_chunk_ids == ["MAIN-HIT", "CHECK-HIT"]
+
+
+# --- Run review 2026-11-07: the adviser's own cited answer must reach the log. ---
+
+@pytest.mark.parametrize("cited, kept", [(["CHECK-HIT"], True), ([], False)])
+def test_gap_evidence_request_keeps_a_cited_explanation(monkeypatch, cited, kept):
+    from engine.models import AgentProposal
+    monkeypatch.setattr("engine.agent.triage_citations", lambda *a, **k: ("PARTIALLY_SUPPORTED", []))
+    own = "Section 4.7.5 lists conditions; ethics approval is not located, so the claim is open."
+
+    class LLM:
+        model = "fixed"
+
+        def generate(self, system, user, schema, output_schema):
+            return AgentProposal(action="request_gap_supporting_evidence", rationale=own,
+                                 cited_chunk_ids=cited, confidence=0.6)
+
+    inst = Institution(id="policy_adviser", name="p", jurisdiction="GLOBAL", type="t", role="t",
+                       mandate="t", available_actions=[AvailableAction(
+                           name="request_gap_supporting_evidence", description="Request evidence.")])
+    agent = InstitutionalAgent(inst, [chunk("seed")], llm=LLM(), knowledge_index=None)
+    agent.search_knowledge = lambda *_a, **_k: [chunk("CHECK-HIT", "GLOBAL")]
+    agent.action_executor = type("Exec", (), {"execute": lambda self, *a, **k: type(
+        "R", (), {"action": "request_gap_supporting_evidence", "result": "ok", "state_changes": {},
+                  "liaison_status": "LOCAL_ONLY", "liaison_checks": [], "liaison_review": {}})()})()
+    decision = agent.evaluate_step(5, "event", {}, gate=None)
+    assert (decision.justification == own) is kept
+    assert decision.rationale_quality == ("MODEL_EXPLANATION" if kept else "RULE_CONSTRAINED_EXPLANATION")

@@ -39,6 +39,8 @@ available_actions:
     description: Record a human-review recommendation on device safety action.
   - name: coordinate_ede_health_review
     description: Request simulated coordination with the emirate health regulator.
+  - name: request_regulatory_evidence
+    description: Send a formal request to a foreign counterpart through the liaison channel; no patient data is attached.
 
 drill_behavior:
   simulated_only: true

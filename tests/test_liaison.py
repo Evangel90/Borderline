@@ -566,3 +566,37 @@ def test_checked_in_reference_for_possible_patient_data_uses_directional_rule():
                                "cross_border_evidence_request", {})
     assert reference["transfer_rules"].answer == "UNCLEAR"
     assert reference["transfer_rules"].sources == ["AE-HEALTH-ICT-LAW-2019"]
+
+
+# --- Run review 2026-11-07: an exact quote is not proof that it answers the question. ---
+
+GLOBAL_GUIDANCE = chunk(
+    "GLOBAL-TEST-RECOMMENDATION:p1:c1",
+    "Member countries should take steps to improve the ability of their authorities to co-operate.",
+    jurisdiction="GLOBAL",
+)
+
+
+def test_legal_basis_resting_only_on_global_guidance_is_unclear():
+    review = all_yes().model_copy(update={"legal_basis": yes(GLOBAL_GUIDANCE)})
+    decision = send(channel(review, evidence=EVIDENCE + [GLOBAL_GUIDANCE]))
+    basis = by_key(decision, "legal_basis")
+    assert (basis["answer"], basis["gap_type"]) == ("UNCLEAR", "missing_evidence")
+    assert any("global" in note for note in basis["adjustments"])
+    assert decision.status == "BLOCK"
+
+
+def test_global_guidance_may_still_back_other_questions():
+    review = all_yes().model_copy(update={"counterpart": yes(GLOBAL_GUIDANCE)})
+    decision = send(channel(review, evidence=EVIDENCE + [GLOBAL_GUIDANCE]))
+    assert answers(decision)["counterpart"] == "YES"
+
+
+def test_every_yes_is_flagged_for_human_review_and_others_are_not():
+    review = all_yes().model_copy(update={"counterpart": LiaisonAnswer(
+        answer="UNCLEAR", reason="Not shown.", quotes=[quote(CH_COUNTERPART)], gap_type="policy_gap")})
+    decision = send(channel(review))
+    flags = {c["check"]: c["human_review_required"] for c in decision.checks}
+    assert flags == {"legal_basis": True, "transfer_rules": True, "counterpart": False}
+    assert by_key(decision, "legal_basis")["human_review_note"]
+    assert decision.review["yes_answers_for_human_review"] == ["legal_basis", "transfer_rules"]

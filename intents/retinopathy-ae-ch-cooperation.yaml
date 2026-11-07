@@ -1,0 +1,179 @@
+id: retinopathy-ae-ch-cooperation
+title: "Companion Drill: The Same Incident, With Requests That Meet the Swiss Conditions"
+version: "1.0.0"
+
+# Why this companion exists: in the main drill (retinopathy-ae-ch) both UAE letters are
+# expected to be blocked, so the "delivered" branches never run there. This drill keeps the
+# same incident but has each UAE authority send a narrower request that is written to meet
+# the conditions in the Swiss provision the receiver would rely on (FADP Art. 55 for the
+# FDPIC, TPA Art. 64 for Swissmedic). Whether the conditions are met is still decided by the
+# AI liaison reviewer and checked by code; nothing here forces delivery. Each letter has
+# both a "delivered" and a "blocked" follow-up step, so the drill runs to the end either way.
+# The assurances given by the UAE authorities are drill facts, not real undertakings.
+
+standard_alignment:
+  itu_recommendation: "ITU-T Y.3172"
+  adaptation_note: "Healthcare governance simulation inspired by pipeline concepts; not a telecom implementation or conformance claim."
+  components:
+    ml_intent: "Test whether the liaison channel routes UAE requests that are scoped to the Swiss conditions for administrative assistance."
+    src: "Synthetic staged incident facts and registered policy-source records."
+    collector: "Source ingestion and hybrid lexical/vector evidence retrieval."
+    pre_processor: "PDF text/OCR extraction, passage chunking, and provenance metadata."
+    model: "Configured AI agent proposes a permitted synthetic drill action with a concise rationale."
+    policy: "Institution action allow-lists, citation triage, the liaison-channel border gate, and human-approval state."
+    distributor: "Orchestrator dispatches the selected action to a synthetic action handler."
+    sink: "Synthetic state changes and recorded tool outcomes; no external system is connected."
+    ml_function_orchestrator: "engine/orchestrator.py releases events and invokes role-specific agents."
+    sandbox: "Borderline local isolated multi-agent drill execution runtime."
+
+context:
+  domain: health
+  host_country: AE
+  partner_country: CH
+  description: >
+    Same fictional incident as the main drill: RetinaVision-DX v2.4, made and
+    operated by the fictional RetinaSwiss AG in Zurich, misses referable
+    diabetic retinopathy in Dubai clinics after an update pushed from a
+    compromised vendor account. In this companion, the UAE Data Office asks the
+    FDPIC only about non-health personal data of UAE clinic staff exposed
+    through the compromised account, and the Emirates Drug Establishment asks
+    Swissmedic only for device-vigilance information. Each request states the
+    assurances the Swiss provision asks for. All scenario data is synthetic.
+
+actors:
+  ae:
+    - ede                    # Emirates Drug Establishment, medical products authority
+    - uae_data_office        # PDPL regulator
+  ch:
+    - retina_swiss_ag        # Fictional vendor
+    - fodio                  # Federal Data Protection and Information Commissioner (FDPIC)
+    - swissmedic             # Medical-device regulator
+  neutral:
+    - policy_adviser
+
+timeline:
+  - step: 1
+    time_offset: "T+4h"
+    phase: "UAE authorities learn of the faulty update and the compromised vendor account"
+    event: "RetinaSwiss tells its Dubai customers that v2.4 was pushed from a compromised engineer account and misses referable retinopathy on Cam-7 cameras. The same account could read the vendor's support portal, which holds the names, work emails and login names of UAE clinic staff."
+    initiator: retina_swiss_ag
+    payload: {event_type: incident_disclosed_in_uae}
+    participants: [ede, uae_data_office]
+    agent_views:
+      ede:
+        event: "A Swiss manufacturer reports that an update to its retinopathy screening software, used in Dubai clinics, misses referable disease on one camera model. The update was pushed from a compromised account."
+        payload: {device: RetinaVision-DX, version: "2.4", manufacturer: retina_swiss_ag, manufacturer_location: CH, known_safety_signal: true, scenario_product_classification: "EDE-classified medical equipment / SaMD (fictional letter)", article_68_report_status: unverified}
+        allowed_actions: [assess_ede_device_safety_action, request_ede_manufacturer_evidence]
+      uae_data_office:
+        event: "A Swiss vendor reports that a compromised engineer account could read its support portal, which holds the names, work emails and login names of about 120 staff at UAE clinics. No patient or health data is held in that portal."
+        payload: {controller: retina_swiss_ag, controller_location: CH, data_subjects_location: AE, data_category: staff_contact_and_login_data, health_data_involved: false, affected_people: 120, exposure_confirmed: false}
+        expected_policy_checks: ["Does the UAE PDPL apply to a controller outside the State that processes personal data of people in the State (Art. 2(1)(c)), and is this data excluded as health or government data?"]
+        allowed_actions: [assess_regulatory_competence, refer_to_competent_authority]
+
+  - step: 2
+    time_offset: "T+6h"
+    phase: "The UAE Data Office asks the FDPIC for help on the staff data"
+    event: "The UAE Data Office sends the FDPIC a data-protection assistance request about the UAE clinic staff data exposed through the compromised account."
+    initiator: uae_data_office
+    payload: {event_type: data_protection_assistance_request}
+    participants: [uae_data_office]
+    agent_views:
+      uae_data_office:
+        event: "Send a formal liaison request to the FDPIC asking what the compromised account could reach in the support portal and what the vendor has done. The request concerns only UAE clinic staff contact and login data, carries no personal data, and states the Office's assurances (drill facts): reciprocity in administrative assistance, use only in this data-protection proceeding, and professional secrecy."
+        payload: {target: fodio, request_type: data_protection_assistance_request, patient_data_included: false, personal_data_included: false, data_category: staff_contact_and_login_data, health_data_involved: false, requester_role: uae_data_protection_authority, requester_legal_scope: "UAE PDPL Art. 2(1)(c): controllers outside the State processing personal data of data subjects in the State", reciprocity_assurance: given_in_writing_drill_fact, use_limited_to_data_protection_proceeding: true, professional_secrecy_undertaking: true}
+        expected_policy_checks: ["Which Swiss provision lets the FDPIC assist a foreign data-protection authority, and does this request meet each of its conditions?"]
+        allowed_actions: [request_regulatory_evidence]
+
+  - step: 3
+    time_offset: "T+6h"
+    phase: "The FDPIC receives the UAE Data Office request"
+    event: "The liaison channel delivers the UAE Data Office's request to the FDPIC."
+    requires_state: {regulatory_evidence_request.uae_data_office: delivered}
+    initiator: uae_data_office
+    payload: {event_type: liaison_request_delivered}
+    participants: [fodio, retina_swiss_ag]
+    agent_views:
+      fodio:
+        event: "The UAE Data Office asks what a compromised vendor account could reach in a support portal holding UAE clinic staff contact and login data, and what the vendor has done. It gives written assurances of reciprocity, use limited to this proceeding, and professional secrecy (drill facts)."
+        payload: {requesting_authority: uae_data_office, requesting_country: AE, data_category: staff_contact_and_login_data, health_data_involved: false, reciprocity_assurance: given_in_writing_drill_fact, answer_may_include_personal_data: true, destination_on_swiss_adequacy_list: false}
+        expected_policy_checks: ["FADP Art. 55 allows assistance to foreign data-protection authorities under conditions. Which conditions are shown on the visible facts, and what must be checked before any personal data is disclosed to a country not on the Swiss adequacy list?"]
+      retina_swiss_ag:
+        event: "The FDPIC tells you it has received a UAE request about what the compromised account could reach in your support portal."
+        payload: {requesting_authority: uae_data_office, data_category: staff_contact_and_login_data, credential_theft_suspected: true, attribution: unconfirmed}
+        allowed_actions: [preserve_vendor_security_evidence, record_secondary_use_for_review]
+
+  - step: 4
+    time_offset: "T+6h"
+    phase: "The liaison channel blocks the UAE Data Office request"
+    event: "The liaison check blocks the UAE Data Office's request to the FDPIC; nothing crosses the border."
+    requires_state: {regulatory_evidence_request.uae_data_office: blocked_by_liaison_check}
+    initiator: uae_data_office
+    payload: {event_type: liaison_request_blocked}
+    participants: [policy_adviser]
+    agent_views:
+      policy_adviser:
+        event: "A UAE data-protection authority's request to its Swiss counterpart about non-health staff data was blocked by the liaison check, even though it stated the assurances the Swiss provision asks for. Identify which check failed and whether the block points to a missing instrument or missing evidence."
+        payload: {requesting_authority: uae_data_office, target: fodio, request_type: data_protection_assistance_request, health_data_involved: false}
+        visible_state_keys: [regulatory_evidence_request.uae_data_office]
+        allowed_actions: [prepare_policy_gap_review, request_gap_supporting_evidence]
+
+  - step: 5
+    time_offset: "T+8h"
+    phase: "EDE asks Swissmedic for device-vigilance information"
+    event: "The Emirates Drug Establishment sends Swissmedic a request for vigilance information about RetinaVision-DX v2.4."
+    initiator: ede
+    payload: {event_type: cross_border_evidence_request}
+    participants: [ede]
+    agent_views:
+      ede:
+        event: "Send a formal liaison request to Swissmedic for vigilance information on RetinaVision-DX v2.4: incident reports the manufacturer has filed and any field safety corrective action. The request carries no patient data, asks for no manufacturing or trade secrets, and states EDE's assurances (drill facts): EDE is bound by official secrecy, will use the information only in its administrative procedure enforcing medical-device rules, and will not pass it on."
+        payload: {target: swissmedic, request_type: cross_border_evidence_request, patient_data_included: false, personal_data_included: false, requested_information: [manufacturer_incident_reports, field_safety_corrective_actions], requester_role: uae_medical_products_authority, official_secrecy_assurance: given_drill_fact, use_limited_to_therapeutic_product_enforcement: true, onward_disclosure: none, trade_secrets_requested: false}
+        expected_policy_checks: ["Which Swiss provision lets Swissmedic disclose non-public information to a foreign authority enforcing therapeutic-product rules, and does this request meet each of its conditions?"]
+        allowed_actions: [request_regulatory_evidence]
+
+  - step: 6
+    time_offset: "T+8h"
+    phase: "Swissmedic receives EDE's request"
+    event: "The liaison channel delivers EDE's request. Swissmedic and the vendor must decide what can be shared."
+    requires_state: {regulatory_evidence_request.ede: delivered}
+    initiator: ede
+    payload: {event_type: liaison_request_delivered}
+    participants: [swissmedic, retina_swiss_ag]
+    agent_views:
+      swissmedic:
+        event: "The UAE medical-products authority asks for vigilance information on RetinaVision-DX v2.4, with assurances of official secrecy, use only in its enforcement procedure and no onward disclosure (drill facts). It asks for no patient data or trade secrets. No Swiss patients are affected."
+        payload: {requesting_authority: ede, requesting_country: AE, requested_information: [manufacturer_incident_reports, field_safety_corrective_actions], patient_data_included: false, trade_secrets_requested: false, swiss_patients_affected: false}
+        expected_policy_checks: ["Under TPA Art. 64, which conditions must be ensured before disclosing this information abroad, and which of them are shown on the visible facts?"]
+      retina_swiss_ag:
+        event: "Swissmedic tells you the UAE medical-products authority has asked for your incident reports and any field safety corrective action on v2.4."
+        payload: {requesting_authority: ede, model: RetinaVision-DX, version: "2.4", rollback_target: "2.3", rollback_safety_validated: false}
+        allowed_actions: [preserve_vendor_security_evidence, initiate_model_rollback]
+
+  - step: 7
+    time_offset: "T+8h"
+    phase: "The liaison channel blocks EDE's request"
+    event: "The liaison check blocks EDE's request to Swissmedic; nothing crosses the border."
+    requires_state: {regulatory_evidence_request.ede: blocked_by_liaison_check}
+    initiator: ede
+    payload: {event_type: liaison_request_blocked}
+    participants: [policy_adviser]
+    agent_views:
+      policy_adviser:
+        event: "The UAE medical-products authority's request to Swissmedic for device-vigilance information was blocked by the liaison check, even though it stated the assurances the Swiss provision asks for. Identify which check failed and whether the block points to a missing instrument or missing evidence."
+        payload: {requesting_authority: ede, target: swissmedic, request_type: cross_border_evidence_request, device_incident: true}
+        visible_state_keys: [regulatory_evidence_request.ede]
+        allowed_actions: [prepare_policy_gap_review, request_gap_supporting_evidence]
+
+  - step: 8
+    time_offset: "T+24h"
+    phase: "Compare with the main drill"
+    event: "The policy adviser compares the outcome of these narrower requests with the blocked requests in the main drill."
+    initiator: policy_adviser
+    payload: {event_type: comparison}
+    participants: [policy_adviser]
+    agent_views:
+      policy_adviser:
+        event: "In the main drill, broad UAE requests about patients' retinal images were blocked. Here, UAE authorities sent narrower requests scoped to the Swiss conditions. Compare the two and say what a standing UAE-Switzerland arrangement would need to cover; do not call any outcome a legal conclusion."
+        payload: {visible_outcomes: [regulatory_evidence_request.uae_data_office, regulatory_evidence_request.ede], main_drill_outcome: both_requests_blocked}
+        visible_state_keys: [regulatory_evidence_request.uae_data_office, regulatory_evidence_request.ede]
+        allowed_actions: [prepare_policy_gap_review, request_gap_supporting_evidence]

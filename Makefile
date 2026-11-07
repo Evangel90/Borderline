@@ -1,4 +1,4 @@
-.PHONY: fetch verify-sources ingest index drill verify-log audit-evidence assess-candidates evaluate-claims evaluate-retrieval replay report-figures ui itu-smoke
+.PHONY: step-coverage fetch verify-sources ingest index drill verify-log audit-evidence assess-candidates evaluate-claims evaluate-retrieval replay report-figures ui itu-smoke
 
 INTENT ?= retinopathy-ae-ch
 RUN ?=
@@ -37,6 +37,10 @@ audit-evidence:
 
 assess-candidates:
 	$(PYTHON) scripts/assess_candidates.py
+
+# Usage: make step-coverage RUNS="retinopathy-ae-ch=<run> retinopathy-ae-ch-cooperation=<run>"
+step-coverage:
+	$(PYTHON) scripts/step_coverage.py $(RUNS)
 
 evaluate-claims:
 	$(PYTHON) scripts/evaluate_claim_seed.py

@@ -160,10 +160,10 @@ timeline:
         expected_policy_checks: ["Federal Law No. 2 of 2019 Art. 13 permits storing or processing UAE health data outside the State only under a Health Authority resolution in coordination with the Ministry. Is such an approval or exception on record? The ministerial list of exceptions is not in this knowledge base, so treat its content as unknown."]
         allowed_actions: [assess_health_data_localization, request_regulatory_evidence, issue_safety_inquiry]
       uae_data_office:
-        event: "Dubai clinics report that UAE patients' retinal images were kept in Zurich and used to retrain a medical AI model without the clinics' approval. You are asked whether this is a matter for your Office."
+        event: "Dubai clinics report that UAE patients' retinal images were kept in Zurich and used to retrain a medical AI model without the clinics' approval. Before deciding whether this is a matter for your Office, it asks its Swiss counterpart for help: send a formal liaison request to the FDPIC asking how the images were processed in Zurich. The request carries no patient data. Whether the Office is competent for this health data is for the liaison check to test, not for you to assume."
         payload: {target: fodio, request_type: data_protection_assistance_request, patient_data_included: false, data_origin: AE, data_location: CH, data_type: retinal_images, use: model_retraining, data_category: personal_health_data, data_held_by_government_entity: false}
-        expected_policy_checks: ["Does the UAE PDPL apply to personal health data that has its own regulating legislation (Art. 2(2)(e))? If not, which UAE authority does the cited legislation make competent, and can the Office still act or ask its Swiss counterpart for help?"]
-        allowed_actions: [assess_regulatory_competence, refer_to_competent_authority, request_regulatory_evidence]
+        expected_policy_checks: ["Does the UAE PDPL apply to personal health data that has its own regulating legislation (Art. 2(2)(e))? If not, which UAE authority does the cited legislation make competent?"]
+        allowed_actions: [request_regulatory_evidence]
 
   - step: 7
     time_offset: "T+7h"

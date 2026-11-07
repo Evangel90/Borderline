@@ -164,6 +164,13 @@ class LiaisonReviewer:
         return result
 
 
+HUMAN_REVIEW_NOTE = (
+    "Quote verified as exact text; the code does not check that it supports this answer. "
+    "A person must confirm the quoted provision applies (for example, that it covers foreign "
+    "authorities rather than domestic ones)."
+)
+
+
 def finalize_answer(key: str, proposed: LiaisonAnswer | None,
                     shown: dict[str, Chunk]) -> dict[str, Any]:
     """Code's final check of one proposed answer. The result is what gets logged and acted on."""
@@ -175,6 +182,7 @@ def finalize_answer(key: str, proposed: LiaisonAnswer | None,
             "reason": "The liaison reviewer gave no usable answer.",
             "quotes": [], "sources": [],
             "adjustments": ["No reviewer answer; set to UNCLEAR / missing_evidence."],
+            "human_review_required": False, "human_review_note": "",
         }
     quotes = [verify_quote(q.chunk_id, q.quote, q.translation, shown) for q in proposed.quotes]
     verified = [q for q in quotes if q["verified"]]
@@ -192,6 +200,14 @@ def finalize_answer(key: str, proposed: LiaisonAnswer | None,
         answer, gap_type = "UNCLEAR", "missing_evidence"
     elif answer in {"YES", "NO"} and not verified:
         adjustments.append(f"{answer} has no quote; set to UNCLEAR / missing_evidence.")
+        answer, gap_type = "UNCLEAR", "missing_evidence"
+
+    if (key == "legal_basis" and answer == "YES"
+            and not any(q["jurisdiction"] != "GLOBAL" for q in verified)):
+        # A global recommendation or guideline is not a legal basis in either country.
+        adjustments.append(
+            "Legal-basis YES rests only on global (non-national) sources; set to UNCLEAR / missing_evidence."
+        )
         answer, gap_type = "UNCLEAR", "missing_evidence"
 
     if answer == "YES":
@@ -220,6 +236,10 @@ def finalize_answer(key: str, proposed: LiaisonAnswer | None,
         "quotes": quotes,
         "sources": sorted({q["doc_id"] for q in verified}),
         "adjustments": adjustments,
+        # The code proves a quote is exact, not that it supports the answer, so every YES
+        # is flagged for a person to confirm the quoted passage actually answers the question.
+        "human_review_required": answer == "YES",
+        "human_review_note": HUMAN_REVIEW_NOTE if answer == "YES" else "",
     }
 
 
@@ -354,6 +374,9 @@ class LiaisonChannel:
             hard_floor_applied=hard_floor_applied,
             quotes_checked=sum(len(check["quotes"]) for check in checks),
             quotes_verified=sum(q["verified"] for check in checks for q in check["quotes"]),
+            yes_answers_for_human_review=[
+                check["check"] for check in checks if check["human_review_required"]
+            ],
             disagreements_with_reference=[
                 check["check"] for check in checks if not check["agrees_with_reference"]
             ],

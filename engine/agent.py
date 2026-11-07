@@ -401,7 +401,10 @@ class InstitutionalAgent:
             })
             rationale_quality = "RULE_CONSTRAINED_EXPLANATION"
 
-        if proposal.action == "request_gap_supporting_evidence" and not fell_back:
+        # Keep the adviser's own explanation when it survived citation screening with citations;
+        # the generic text is only for answers that carry no supported citation.
+        if (proposal.action == "request_gap_supporting_evidence" and not fell_back
+                and not proposal.cited_chunk_ids):
             proposal = proposal.model_copy(update={
                 "rationale": (
                     "This drill records a request for the missing evidence identified "

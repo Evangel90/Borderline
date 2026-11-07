@@ -1,0 +1,210 @@
+{
+  "runs": [
+    {
+      "intent": "retinopathy-ae-ch",
+      "run_id": "retinopathy-main-20261107-2",
+      "steps": [
+        {
+          "step": 1,
+          "phase": "Vendor pushes a model update; graders notice fewer referrals",
+          "status": "RAN",
+          "requires_state": {}
+        },
+        {
+          "step": 2,
+          "phase": "Spot audit confirms missed referable disease on one camera model",
+          "status": "RAN",
+          "requires_state": {}
+        },
+        {
+          "step": 3,
+          "phase": "Vendor finds the update was pushed from a compromised account",
+          "status": "RAN",
+          "requires_state": {}
+        },
+        {
+          "step": 4,
+          "phase": "Vendor finds the model was retrained on UAE patients' images held in Switzerland",
+          "status": "RAN",
+          "requires_state": {}
+        },
+        {
+          "step": 5,
+          "phase": "Controversy 1: the vendor says the images were used for research",
+          "status": "RAN",
+          "requires_state": {}
+        },
+        {
+          "step": 6,
+          "phase": "UAE authorities learn UAE patients' images were reused in Zurich",
+          "status": "RAN",
+          "requires_state": {}
+        },
+        {
+          "step": 7,
+          "phase": "The Swiss privacy regulator receives the UAE Data Office request",
+          "status": "SKIPPED_CONDITION_NOT_MET",
+          "requires_state": {
+            "regulatory_evidence_request.uae_data_office": "delivered"
+          }
+        },
+        {
+          "step": 8,
+          "phase": "The liaison channel blocks the UAE Data Office request",
+          "status": "RAN",
+          "requires_state": {
+            "regulatory_evidence_request.uae_data_office": "blocked_by_liaison_check"
+          }
+        },
+        {
+          "step": 9,
+          "phase": "UAE regulators ask what left the country",
+          "status": "RAN",
+          "requires_state": {}
+        },
+        {
+          "step": 10,
+          "phase": "Swiss authorities receive the UAE request",
+          "status": "SKIPPED_CONDITION_NOT_MET",
+          "requires_state": {
+            "regulatory_evidence_request.dha": "delivered"
+          }
+        },
+        {
+          "step": 11,
+          "phase": "The liaison channel blocks the UAE request",
+          "status": "RAN",
+          "requires_state": {
+            "regulatory_evidence_request.dha": "blocked_by_liaison_check"
+          }
+        },
+        {
+          "step": 12,
+          "phase": "Controversy 2: suspend the tool? The two sides disagree",
+          "status": "RAN",
+          "requires_state": {}
+        },
+        {
+          "step": 13,
+          "phase": "Optional escalation: patient images appear in an insurer pricing model",
+          "status": "RAN",
+          "requires_state": {}
+        }
+      ]
+    },
+    {
+      "intent": "retinopathy-ae-ch-cooperation",
+      "run_id": "retinopathy-coop-20261107-1",
+      "steps": [
+        {
+          "step": 1,
+          "phase": "UAE authorities learn of the faulty update and the compromised vendor account",
+          "status": "RAN",
+          "requires_state": {}
+        },
+        {
+          "step": 2,
+          "phase": "The UAE Data Office asks the FDPIC for help on the staff data",
+          "status": "RAN",
+          "requires_state": {}
+        },
+        {
+          "step": 3,
+          "phase": "The FDPIC receives the UAE Data Office request",
+          "status": "SKIPPED_CONDITION_NOT_MET",
+          "requires_state": {
+            "regulatory_evidence_request.uae_data_office": "delivered"
+          }
+        },
+        {
+          "step": 4,
+          "phase": "The liaison channel blocks the UAE Data Office request",
+          "status": "RAN",
+          "requires_state": {
+            "regulatory_evidence_request.uae_data_office": "blocked_by_liaison_check"
+          }
+        },
+        {
+          "step": 5,
+          "phase": "EDE asks Swissmedic for device-vigilance information",
+          "status": "RAN",
+          "requires_state": {}
+        },
+        {
+          "step": 6,
+          "phase": "Swissmedic receives EDE's request",
+          "status": "SKIPPED_CONDITION_NOT_MET",
+          "requires_state": {
+            "regulatory_evidence_request.ede": "delivered"
+          }
+        },
+        {
+          "step": 7,
+          "phase": "The liaison channel blocks EDE's request",
+          "status": "RAN",
+          "requires_state": {
+            "regulatory_evidence_request.ede": "blocked_by_liaison_check"
+          }
+        },
+        {
+          "step": 8,
+          "phase": "Compare with the main drill",
+          "status": "RAN",
+          "requires_state": {}
+        }
+      ]
+    }
+  ],
+  "branches": {
+    "regulatory_evidence_request.uae_data_office": {
+      "delivered": {
+        "covered": false,
+        "where": [
+          "retinopathy-ae-ch step 7: SKIPPED_CONDITION_NOT_MET",
+          "retinopathy-ae-ch-cooperation step 3: SKIPPED_CONDITION_NOT_MET"
+        ]
+      },
+      "blocked_by_liaison_check": {
+        "covered": true,
+        "where": [
+          "retinopathy-ae-ch step 8: RAN",
+          "retinopathy-ae-ch-cooperation step 4: RAN"
+        ]
+      }
+    },
+    "regulatory_evidence_request.dha": {
+      "delivered": {
+        "covered": false,
+        "where": [
+          "retinopathy-ae-ch step 10: SKIPPED_CONDITION_NOT_MET"
+        ]
+      },
+      "blocked_by_liaison_check": {
+        "covered": true,
+        "where": [
+          "retinopathy-ae-ch step 11: RAN"
+        ]
+      }
+    },
+    "regulatory_evidence_request.ede": {
+      "delivered": {
+        "covered": false,
+        "where": [
+          "retinopathy-ae-ch-cooperation step 6: SKIPPED_CONDITION_NOT_MET"
+        ]
+      },
+      "blocked_by_liaison_check": {
+        "covered": true,
+        "where": [
+          "retinopathy-ae-ch-cooperation step 7: RAN"
+        ]
+      }
+    }
+  },
+  "unconditional_steps_missing": [],
+  "branches_not_covered": [
+    "regulatory_evidence_request.uae_data_office = delivered",
+    "regulatory_evidence_request.dha = delivered",
+    "regulatory_evidence_request.ede = delivered"
+  ]
+}
