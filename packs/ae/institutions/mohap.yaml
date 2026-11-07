@@ -15,9 +15,9 @@ regulatory_scope:
   - health_data_localization
 
 relevant_authorities:
-  - AE-HEALTH-9.1 # National Policy for Advancing Digital Healthcare Services and AI
-  - AE-HEALTH-9.3 # MoHAP AI in Healthcare Guidelines
-  - AE-DATA-2.3   # Federal Law No. 2 of 2019 Concerning Use of ICT in Health Fields
+  - AE-HEALTH-ICT-LAW-2019        # Art. 13: health data outside the State needs a Health Authority resolution in coordination with the Ministry
+  - AE-HEALTH-ICT-EXEC-REG-2020   # Cabinet Resolution No. 32 of 2020
+  # Ministerial Resolution No. 51 of 2021 (cases where health data may leave the State) is not registered.
 
 powers:
   - order_clinical_suspension
@@ -34,6 +34,8 @@ available_actions:
     description: Request the manufacturer incident report through the simulated process.
   - name: request_regulatory_evidence
     description: Send a synthetic evidence request through the configured bilateral liaison gate.
+  - name: assess_health_data_localization
+    description: Record a review of whether health data stored or processed outside the State had the approval Federal Law No. 2 of 2019 Art. 13 requires, for human review.
 
 drill_behavior:
   strictness: high

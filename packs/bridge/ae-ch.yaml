@@ -56,6 +56,10 @@ liaison:
       answer: UNCLEAR
       reason: "Swiss TPA Art. 64 lets Swiss enforcement authorities disclose non-public information to foreign authorities that enforce therapeutic-product regulations, if the requester is bound by official secrecy, uses it only in that enforcement and passes nothing on; health data needs further conditions such as averting a serious health risk. No UAE assurance meeting these conditions, and no UAE-Switzerland cooperation instrument, is registered in this bridge pack."
       sources: [CH-HEALTH-TPA]
+    data_protection_assistance_request:
+      answer: UNCLEAR
+      reason: "Swiss FADP Art. 55(1) lets the FDPIC exchange information with foreign authorities 'responsible for data protection' so they may fulfil 'their respective statutory duties in relation to data protection', if reciprocity is guaranteed and the recipient keeps secrecy and uses the information only in that proceeding. UAE PDPL Art. 2(2)(e) excludes 'Personal Health Data that has legislation regulating its protection and processing', so whether the UAE Data Office has a statutory data-protection duty over UAE patients' retinal images is unclear. No reciprocity assurance is registered in this bridge pack."
+      sources: [CH-DATA-FADP, AE-DATA-PDPL-2021-EN]
     incident_notification:
       answer: UNCLEAR
       reason: "No UAE-Switzerland vigilance or incident-notification exchange instrument is registered in this bridge pack."

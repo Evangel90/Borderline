@@ -41,6 +41,8 @@ actors:
     - dubai_clinic_operator  # Synthetic Dubai clinic operator; licensing unverified
     - dha                    # Emirate health regulator (Dubai chosen for this drill)
     - ede                    # Emirates Drug Establishment, medical products authority
+    - mohap                  # Federal health ministry; Health Data Law Art. 13 approvals are coordinated with it
+    - uae_data_office        # PDPL regulator; whether it covers health data is itself a drill question
     - uae_cyber              # Activated by cyber-tagged events
   ch:
     - retina_swiss_ag        # Fictional vendor that builds, hosts and updates the model
@@ -140,6 +142,59 @@ timeline:
         expected_policy_checks: ["Which vigilance duties apply to a Swiss manufacturer for an incident that occurred only abroad?"]
 
   - step: 6
+    time_offset: "T+7h"
+    phase: "UAE authorities learn UAE patients' images were reused in Zurich"
+    event: "The Dubai clinics forward the vendor's notice to MoHAP and the UAE Data Office: retinal images from UAE patients were kept in Zurich and used to retrain the model, which the clinic agreement did not allow."
+    initiator: dubai_clinic_operator
+    payload: {event_type: secondary_use_disclosed_in_uae}
+    participants: [mohap, uae_data_office]
+    agent_views:
+      mohap:
+        event: "Dubai clinics report that their Swiss vendor kept UAE patients' retinal images in Zurich and used them to retrain the screening model now linked to missed diagnoses. No approval for storing or processing these images outside the UAE has been located."
+        payload: {target: swissmedic, request_type: cross_border_evidence_request, patient_data_included: false, data_origin: AE, data_location: CH, data_type: retinal_images, use: model_retraining, outside_state_approval: not_located, ministerial_exception_list_in_knowledge_base: false}
+        expected_policy_checks: ["Federal Law No. 2 of 2019 Art. 13 permits storing or processing UAE health data outside the State only under a Health Authority resolution in coordination with the Ministry. Is such an approval or exception on record? The ministerial list of exceptions is not in this knowledge base, so treat its content as unknown."]
+        allowed_actions: [assess_health_data_localization, request_regulatory_evidence, issue_safety_inquiry]
+      uae_data_office:
+        event: "Dubai clinics report that UAE patients' retinal images were kept in Zurich and used to retrain a medical AI model without the clinics' approval. You are asked whether this is a matter for your Office."
+        payload: {target: fodio, request_type: data_protection_assistance_request, patient_data_included: false, data_origin: AE, data_location: CH, data_type: retinal_images, use: model_retraining, data_category: personal_health_data, data_held_by_government_entity: false}
+        expected_policy_checks: ["Does the UAE PDPL apply to personal health data that has its own regulating legislation (Art. 2(2)(e))? If not, which UAE authority does the cited legislation make competent, and can the Office still act or ask its Swiss counterpart for help?"]
+        allowed_actions: [assess_regulatory_competence, refer_to_competent_authority, request_regulatory_evidence]
+
+  - step: 7
+    time_offset: "T+7h"
+    phase: "The Swiss privacy regulator receives the UAE Data Office request"
+    event: "The liaison channel delivers the UAE Data Office's request to the FDPIC."
+    requires_state: {regulatory_evidence_request.uae_data_office: delivered}
+    initiator: uae_data_office
+    payload: {event_type: liaison_request_delivered}
+    participants: [fodio]
+    agent_views:
+      fodio:
+        event: "The UAE Data Office asks for information about UAE-origin retinal images processed in Switzerland."
+        payload: {requesting_authority: uae_data_office, requesting_country: AE, data_category: personal_health_data, reciprocity_assurance: not_registered}
+        expected_policy_checks: ["FADP Art. 55 allows assistance only to foreign authorities responsible for data protection, for their data-protection duties, with reciprocity. Is the requester competent for this health data?"]
+
+  - step: 8
+    time_offset: "T+7h"
+    phase: "The liaison channel blocks the UAE Data Office request"
+    event: "The liaison check blocks the UAE Data Office's request to the FDPIC; nothing crosses the border."
+    requires_state: {regulatory_evidence_request.uae_data_office: blocked_by_liaison_check}
+    initiator: uae_data_office
+    payload: {event_type: liaison_request_blocked}
+    participants: [uae_data_office, policy_adviser]
+    agent_views:
+      uae_data_office:
+        event: "Your request to the Swiss FDPIC was not delivered. The Office still does not know how UAE patients' images were processed in Zurich."
+        payload: {target: fodio, data_lineage_known: false}
+        visible_state_keys: [regulatory_evidence_request.uae_data_office]
+        allowed_actions: [assess_regulatory_competence, refer_to_competent_authority]
+      policy_adviser:
+        event: "The UAE data-protection regulator's request to its Swiss counterpart was blocked by the liaison check. Identify which check failed and whether any UAE authority is clearly responsible for protecting UAE patients' health data once it is abroad."
+        payload: {requesting_authority: uae_data_office, target: fodio, request_type: data_protection_assistance_request}
+        visible_state_keys: [regulatory_evidence_request.uae_data_office]
+        allowed_actions: [prepare_policy_gap_review]
+
+  - step: 9
     time_offset: "T+8h"
     phase: "UAE regulators ask what left the country"
     event: "DHA sends a formal request to Swissmedic through the liaison channel asking which UAE patient data left the country, where it went and how it was used."
@@ -153,11 +208,11 @@ timeline:
         expected_policy_checks: ["Which Swiss authority is the right counterpart, and can the request proceed without patient data?"]
         allowed_actions: [request_regulatory_evidence]
 
-  - step: 7
+  - step: 10
     time_offset: "T+8h"
     phase: "Swiss authorities receive the UAE request"
     event: "The liaison channel delivers DHA's request. Swiss authorities and the vendor must decide what they can disclose."
-    requires_state: {regulatory_evidence_request: delivered}
+    requires_state: {regulatory_evidence_request.dha: delivered}
     initiator: dha
     payload: {event_type: liaison_request_delivered}
     participants: [swissmedic, fodio, retina_swiss_ag]
@@ -174,11 +229,11 @@ timeline:
         payload: {requesting_authority: dha, data_origin: AE, data_location: CH, use: model_retraining}
         allowed_actions: [record_secondary_use_for_review, preserve_vendor_security_evidence]
 
-  - step: 8
+  - step: 11
     time_offset: "T+8h"
     phase: "The liaison channel blocks the UAE request"
     event: "The liaison check blocks DHA's request; nothing crosses the border."
-    requires_state: {regulatory_evidence_request: blocked_by_liaison_check}
+    requires_state: {regulatory_evidence_request.dha: blocked_by_liaison_check}
     initiator: dha
     payload: {event_type: liaison_request_blocked}
     participants: [dha, policy_adviser]
@@ -186,21 +241,21 @@ timeline:
       dha:
         event: "Your liaison request to Swissmedic was not delivered. The UAE still does not know which patient data left the country or how it was used."
         payload: {target: swissmedic, known_safety_signal: true, data_lineage_known: false}
-        visible_state_keys: [regulatory_evidence_request]
+        visible_state_keys: [regulatory_evidence_request.dha]
         allowed_actions: [open_clinical_incident_review, request_patient_follow_up_review]
       policy_adviser:
         event: "A UAE regulator's request to a Swiss counterpart was blocked by the liaison check. Identify which of the three checks failed and the domain-level coordination question it raises."
         payload: {requesting_authority: dha, target: swissmedic, request_type: cross_border_evidence_request}
-        visible_state_keys: [regulatory_evidence_request]
+        visible_state_keys: [regulatory_evidence_request.dha]
         allowed_actions: [prepare_policy_gap_review]
 
-  - step: 9
+  - step: 12
     time_offset: "T+24h"
     phase: "Controversy 2: suspend the tool? The two sides disagree"
     event: "Suspending RetinaVision-DX halts screening for every patient; keeping it risks more missed disease. The vendor says a rollback to v2.3 is enough; UAE authorities are weighing suspension."
     initiator: dha
     payload: {event_type: suspension_decision, human_approval_required: true}
-    participants: [screening_ai, dubai_clinic_operator, dha, ede, uae_cyber, retina_swiss_ag, fodio, swissmedic, ncsc, policy_adviser]
+    participants: [screening_ai, dubai_clinic_operator, dha, ede, mohap, uae_data_office, uae_cyber, retina_swiss_ag, fodio, swissmedic, ncsc, policy_adviser]
     agent_views:
       screening_ai:
         event: "Pausing screening would stop all retinopathy screening at the clinics; continuing risks more missed referable disease on Cam-7. Any pause requires human approval."
@@ -219,6 +274,15 @@ timeline:
         event: "Review device-safety options for RetinaVision-DX v2.4 and the evidence needed before any field action."
         payload: {known_safety_signal: true, device: RetinaVision-DX, human_approval_required: true, scenario_product_classification: "EDE-classified medical equipment / SaMD (fictional letter)", uae_marketing_authorization: "none recorded in fictional case file", device_risk_class: unverified, manufacturer_corrective_action_plan: "submitted; completion unverified", article_68_report_status: unverified, article_70_case_status: unverified}
         expected_policy_checks: ["Use the fictional classification as a drill fact only. Determine separately whether the Article 68 report or Article 70 case predicates are established, and distinguish the manufacturer's submitted plan from verified completion."]
+      mohap:
+        event: "UAE authorities are weighing suspension of RetinaVision-DX. UAE patients' retinal images remain in Zurich and no approval for keeping or processing them outside the UAE has been located."
+        payload: {known_safety_signal: true, data_location: CH, outside_state_approval: not_located, human_approval_required: true}
+        expected_policy_checks: ["Separate the device-safety decision from the health-data localization question; which authority acts on each?"]
+        allowed_actions: [assess_health_data_localization, issue_safety_inquiry]
+      uae_data_office:
+        event: "Health authorities are deciding on suspension. UAE patients' retinal images remain in Zurich and no UAE authority has yet confirmed it is responsible for them."
+        payload: {data_location: CH, data_category: personal_health_data, competent_authority_confirmed: false}
+        allowed_actions: [assess_regulatory_competence, refer_to_competent_authority]
       uae_cyber:
         event: "UAE authorities learn that the update affecting Dubai clinics was pushed from a compromised Swiss vendor account."
         payload: {credential_theft_suspected: true, attribution: unconfirmed, affected_country: AE, compromise_location: CH, health_decision: pending}
@@ -237,10 +301,10 @@ timeline:
         payload: {credential_theft_suspected: true, reporting_applicability: unresolved, health_decision: pending}
       policy_adviser:
         event: "Compare both sides' positions and unresolved questions with global practice; do not decide whether to suspend the system."
-        payload: {known_safety_signal: true, known_data_use_issue: true, unresolved_questions: [lead_authority, suspension_authority, research_versus_new_purpose, cross_border_data_sharing_basis, patient_notification, reporting_deadlines]}
+        payload: {known_safety_signal: true, known_data_use_issue: true, unresolved_questions: [lead_authority, suspension_authority, research_versus_new_purpose, cross_border_data_sharing_basis, health_data_protection_authority, patient_notification, reporting_deadlines]}
         expected_policy_checks: ["Identify domain-level coordination gaps and the global examples to compare them with."]
 
-  - step: 10
+  - step: 13
     time_offset: "Reserve: judge-injected"
     phase: "Optional escalation: patient images appear in an insurer pricing model"
     event: "A judge injects evidence that retinal images may have appeared in an insurer's pricing model."

@@ -111,21 +111,47 @@ def test_executor_sends_requests_through_the_channel(legal_basis, expected_state
         INSTITUTIONS["ae_health"], "request_regulatory_evidence",
         {"target": "ch_device", "patient_data_included": False}, BorderGate(config),
     )
-    assert result.state_changes == {"regulatory_evidence_request": expected_state}
+    assert result.state_changes == {
+        "regulatory_evidence_request": expected_state,
+        "regulatory_evidence_request.ae_health": expected_state,
+    }
     assert len(result.liaison_checks) == 3
 
 
-def test_checked_in_bridge_blocks_dha_request_to_swissmedic():
+def test_per_sender_state_survives_a_later_request():
+    config = bridge()
+    executor = ActionExecutor({}, LiaisonChannel(config, INSTITUTIONS))
+    payload = {"target": "ch_device", "patient_data_included": False}
+    executor.execute(INSTITUTIONS["ae_health"], "request_regulatory_evidence", payload, BorderGate(config))
+    executor.execute(INSTITUTIONS["ae_emirate_health"], "request_regulatory_evidence", payload, BorderGate(config))
+    assert executor.state["regulatory_evidence_request.ae_health"] == "delivered"
+    assert executor.state["regulatory_evidence_request.ae_emirate_health"] == "blocked_by_liaison_check"
+    assert executor.state["regulatory_evidence_request"] == "blocked_by_liaison_check"
+
+
+def checked_in_channel():
     with open("packs/bridge/ae-ch.yaml", encoding="utf-8") as source:
         config = BridgeConfig(**yaml.safe_load(source))
     institutions = {}
-    for path in ("packs/ae/institutions/dha.yaml", "packs/ch/institutions/swissmedic.yaml"):
+    for path in ("packs/ae/institutions/dha.yaml", "packs/ae/institutions/mohap.yaml",
+                 "packs/ae/institutions/uae_data_office.yaml",
+                 "packs/ch/institutions/swissmedic.yaml", "packs/ch/institutions/fodio.yaml"):
         with open(path, encoding="utf-8") as source:
             inst = Institution(**yaml.safe_load(source))
         institutions[inst.id] = inst
-    decision = LiaisonChannel(config, institutions).check(
-        institutions["dha"], "swissmedic", "cross_border_evidence_request",
-        {"patient_data_included": False},
-    )
+    return LiaisonChannel(config, institutions), institutions
+
+
+@pytest.mark.parametrize("sender, receiver, request_type, expected", [
+    ("dha", "swissmedic", "cross_border_evidence_request",
+     {"legal_basis": "UNCLEAR", "transfer_rules": "YES", "counterpart": "NO"}),
+    ("mohap", "swissmedic", "cross_border_evidence_request",
+     {"legal_basis": "UNCLEAR", "transfer_rules": "YES", "counterpart": "YES"}),
+    ("uae_data_office", "fodio", "data_protection_assistance_request",
+     {"legal_basis": "UNCLEAR", "transfer_rules": "YES", "counterpart": "YES"}),
+])
+def test_checked_in_bridge_blocks_each_uae_request(sender, receiver, request_type, expected):
+    channel, institutions = checked_in_channel()
+    decision = channel.check(institutions[sender], receiver, request_type, {"patient_data_included": False})
     assert decision.status == "BLOCK"
-    assert answers(decision) == {"legal_basis": "UNCLEAR", "transfer_rules": "YES", "counterpart": "NO"}
+    assert answers(decision) == expected

@@ -5,13 +5,14 @@ type: federal_authority
 role: data_protection_regulator
 
 mandate: >
-  Federal regulatory authority established to oversee compliance with Federal Decree-Law No. 45
-  of 2021 regarding Personal Data Protection (PDPL), cross-border data transfer adequacy,
-  and personal data breach investigations. For health data, also consider Federal Law No. 2
-  of 2019, including its Article 13 restriction on storing or processing relevant health data
-  outside the State. Do not decide whether a statutory exception applies without the 2021
-  exemption resolution and evidence of any required health-authority approval; request the
-  applicable approval, legal basis, and safeguards for review.
+  Federal authority established by Federal Decree-Law No. 44 of 2021 (not registered in this
+  knowledge base) to oversee compliance with the UAE PDPL (Federal Decree by Law No. 45 of 2021).
+  Before acting, check whether the PDPL reaches the matter at all: Art. 2(2)(b) excludes
+  governmental entities and Art. 2(2)(e) excludes personal health data that has its own
+  regulating legislation. Federal Law No. 2 of 2019 regulates health data and Art. 13 assigns
+  approvals for storing or processing it outside the State to the Health Authority in
+  coordination with the Ministry. Do not assume the Office is competent for health data; state
+  the competence question and refer to the authority the cited text names where appropriate.
 
 regulatory_scope:
   - personal_data_protection
@@ -25,9 +26,9 @@ regulatory_scope:
   - health authority approval
 
 relevant_authorities:
-  - AE-DATA-PDPL-2021
+  - AE-DATA-PDPL-2021-EN
   - AE-HEALTH-ICT-LAW-2019
-  - AE-AI-CHARTER-2024
+  - AE-HEALTH-ICT-EXEC-REG-2020
 
 powers:
   - block_cross_border_data_transfers
@@ -42,6 +43,12 @@ available_actions:
     description: Record a review of the proposed transfer basis under the UAE PDPL.
   - name: request_transfer_safeguards
     description: Request documentation of the purpose, recipient, safeguards, and retention.
+  - name: assess_regulatory_competence
+    description: Record a review of whether the Office is the competent authority for this data, for human review.
+  - name: refer_to_competent_authority
+    description: Refer the matter to the UAE authority the cited legislation names as competent.
+  - name: request_regulatory_evidence
+    description: Send a formal request to a foreign counterpart through the liaison channel; no patient data is attached.
 
 drill_behavior:
   strictness: very_high

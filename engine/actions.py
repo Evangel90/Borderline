@@ -70,6 +70,9 @@ class ActionExecutor:
         "assess_transfer_direction_scope": ("transfer_scope_review", "in_progress"),
         "request_safeguards": ("swiss_safeguards", "requested"),
         "recommend_pause_disclosure": ("disclosure_recommendation", "pause_pending_review"),
+        "assess_regulatory_competence": ("regulatory_competence_review", "human_review_required"),
+        "refer_to_competent_authority": ("competent_authority_referral", "requested"),
+        "assess_health_data_localization": ("health_data_localization_review", "human_review_required"),
     }
 
     def __init__(self, state: dict[str, Any] | None = None,
@@ -87,14 +90,19 @@ class ActionExecutor:
             if action == "request_regulatory_evidence"
             else "regulatory_notification"
         )
+        # The shared key keeps the latest outcome; the per-sender key lets a scenario
+        # branch on one institution's letter when several are in flight.
+        sender_key = f"{record_key}.{institution.id}"
         if decision.status == "BLOCK":
             changes = self._record(record_key, "blocked_by_liaison_check")
+            changes.update(self._record(sender_key, "blocked_by_liaison_check"))
             return ActionResult(
                 action, decision.status,
                 f"Liaison check blocked the request; nothing crossed the border. {decision.reason}",
                 changes, decision.checks,
             )
         changes = self._record(record_key, "delivered")
+        changes.update(self._record(sender_key, "delivered"))
         return ActionResult(
             action, decision.status,
             f"Request delivered to {payload['target']} on the simulated liaison channel; "
