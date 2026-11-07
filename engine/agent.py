@@ -353,7 +353,11 @@ class InstitutionalAgent:
                 })
                 rationale_quality = "RULE_CONSTRAINED_EXPLANATION"
 
-        if proposal.action == "request_manual_review":
+        # A fallback taken because the model's explanation failed relevance screening must stay
+        # flagged for human review; the generic action rewrites below would otherwise hide it.
+        fell_back = rationale_quality == "FALLBACK_REVIEW_REQUIRED"
+
+        if proposal.action == "request_manual_review" and not fell_back:
             proposal = proposal.model_copy(update={
                 "rationale": (
                     "This drill records a request for human review because the visible scenario "
@@ -377,7 +381,7 @@ class InstitutionalAgent:
             })
             rationale_quality = "RULE_CONSTRAINED_EXPLANATION"
 
-        if proposal.action == "request_gap_supporting_evidence":
+        if proposal.action == "request_gap_supporting_evidence" and not fell_back:
             proposal = proposal.model_copy(update={
                 "rationale": (
                     "This drill records a request for the missing evidence identified "

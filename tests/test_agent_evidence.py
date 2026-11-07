@@ -67,3 +67,20 @@ def test_off_topic_explanation_falls_back_to_available_review_action():
     assert decision.confidence == 0.0
     assert decision.rationale_quality == "FALLBACK_REVIEW_REQUIRED"
     assert "Human review" in decision.justification
+
+
+def test_off_topic_fallback_to_manual_review_stays_flagged():
+    institution = Institution(
+        id="clinic", name="Synthetic clinic", jurisdiction="AE", type="provider",
+        role="clinical review", mandate="Review evidence", powers=[],
+        available_actions=[
+            AvailableAction(name="prepare_policy_gap_review", description="Prepare comparison"),
+            AvailableAction(name="request_manual_review", description="Review screening safety"),
+        ],
+    )
+    llm = OffTopicLLM()
+    agent = InstitutionalAgent(institution, [], llm=llm)
+    decision = agent.evaluate_step(1, "Review incident evidence", {}, gate=None)
+    assert decision.action_taken == "request_manual_review"
+    assert decision.rationale_quality == "FALLBACK_REVIEW_REQUIRED"
+    assert "Human review" in decision.justification
