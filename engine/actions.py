@@ -15,6 +15,7 @@ class ActionResult:
     result: str
     state_changes: dict[str, Any] = field(default_factory=dict)
     liaison_checks: list[dict[str, Any]] = field(default_factory=list)
+    liaison_review: dict[str, Any] = field(default_factory=dict)
 
 
 class ActionExecutor:
@@ -99,7 +100,7 @@ class ActionExecutor:
             return ActionResult(
                 action, decision.status,
                 f"Liaison check blocked the request; nothing crossed the border. {decision.reason}",
-                changes, decision.checks,
+                changes, decision.checks, decision.review,
             )
         changes = self._record(record_key, "delivered")
         changes.update(self._record(sender_key, "delivered"))
@@ -107,7 +108,7 @@ class ActionExecutor:
             action, decision.status,
             f"Request delivered to {payload['target']} on the simulated liaison channel; "
             "no external message or data was sent.",
-            changes, decision.checks,
+            changes, decision.checks, decision.review,
         )
 
     def _record(self, key: str, value: Any) -> dict[str, Any]:

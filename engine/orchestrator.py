@@ -12,7 +12,7 @@ from engine.models import (
     PolicyEvidence, PolicyGap,
 )
 from engine.gates import BorderGate
-from engine.liaison import LiaisonChannel
+from engine.liaison import CANDIDATE_GAP_TYPES, LiaisonChannel, LiaisonReviewer
 from engine.agent import InstitutionalAgent
 from engine.actions import ActionExecutor
 from engine.knowledge import KnowledgeIndex
@@ -63,11 +63,6 @@ class DrillOrchestrator:
         self.llm = create_chat_client()
         self.simulation_state: Dict[str, Any] = {}
         institutions = self._load_institutions()
-        self.liaison = (
-            LiaisonChannel(self.bridge, {inst.id: inst for inst, _ in institutions})
-            if self.bridge.liaison else None
-        )
-        self.action_executor = ActionExecutor(self.simulation_state, self.liaison)
 
         # Load chunks
         self.chunks: Dict[str, List[Chunk]] = {
@@ -78,6 +73,16 @@ class DrillOrchestrator:
         self.knowledge_index = KnowledgeIndex(
             self.chunks["AE"] + self.chunks["CH"] + self.chunks["GLOBAL"]
         )
+
+        # An AI liaison reviewer answers the three liaison questions; code verifies its quotes.
+        self.liaison = (
+            LiaisonChannel(
+                self.bridge, {inst.id: inst for inst, _ in institutions},
+                LiaisonReviewer(self.llm, self.knowledge_index),
+            )
+            if self.bridge.liaison else None
+        )
+        self.action_executor = ActionExecutor(self.simulation_state, self.liaison)
 
         self.agents: Dict[str, InstitutionalAgent] = self._init_agents(institutions)
 
@@ -462,36 +467,93 @@ class DrillOrchestrator:
 
     @staticmethod
     def _build_liaison_gaps(decisions: List[DecisionLogEntry]) -> List[PolicyGap]:
-        """Record every blocked liaison request as a gap candidate (rule 6: unclear means blocked and logged)."""
+        """Turn blocked liaison requests into gap candidates.
+
+        Only NO / UNCLEAR answers typed policy_gap, implementation_gap or conflict can
+        become candidates; their verified quotes are the evidence. missing_evidence is
+        our own homework and is listed by _liaison_homework instead.
+        """
         gaps = []
         for decision in decisions:
-            failed = [check for check in decision.liaison_checks if check["answer"] != "YES"]
-            if decision.liaison_status != "BLOCK" or not failed:
+            if decision.liaison_status != "BLOCK":
+                continue
+            typed = [
+                check for check in decision.liaison_checks
+                if check["answer"] != "YES" and check.get("gap_type") in CANDIDATE_GAP_TYPES
+            ]
+            if not typed:
                 continue
             target = decision.visible_payload.get("target", "unknown")
-            sources = sorted({source for check in failed for source in check["sources"]})
+            verified = [
+                quote for check in typed for quote in check.get("quotes", []) if quote["verified"]
+            ]
+            own = decision.jurisdiction
             gaps.append(PolicyGap(
                 gap_id=f"LIAISON-{decision.step}-{decision.actor_id}",
                 category="LIAISON_BLOCKED",
                 title=f"Cross-border request from {decision.actor_id} to {target} could not be delivered",
-                host_jurisdiction=decision.jurisdiction,
-                partner_jurisdiction="CH" if decision.jurisdiction == "AE" else "AE",
+                host_jurisdiction=own,
+                partner_jurisdiction="CH" if own == "AE" else "AE",
                 friction_point=" ".join(
-                    f"{check['question']} {check['answer']}: {check['reason']}" for check in failed
+                    f"{check['question']} {check['answer']} ({check['gap_type']}): {check['reason']}"
+                    for check in typed
                 ),
-                host_citation=", ".join(s for s in sources if s.startswith(decision.jurisdiction)) or "None recorded.",
-                partner_citation=", ".join(s for s in sources if not s.startswith(decision.jurisdiction)) or "None recorded.",
-                global_benchmark="No global example paired yet.",
+                host_citation=", ".join(sorted({q["chunk_id"] for q in verified if q["jurisdiction"] == own})) or "None recorded.",
+                partner_citation=", ".join(sorted({q["chunk_id"] for q in verified if q["jurisdiction"] not in {own, "GLOBAL"}})) or "None recorded.",
+                global_benchmark=", ".join(sorted({q["chunk_id"] for q in verified if q["jurisdiction"] == "GLOBAL"})) or "No global example paired yet.",
                 remediation_recommendation="Establish who may exchange incident evidence across the border, on what legal basis, and through which counterpart.",
-                finding_method="Deterministic liaison-channel check of a request an agent sent; rules come from the bridge pack.",
-                limitations="The bridge pack records what this knowledge base contains; an instrument absent from it may still exist.",
+                finding_method=(
+                    "An AI liaison reviewer answered the three liaison questions; code verified each "
+                    "quote verbatim against its chunk and typed every NO or UNCLEAR."
+                ),
+                limitations=(
+                    "Unreviewed candidate, not a legal conclusion. Quotes are verified as exact text only; "
+                    "whether they support the answer has not been reviewed by anyone with legal standing. "
+                    "An instrument absent from this knowledge base may still exist."
+                ),
+                evidence=[
+                    PolicyEvidence(
+                        source_type="policy_chunk",
+                        source_ref=quote["chunk_id"],
+                        title=quote["doc_id"],
+                        jurisdiction=quote["jurisdiction"],
+                        excerpt=quote["quote"] + (
+                            f" [{quote['translation_label']}: {quote['translation']}]"
+                            if quote.get("translation") else ""
+                        ),
+                        relevance="Verified verbatim quote relied on by the liaison reviewer.",
+                    )
+                    for quote in verified
+                ],
                 assessment_status="BLOCKED_BY_LIAISON_CHECK",
                 finding_class="potential_gap",
-                conclusion=f"The request was blocked on {len(failed)} of 3 liaison checks.",
+                conclusion=f"The request was blocked; {len(typed)} of 3 liaison checks carry a gap type.",
                 trigger_entry_ids=[decision.entry_id],
-                missing_evidence=[check["question"] for check in failed],
+                missing_evidence=[
+                    check["question"] for check in decision.liaison_checks
+                    if check["answer"] != "YES" and check.get("gap_type") == "missing_evidence"
+                ],
+                gap_types=sorted({check["gap_type"] for check in typed}),
             ))
         return gaps
+
+    @staticmethod
+    def _liaison_homework(decisions: List[DecisionLogEntry]) -> List[Dict[str, Any]]:
+        """List missing_evidence answers: documents we lack, not gaps in the law."""
+        return [
+            {
+                "entry_id": decision.entry_id,
+                "step": decision.step,
+                "sender": decision.actor_id,
+                "receiver": decision.visible_payload.get("target", "unknown"),
+                "question": check["question"],
+                "reason": check["reason"],
+                "code_adjustments": check.get("adjustments", []),
+            }
+            for decision in decisions
+            for check in decision.liaison_checks
+            if check["answer"] != "YES" and check.get("gap_type") == "missing_evidence"
+        ]
 
     def run(self, include_optional: bool = False) -> List[DecisionLogEntry]:
         print(f"\n🚀 Running Cross-Border Drill: {self.intent.title}")
@@ -575,9 +637,15 @@ class DrillOrchestrator:
         candidates.extend(self._build_liaison_gaps(all_decisions))
         for candidate in candidates:
             self.gap_register.record_gap(candidate)
+        homework = self._liaison_homework(all_decisions)
+        homework_path = os.path.join(self.run_dir, "liaison_homework.jsonl")
+        with open(homework_path, "w", encoding="utf-8") as output:
+            for item in homework:
+                output.write(json.dumps(item, ensure_ascii=False) + "\n")
         print("\n" + "=" * 60)
         print(f"✅ Drill Completed! Logged {len(all_decisions)} decisions to {self.logger.log_path}")
         print(f"✅ Recorded {len(candidates)} governance assessments to {self.gap_register.gaps_path}")
+        print(f"📝 Recorded {len(homework)} missing-evidence liaison answers to {homework_path}")
         print(f"🔒 Final Hash: {self.logger.latest_hash}")
 
         return all_decisions

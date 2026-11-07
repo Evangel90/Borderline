@@ -68,6 +68,31 @@ class LiaisonRule(BaseModel):
         return self
 
 
+LIAISON_GAP_TYPES = ("policy_gap", "implementation_gap", "conflict", "missing_evidence")
+
+
+class LiaisonQuote(BaseModel):
+    """One passage the liaison reviewer relies on; code checks it verbatim."""
+    chunk_id: str
+    quote: str
+    translation: str = ""  # required for Arabic quotes; always shown as unofficial
+
+
+class LiaisonAnswer(BaseModel):
+    """The reviewer's proposed answer to one liaison question, before code checks it."""
+    answer: str  # YES, NO, UNCLEAR; anything else is treated as UNCLEAR
+    reason: str = Field(max_length=800)
+    quotes: List[LiaisonQuote] = Field(default_factory=list, max_length=4)
+    gap_type: Optional[str] = None  # for NO / UNCLEAR, one of LIAISON_GAP_TYPES
+
+
+class LiaisonReview(BaseModel):
+    """AI liaison reviewer output: one answer per liaison question."""
+    legal_basis: LiaisonAnswer
+    transfer_rules: LiaisonAnswer
+    counterpart: LiaisonAnswer
+
+
 class LiaisonConfig(BaseModel):
     """Bridge-pack rules for the three liaison-channel questions."""
     counterparts: List[List[str]]  # institution ID pairs that may exchange requests
@@ -172,6 +197,7 @@ class DecisionLogEntry(BaseModel):
     state_changes: Dict[str, Any] = Field(default_factory=dict)
     liaison_status: Optional[str] = None  # gate result for the selected action or LOCAL_ONLY
     liaison_checks: List[Dict[str, Any]] = Field(default_factory=list)
+    liaison_review: Dict[str, Any] = Field(default_factory=dict)  # reviewer, quote checks, patient-data floor
     gate_status: Optional[str] = None
     gate_reason: Optional[str] = None
     prev_hash: str
@@ -214,3 +240,4 @@ class PolicyGap(BaseModel):
     conclusion: str = "No conclusion recorded."
     trigger_entry_ids: List[str] = Field(default_factory=list)
     missing_evidence: List[str] = Field(default_factory=list)
+    gap_types: List[str] = Field(default_factory=list)

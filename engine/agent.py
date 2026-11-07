@@ -466,6 +466,7 @@ class InstitutionalAgent:
             authorized_actions=allowed_action_names,
             liaison_status=execution.liaison_status,
             liaison_checks=execution.liaison_checks,
+            liaison_review=execution.liaison_review,
             gate_status=gate_status,
             gate_reason=gate_reason or None,
             prev_hash="",

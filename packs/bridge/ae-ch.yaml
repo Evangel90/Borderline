@@ -45,8 +45,10 @@ liaison_gate_rules:
     action: ROUTE
     path: "MoHAP <-> Swissmedic bilateral vigilance channel"
 
-# Rules for the three liaison-channel questions (engine/liaison.py).
-# Each answer records what this knowledge base contains; UNCLEAR blocks a request.
+# Hand-written reference answers for the three liaison-channel questions (engine/liaison.py).
+# They do not decide anything: an AI liaison reviewer answers each question with quotes that
+# code verifies. These answers are logged next to the reviewer's as `reference_answer` so
+# disagreements can be reviewed, and they serve as a test fixture.
 liaison:
   counterparts:
     - [mohap, swissmedic]
