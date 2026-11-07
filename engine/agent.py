@@ -357,7 +357,7 @@ class InstitutionalAgent:
             proposal = proposal.model_copy(update={
                 "rationale": (
                     "This drill records a request for human review because the visible scenario "
-                    "facts leave deployment evidence unresolved. It does not assert that a cited "
+                    "facts leave clinical safety or supporting evidence unresolved. It does not assert that a cited "
                     "strategy, policy, or law creates a clinic duty."
                 ),
                 "cited_chunk_ids": [],
@@ -368,9 +368,9 @@ class InstitutionalAgent:
         if proposal.action in {"report_model_update", "confirm_model_deployment"}:
             proposal = proposal.model_copy(update={
                 "rationale": (
-                    "This drill records the proposed model version and deployment status in "
+                    "This drill records the reported model version and deployment status in "
                     "synthetic state. It does not assert a regulatory mandate, compliance "
-                    "determination, or completed real-world deployment."
+                    "determination, or real-world deployment."
                 ),
                 "cited_chunk_ids": [],
                 "confidence": min(proposal.confidence, 0.5),
@@ -380,7 +380,7 @@ class InstitutionalAgent:
         if proposal.action == "request_gap_supporting_evidence":
             proposal = proposal.model_copy(update={
                 "rationale": (
-                    "This drill records a request for the missing vendor evidence identified "
+                    "This drill records a request for the missing evidence identified "
                     "in the scenario. It does not assert that any retrieved source creates a "
                     "specific legal or policy duty."
                 ),
@@ -392,8 +392,8 @@ class InstitutionalAgent:
         if self.institution.id == "dha" and proposal.action == "open_clinical_incident_review":
             proposal = proposal.model_copy(update={
                 "rationale": (
-                    "This drill records a simulated clinical review of the proposed service because "
-                    "validation and workflow evidence remain incomplete. It does not assert a DHA "
+                    "This drill records a simulated clinical review because the visible facts leave "
+                    "clinical safety or validation evidence unresolved. It does not assert a DHA "
                     "legal mandate, facility-specific duty, or approval decision."
                 ),
                 "cited_chunk_ids": [],
@@ -461,6 +461,7 @@ class InstitutionalAgent:
             visible_state=visible_state or {},
             authorized_actions=allowed_action_names,
             liaison_status=execution.liaison_status,
+            liaison_checks=execution.liaison_checks,
             gate_status=gate_status,
             gate_reason=gate_reason or None,
             prev_hash="",

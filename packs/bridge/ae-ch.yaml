@@ -44,3 +44,26 @@ liaison_gate_rules:
   mutual_regulatory_notification:
     action: ROUTE
     path: "MoHAP <-> Swissmedic bilateral vigilance channel"
+
+# Rules for the three liaison-channel questions (engine/liaison.py).
+# Each answer records what this knowledge base contains; UNCLEAR blocks a request.
+liaison:
+  counterparts:
+    - [mohap, swissmedic]
+    - [uae_data_office, fodio]
+  request_types:
+    cross_border_evidence_request:
+      answer: UNCLEAR
+      reason: "No UAE-Switzerland cooperation instrument between health or data-protection regulators is registered in this bridge pack. Each authority's domestic information powers do not by themselves establish a basis to request evidence from, or answer, a foreign regulator."
+    incident_notification:
+      answer: UNCLEAR
+      reason: "No UAE-Switzerland vigilance or incident-notification exchange instrument is registered in this bridge pack."
+  personal_data_transfers:
+    AE->CH:
+      answer: UNCLEAR
+      reason: "UAE Federal Law No. 2 of 2019 Art. 13 does not permit storing or processing health data outside the State unless the Health Authority issues a resolution in coordination with the Ministry. No such resolution or exemption is in this knowledge base."
+      sources: [AE-HEALTH-ICT-LAW-2019]
+    CH->AE:
+      answer: UNCLEAR
+      reason: "The UAE is not on the checked Swiss DPO Annex 1 adequacy list, so a disclosure from Switzerland would need FADP Art. 16(2) safeguards or an Art. 17 exception. None is recorded."
+      sources: [CH-DATA-FADP, CH-DATA-DPO]

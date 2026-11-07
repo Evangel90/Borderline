@@ -4,6 +4,7 @@ from dataclasses import dataclass, field
 from typing import Any
 
 from engine.gates import BorderGate
+from engine.liaison import LiaisonChannel
 from engine.models import Institution
 
 
@@ -13,10 +14,16 @@ class ActionResult:
     liaison_status: str
     result: str
     state_changes: dict[str, Any] = field(default_factory=dict)
+    liaison_checks: list[dict[str, Any]] = field(default_factory=list)
 
 
 class ActionExecutor:
     """Execute only declared actions, with the border gate as a mandatory veto."""
+
+    LIAISON_REQUEST_TYPES = {
+        "request_regulatory_evidence": "cross_border_evidence_request",
+        "route_regulatory_notification": "incident_notification",
+    }
 
     GATED_ACTIONS = {
         "request_raw_telemetry": "raw_patient_telemetry",
@@ -65,8 +72,35 @@ class ActionExecutor:
         "recommend_pause_disclosure": ("disclosure_recommendation", "pause_pending_review"),
     }
 
-    def __init__(self, state: dict[str, Any] | None = None) -> None:
+    def __init__(self, state: dict[str, Any] | None = None,
+                 liaison: LiaisonChannel | None = None) -> None:
         self.state = state if state is not None else {}
+        self.liaison = liaison
+
+    def _send_liaison_request(
+        self, institution: Institution, action: str, payload: dict[str, Any],
+    ) -> ActionResult:
+        request_type = payload.get("request_type", self.LIAISON_REQUEST_TYPES[action])
+        decision = self.liaison.check(institution, payload["target"], request_type, payload)
+        record_key = (
+            "regulatory_evidence_request"
+            if action == "request_regulatory_evidence"
+            else "regulatory_notification"
+        )
+        if decision.status == "BLOCK":
+            changes = self._record(record_key, "blocked_by_liaison_check")
+            return ActionResult(
+                action, decision.status,
+                f"Liaison check blocked the request; nothing crossed the border. {decision.reason}",
+                changes, decision.checks,
+            )
+        changes = self._record(record_key, "delivered")
+        return ActionResult(
+            action, decision.status,
+            f"Request delivered to {payload['target']} on the simulated liaison channel; "
+            "no external message or data was sent.",
+            changes, decision.checks,
+        )
 
     def _record(self, key: str, value: Any) -> dict[str, Any]:
         self.state[key] = value
@@ -89,6 +123,9 @@ class ActionExecutor:
             raise ValueError(
                 f"Action '{action}' is not available to {institution.id} in this event."
             )
+
+        if action in self.LIAISON_REQUEST_TYPES and self.liaison is not None and "target" in payload:
+            return self._send_liaison_request(institution, action, payload)
 
         if action in self.GATED_ACTIONS:
             data_type = self.GATED_ACTIONS[action]

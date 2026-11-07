@@ -53,6 +53,28 @@ class GateRule(BaseModel):
     path: Optional[str] = None
 
 
+LIAISON_ANSWERS = {"YES", "NO", "UNCLEAR"}
+
+
+class LiaisonRule(BaseModel):
+    answer: str  # YES, NO, UNCLEAR
+    reason: str
+    sources: List[str] = Field(default_factory=list)
+
+    @model_validator(mode="after")
+    def validate_answer(self) -> "LiaisonRule":
+        if self.answer not in LIAISON_ANSWERS:
+            raise ValueError(f"Liaison answer must be one of {sorted(LIAISON_ANSWERS)}.")
+        return self
+
+
+class LiaisonConfig(BaseModel):
+    """Bridge-pack rules for the three liaison-channel questions."""
+    counterparts: List[List[str]]  # institution ID pairs that may exchange requests
+    request_types: Dict[str, LiaisonRule]  # question 1: legal basis to share
+    personal_data_transfers: Dict[str, LiaisonRule] = Field(default_factory=dict)  # "AE->CH"
+
+
 class BridgeConfig(BaseModel):
     id: str
     title: str
@@ -60,6 +82,7 @@ class BridgeConfig(BaseModel):
     adequacy_status: Dict[str, Any]
     cross_border_regimes: Dict[str, Any]
     liaison_gate_rules: Dict[str, GateRule]
+    liaison: Optional[LiaisonConfig] = None
 
 
 class AgentView(BaseModel):
@@ -148,6 +171,7 @@ class DecisionLogEntry(BaseModel):
     confidence: Optional[float] = None
     state_changes: Dict[str, Any] = Field(default_factory=dict)
     liaison_status: Optional[str] = None  # gate result for the selected action or LOCAL_ONLY
+    liaison_checks: List[Dict[str, Any]] = Field(default_factory=list)
     gate_status: Optional[str] = None
     gate_reason: Optional[str] = None
     prev_hash: str

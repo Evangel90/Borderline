@@ -12,6 +12,7 @@ from engine.models import (
     PolicyEvidence, PolicyGap,
 )
 from engine.gates import BorderGate
+from engine.liaison import LiaisonChannel
 from engine.agent import InstitutionalAgent
 from engine.actions import ActionExecutor
 from engine.knowledge import KnowledgeIndex
@@ -61,7 +62,12 @@ class DrillOrchestrator:
         self.gate = BorderGate(self.bridge)
         self.llm = create_chat_client()
         self.simulation_state: Dict[str, Any] = {}
-        self.action_executor = ActionExecutor(self.simulation_state)
+        institutions = self._load_institutions()
+        self.liaison = (
+            LiaisonChannel(self.bridge, {inst.id: inst for inst, _ in institutions})
+            if self.bridge.liaison else None
+        )
+        self.action_executor = ActionExecutor(self.simulation_state, self.liaison)
 
         # Load chunks
         self.chunks: Dict[str, List[Chunk]] = {
@@ -73,8 +79,7 @@ class DrillOrchestrator:
             self.chunks["AE"] + self.chunks["CH"] + self.chunks["GLOBAL"]
         )
 
-        # Load institutions
-        self.agents: Dict[str, InstitutionalAgent] = self._init_agents()
+        self.agents: Dict[str, InstitutionalAgent] = self._init_agents(institutions)
 
     def _load_chunks(self, path: str) -> List[Chunk]:
         chunks = []
@@ -420,8 +425,10 @@ class DrillOrchestrator:
             missing_evidence=list(result.missing_evidence),
         )
 
-    def _init_agents(self) -> Dict[str, InstitutionalAgent]:
-        agents = {}
+    @staticmethod
+    def _load_institutions() -> List[tuple[Institution, str]]:
+        institutions = []
+        seen = set()
         for pack_id, jurisdiction in (("ae", "AE"), ("ch", "CH"), ("global", "GLOBAL")):
             institution_dir = os.path.join("packs", pack_id, "institutions")
             if not os.path.isdir(institution_dir):
@@ -431,19 +438,60 @@ class DrillOrchestrator:
                     continue
                 with open(os.path.join(institution_dir, inst_file), encoding="utf-8") as source:
                     inst = Institution(**yaml.safe_load(source))
-                if inst.id in agents:
+                if inst.id in seen:
                     raise ValueError(f"Duplicate institution id '{inst.id}' across packs.")
-                jurisdiction_chunks = (
-                    self.chunks["AE"] + self.chunks["CH"] + self.chunks["GLOBAL"]
-                    if jurisdiction == "GLOBAL"
-                    else self.chunks[jurisdiction] + self.chunks["GLOBAL"]
-                )
-                agents[inst.id] = InstitutionalAgent(
-                    inst, jurisdiction_chunks, self.llm, self.action_executor,
-                    self.knowledge_index,
-                )
+                seen.add(inst.id)
+                institutions.append((inst, jurisdiction))
+        return institutions
 
+    def _init_agents(
+        self, institutions: List[tuple[Institution, str]],
+    ) -> Dict[str, InstitutionalAgent]:
+        agents = {}
+        for inst, jurisdiction in institutions:
+            jurisdiction_chunks = (
+                self.chunks["AE"] + self.chunks["CH"] + self.chunks["GLOBAL"]
+                if jurisdiction == "GLOBAL"
+                else self.chunks[jurisdiction] + self.chunks["GLOBAL"]
+            )
+            agents[inst.id] = InstitutionalAgent(
+                inst, jurisdiction_chunks, self.llm, self.action_executor,
+                self.knowledge_index,
+            )
         return agents
+
+    @staticmethod
+    def _build_liaison_gaps(decisions: List[DecisionLogEntry]) -> List[PolicyGap]:
+        """Record every blocked liaison request as a gap candidate (rule 6: unclear means blocked and logged)."""
+        gaps = []
+        for decision in decisions:
+            failed = [check for check in decision.liaison_checks if check["answer"] != "YES"]
+            if decision.liaison_status != "BLOCK" or not failed:
+                continue
+            target = decision.visible_payload.get("target", "unknown")
+            sources = sorted({source for check in failed for source in check["sources"]})
+            gaps.append(PolicyGap(
+                gap_id=f"LIAISON-{decision.step}-{decision.actor_id}",
+                category="LIAISON_BLOCKED",
+                title=f"Cross-border request from {decision.actor_id} to {target} could not be delivered",
+                host_jurisdiction=decision.jurisdiction,
+                partner_jurisdiction="CH" if decision.jurisdiction == "AE" else "AE",
+                friction_point=" ".join(
+                    f"{check['question']} {check['answer']}: {check['reason']}" for check in failed
+                ),
+                host_citation=", ".join(s for s in sources if s.startswith(decision.jurisdiction)) or "None recorded.",
+                partner_citation=", ".join(s for s in sources if not s.startswith(decision.jurisdiction)) or "None recorded.",
+                global_benchmark="No global example paired yet.",
+                remediation_recommendation="Establish who may exchange incident evidence across the border, on what legal basis, and through which counterpart.",
+                finding_method="Deterministic liaison-channel check of a request an agent sent; rules come from the bridge pack.",
+                limitations="The bridge pack records what this knowledge base contains; an instrument absent from it may still exist.",
+                assessment_status="BLOCKED_BY_LIAISON_CHECK",
+                finding_class="potential_gap",
+                conclusion=f"The request was blocked on {len(failed)} of 3 liaison checks.",
+                trigger_entry_ids=[decision.entry_id],
+                missing_evidence=[check["question"] for check in failed],
+            ))
+        return gaps
 
     def run(self, include_optional: bool = False) -> List[DecisionLogEntry]:
         print(f"\n🚀 Running Cross-Border Drill: {self.intent.title}")
@@ -524,6 +572,7 @@ class DrillOrchestrator:
         sharing_candidate = self._build_policy_gap(all_decisions)
         if sharing_candidate is not None:
             candidates.append(sharing_candidate)
+        candidates.extend(self._build_liaison_gaps(all_decisions))
         for candidate in candidates:
             self.gap_register.record_gap(candidate)
         print("\n" + "=" * 60)
