@@ -2,6 +2,8 @@
 
 **Date:** 7 November 2026 · **Status:** candidates, not findings · **Search records:** `gaps/searches/`
 
+> **Update, step 2 (7 November 2026, later).** Candidate status is now set by code, not by hand: `make assess-candidates` applies the evidence-sufficiency rule to `gaps/candidate_register.yaml` and writes `report/candidate-status.json`. Under that rule CAND-001, CAND-002 and CAND-003 are `OPEN_CANDIDATE`: each waits on one obtainable document that could refute it (OECD adherents list; a clean Arabic text of Federal Decree-Law 38/2024; the Swiss–EU mutual recognition agreement). CAND-004, Resolution 51 "not publicly accessible to the project after documented attempts", is `SUPPORTED_CANDIDATE` (unreviewed). The assessments in the table below are the earlier hand-made ones; the JSON file is authoritative.
+
 Nothing in this file is a legal conclusion. Nobody with legal standing has reviewed it. Each candidate states what the registered sources say, quoted exactly with the chunk ID, what we searched for and did not find, and what evidence is still missing. "Not found" means not found in this knowledge base. It does not mean the law is silent.
 
 | Candidate | Type | Assessment | Strongest evidence | Main open question |

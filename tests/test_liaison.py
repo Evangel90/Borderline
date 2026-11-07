@@ -168,7 +168,7 @@ def test_quote_check_normalizes_whitespace_only():
                   quote=CH_BASIS.text.replace("may disclose", "shall disclose")),
      "verbatim"),
     (LiaisonQuote(chunk_id="CH-NOT-SHOWN:p9:c9", quote=" ".join(CH_BASIS.text.split())),
-     "not among the passages shown"),
+     "not among the passages available"),
     (LiaisonQuote(chunk_id=CH_BASIS.chunk_id, quote="The authority may disclose"),
      "shorter than"),
 ])

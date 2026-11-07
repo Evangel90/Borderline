@@ -1,0 +1,47 @@
+{
+  "search_id": "SEARCH-NCAR-PARTICIPANTS-001",
+  "date": "2026-11-07",
+  "question": "Does the IMDRF NCAR exchange document name Switzerland, Swissmedic, the United Arab Emirates or a UAE regulator as a participant?",
+  "searched_for": [
+    "Switzerland",
+    "Swiss",
+    "Swissmedic",
+    "United Arab Emirates",
+    "Emirates",
+    "UAE",
+    "European Commission"
+  ],
+  "searched_in": [
+    {
+      "doc_id": "IMDRF-NCAR-N14-2025",
+      "title": "IMDRF/NCAR WG/N14 (Edition 5) Medical Devices: Post Market Surveillance: National Competent Authority Report Exchange Criteria and Report Form",
+      "binding": "guidance",
+      "chunks": 35
+    }
+  ],
+  "found": {
+    "Switzerland": [],
+    "Swiss": [],
+    "Swissmedic": [],
+    "United Arab Emirates": [],
+    "Emirates": [],
+    "UAE": [],
+    "European Commission": [
+      "IMDRF-NCAR-N14-2025:p16:c1"
+    ]
+  },
+  "not_found": [
+    "Switzerland",
+    "Swiss",
+    "Swissmedic",
+    "United Arab Emirates",
+    "Emirates",
+    "UAE"
+  ],
+  "coverage_limits": {
+    "excluded_from_retrieval": [],
+    "mostly_arabic_not_covered_by_english_terms": [],
+    "method": "Exact case-insensitive phrase match over ingested English text; no synonyms, no semantic search. Limited to: IMDRF-NCAR-N14-2025.",
+    "meaning": "Absence here means absence from this knowledge base, not from the jurisdiction's law."
+  }
+}

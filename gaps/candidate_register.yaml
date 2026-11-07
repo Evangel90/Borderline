@@ -1,0 +1,192 @@
+# Gap candidates as data, checked by gaps/sufficiency.py (`make assess-candidates`).
+#
+# Nothing here is a legal conclusion. No one with legal standing has reviewed it.
+# A candidate is SUPPORTED_CANDIDATE only when code confirms all of:
+#   1. every quote verifies word for word against its chunk;
+#   2. every listed search record exists in gaps/searches/ and its absent terms were not found;
+#   3. at least one verified quote from a GLOBAL source is marked as a comparator;
+#   4. no known-missing document that is still obtainable could refute it.
+# Otherwise it stays OPEN_CANDIDATE, and the output lists each unmet condition.
+#
+# Quote roles: host (UAE side), partner (Swiss side), global_comparator, context.
+
+# Documents we know exist but do not hold. Two kinds:
+#   unobtainable_after_documented_attempts: does not block; needs at least one documented attempt
+#     (without one it is treated as obtainable). Recorded as its own accessibility candidate.
+#   obtainable_not_fetched: blocks every candidate it could refute until it is fetched.
+# Documents not known to exist (e.g. "any bilateral memorandum") are not listed here; they go
+# under a candidate's refuting_evidence_to_look_for and do not block.
+missing_documents:
+  - id: AE-HEALTH-DATA-EXEMPTIONS-MR51-2021
+    title: "Ministerial Resolution No. (51) of 2021 on the cases in which health data and information may be stored or transferred outside the State"
+    kind: unobtainable_after_documented_attempts
+    attempts:
+      - date: "2026-11-07"
+        attempt: "Fetch from MoHAP health legislation portal (uaephl.mohap.gov.ae) and mohap.gov.ae"
+        outcome: "Connections refused from outside the region, automated and manual."
+      - date: "2026-11-07"
+        attempt: "Internet Archive copy of MoHAP's document viewer"
+        outcome: "Viewer configuration archived 2024-03-20 with the matching title (4 pages); page images not archived."
+      - date: "2026-11-07"
+        attempt: "Copy linked from DHA policy PP-11, section 4.15.1"
+        outcome: "Linked file is Official Gazette No. 712, containing the federal narcotics law, not Resolution 51."
+    note: "Registered without a file in data/sources.csv. Do not hunt for it again (user decision 4)."
+
+  - id: CH-EU-MRA-1999
+    title: "Agreement between the European Community and the Swiss Confederation on mutual recognition in relation to conformity assessment (1999), medical devices chapter, as currently in force"
+    kind: obtainable_not_fetched
+    where: "EUR-Lex (Official Journal L 114, 30.4.2002) and later Joint Committee decisions"
+    note: "Could show whether Swissmedic reaches NCAR reports through the European Commission."
+
+  - id: AE-FEDERAL-DECREE-LAW-38-2024-AR-CLEAN
+    title: "Federal Decree-Law No. 38 of 2024 on medical products, pharmacy profession and pharmaceutical establishments: clean, searchable Arabic text"
+    kind: obtainable_not_fetched
+    where: "uaelegislation.gov.ae (refuses automated download; the user can download manually)"
+    note: "The registered Arabic file extracts garbled; only the official English translation was searched, and the Arabic controls."
+
+  - id: OECD-LEGAL-0352-ADHERENTS
+    title: "List of adherents to the OECD Recommendation on Cross-border Co-operation in the Enforcement of Laws Protecting Privacy (2007)"
+    kind: obtainable_not_fetched
+    where: "legalinstruments.oecd.org, instrument OECD-LEGAL-0352"
+    note: "Would show whether the UAE (not an OECD member) adheres and has a designated contact point."
+
+candidates:
+  - id: CAND-003
+    title: "Neither country is in the international device-incident exchange"
+    type: coordination / standards
+    hypothesis: >-
+      An international channel exists for medical-device regulators to exchange incident reports under
+      confidentiality arrangements, but neither Swissmedic nor any UAE regulator participates. In the
+      drill, a Swiss-made device harming UAE patients has no established regulator-to-regulator
+      incident channel.
+    quotes:
+      - chunk_id: "IMDRF-NCAR-N14-2025:p9:c1"
+        role: global_comparator
+        quote: "Participation in the NCAR Exchange Program will be limited to the IMDRF Management Committee (MC) Regulators. A list of NCAR Participant Countries is provided in Annex1."
+      - chunk_id: "IMDRF-NCAR-N14-2025:p9:c2"
+        role: global_comparator
+        quote: "IMDRF MC Regulators who intend to participate in the NCAR Exchange Program will need where possible to have confidentiality arrangements in place with other participating NCAs and the NCAR Secretariat."
+      - chunk_id: "IMDRF-NCAR-N14-2025:p16:c1"
+        role: context
+        quote: "Annex 1– IMDRF NCAR Participant Countries"
+    searches:
+      - search_id: SEARCH-NCAR-PARTICIPANTS-001
+        absent_terms: ["Switzerland", "Swissmedic", "United Arab Emirates", "UAE"]
+    could_be_refuted_by: [CH-EU-MRA-1999]
+    refuting_evidence_to_look_for:
+      - "A bilateral UAE-Swiss memorandum on device vigilance (not known to exist)."
+      - "IMDRF membership or NCAR participant changes after March 2025."
+
+  - id: CAND-002
+    title: "The UAE rule for approving AI software upgrades is undefined"
+    type: standards
+    scope: "UAE side only; the Swiss side applies a general EU MDR prior-approval rule, so no Swiss gap is claimed."
+    hypothesis: >-
+      The registered UAE sources require certification of "major upgraded versions" of AI software
+      without defining "major" or naming the certifying body, while Switzerland (through the EU MDR
+      annexes it applies) requires prior approval of changes that could affect safety or performance.
+    quotes:
+      - chunk_id: "AE-DHA-AI-HEALTH-2021:p10:c1"
+        role: host
+        quote: "Comply with all required certification of the AI software and its major upgraded versions from recognized international/local agencies."
+      - chunk_id: "CH-HEALTH-MedDO:p13:c1"
+        role: partner
+        quote: "The conformity assessment procedure is governed by Articles 52 and 54 and by Annexes IX–XI to EU-MDR"
+      - chunk_id: "EU-MDR-2017-745:p202:c1"
+        role: global_comparator
+        quote: "Changes to the approved device shall require approval from the notified body which issued the EU technical documentation assessment certificate where such changes could affect the safety and performance of the device or the conditions prescribed for use of the device."
+      - chunk_id: "EU-MDCG-2020-3-REV1:p13:c2"
+        role: global_comparator
+        quote: "change of an algorithm which impact the operating principles or impact the control of the device and may alter the diagnosis or therapy delivered"
+      - chunk_id: "IMDRF-AIML-N88-2025:p8:c2"
+        role: global_comparator
+        quote: "when models are retrained after deployment, there are appropriate controls in place to manage risks of overfitting, unintended bias, or degradation of the model (for example, dataset drift) that may impact the safety and performance of the model."
+      - chunk_id: "US-FDA-PCCP-AI-2025:p7:c2"
+        role: global_comparator
+        quote: "1) a detailed description of the specific, planned device modifications, which is referred to as the “Description of Modifications”; 2) the associated methodology to develop, validate, and implement those modifications in a manner that ensures the continued safety and effectiveness of the device across the intended use populations, which is referred to as the “Modification Protocol”; and 3) the assessment of the benefits and risks of the planned modifications and risk mitigations, which is referred to as the “Impact Assessment.”"
+    searches:
+      - search_id: SEARCH-AI-CHANGE-CONTROL-001
+        absent_terms: ["predetermined change control", "change control plan", "modification protocol"]
+      - search_id: SEARCH-AI-CHANGE-CONTROL-002
+        absent_terms: []
+    could_be_refuted_by: [AE-FEDERAL-DECREE-LAW-38-2024-AR-CLEAN]
+    refuting_evidence_to_look_for:
+      - "EDE implementing rules for software changes under Federal Decree-Law No. 38 of 2024 (not known to exist)."
+      - "Any UAE AI-device guidance outside this knowledge base."
+
+  - id: CAND-001
+    title: "No clearly competent UAE counterpart for protecting UAE health data abroad"
+    type: coordination / policy
+    hypothesis: >-
+      When UAE patients' health data is held and reused abroad, the registered sources do not show an
+      instrument connecting a competent UAE authority to the Swiss FDPIC with the reciprocity FADP
+      Art. 55 requires.
+    quotes:
+      - chunk_id: "AE-DATA-PDPL-2021-EN:p6:c2"
+        role: host
+        quote: "Provisions of this Decree by Law shall not apply to the following:"
+      - chunk_id: "AE-DATA-PDPL-2021-EN:p6:c2"
+        role: host
+        quote: "e. Personal Health Data that has legislation regulating its protection and processing."
+      - chunk_id: "AE-HEALTH-ICT-LAW-2019:p8:c1"
+        role: host
+        quote: "It is not permissible to store, process, generate or transform the health data and information outside State -which are related to the health services provided inside State- except in the case where a resolution is issued from the Health Authority in coordination with the Ministry."
+      - chunk_id: "AE-DHA-HEALTH-DATA-PROTECTION-PP11-2022:p27:c1"
+        role: host
+        quote: "Protected health information should not be transferred to a country or territory outside the UAE; except for transfer of PHI within the category of UAE ICT Health Law exemptions"
+      - chunk_id: "AE-DHA-HEALTH-DATA-PROTECTION-PP11-2022:p35:c1"
+        role: host
+        quote: "must inform the UAE Information Office and DHA the contact details of the appointed DPO."
+      - chunk_id: "AE-DHA-HEALTH-INFO-SHARING-PP13-2024:p30:c2"
+        role: host
+        quote: "Protected health information should not be transferred to a country or territory outside the UAE; except for transfer of PHI within the category of Cabinet Decision No. (51) of year 2021"
+      - chunk_id: "AE-DHA-HEALTH-INFO-SHARING-PP13-2024:p18:c2"
+        role: host
+        quote: "For the purposes of scientific and clinical research, provided that the ethics and rules of scientific research are followed as per ICH_GCP principles and guidelines. Non-identifiable If Identifiable data needed, then Patient consent required"
+      - chunk_id: "AE-DATA-OFFICE-LAW-44-2021:p2:c2"
+        role: host
+        quote: "Propose joining or signing the international conventions and agreements and propose the partnership agreements with the gulf, regional and international states, organisations, and bodies with regards to the activities and competencies of the Office"
+      - chunk_id: "CH-DATA-FADP:p24:c1"
+        role: partner
+        quote: "The FDPIC may exchange information or personal data with foreign authorities that are responsible for data protection in order that they may fulfil their respective statutory duties in relation to data protection, provided the following requirements are satisfied: a. Reciprocity with regard to administrative assistance is guaranteed."
+      - chunk_id: "OECD-LEGAL-0352:p9:c1"
+        role: global_comparator
+        quote: "Member countries should designate a national contact point for co-operation and mutual assistance under this Recommendation"
+    searches:
+      - search_id: SEARCH-HEALTH-DATA-AUTHORITY-001
+        absent_terms: ["foreign authorit", "reciproc"]
+    could_be_refuted_by: [OECD-LEGAL-0352-ADHERENTS, AE-HEALTH-DATA-EXEMPTIONS-MR51-2021]
+    refuting_evidence_to_look_for:
+      - "Any Emirates Data Office cooperation agreement with the FDPIC (not known to exist)."
+      - "PDPL Executive Regulations (reportedly not issued as of mid-2026; not verified)."
+
+  - id: CAND-004
+    title: "Resolution No. 51 of 2021 is not publicly accessible to the project after documented attempts"
+    type: accessibility / implementation
+    hypothesis: >-
+      The binding list of cases in which UAE health data may leave the State is not publicly accessible
+      to the project after documented attempts: the regulator's site was unreachable, and DHA's own
+      policies call it a "Cabinet Decision" (it is ministerial), with PP-11 linking a gazette issue that
+      contains a different law. This is worded as inaccessibility to the project, not as the document
+      being absent from public record.
+    quotes:
+      - chunk_id: "AE-HEALTH-ICT-LAW-2019:p8:c1"
+        role: host
+        quote: "except in the case where a resolution is issued from the Health Authority in coordination with the Ministry."
+      - chunk_id: "AE-DHA-HEALTH-DATA-PROTECTION-PP11-2022:p27:c1"
+        role: host
+        quote: "a. Cabinet Decision No. (51) of year 2021 on exemption for storage and transfer of health records and information must be abide to: https://www.dha.gov.ae/uploads/112021/fd2757c0-7f87-4f1d-b6c34c8eb9045393.pdf"
+      - chunk_id: "AE-DHA-HEALTH-INFO-SHARING-PP13-2024:p30:c2"
+        role: host
+        quote: "within the category of Cabinet Decision No. (51) of year 2021 on exemption for storage and transfer of health records and information"
+      - chunk_id: "EU-MDR-2017-745:p30:c1"
+        role: global_comparator
+        quote: "of the national provisions introduced pursuant to this paragraph and the grounds for introducing them. The Commission shall keep the information publicly available."
+        note: "Analogy only: EU national derogations (reprocessing of single-use devices) are notified and kept publicly available."
+    searches:
+      - search_id: SEARCH-RESOLUTION-51-REFERENCES-001
+        absent_terms: ["Ministerial Resolution No. (51)", "Ministerial Resolution No. 51"]
+    accessibility_of: AE-HEALTH-DATA-EXEMPTIONS-MR51-2021
+    could_be_refuted_by: []
+    refuting_evidence_to_look_for:
+      - "A public, official copy of Resolution No. 51 of 2021 (the Arabic PP-11, registered but excluded from retrieval, was not searched)."

@@ -1,0 +1,385 @@
+{
+  "rule": [
+    "every quote verifies word for word against its chunk",
+    "a search record exists in gaps/searches/ and its absent terms were not found",
+    "a verified GLOBAL comparator is quoted",
+    "no obtainable known-missing document could refute it"
+  ],
+  "disclaimer": "Candidates, not findings. Nothing here is a legal conclusion and nothing has been reviewed by anyone with legal standing. Verification confirms exact text only, not that a quote supports the hypothesis. Absence means absence from this knowledge base.",
+  "missing_documents": [
+    {
+      "id": "AE-HEALTH-DATA-EXEMPTIONS-MR51-2021",
+      "title": "Ministerial Resolution No. (51) of 2021 on the cases in which health data and information may be stored or transferred outside the State",
+      "effective_kind": "unobtainable_after_documented_attempts"
+    },
+    {
+      "id": "CH-EU-MRA-1999",
+      "title": "Agreement between the European Community and the Swiss Confederation on mutual recognition in relation to conformity assessment (1999), medical devices chapter, as currently in force",
+      "effective_kind": "obtainable_not_fetched"
+    },
+    {
+      "id": "AE-FEDERAL-DECREE-LAW-38-2024-AR-CLEAN",
+      "title": "Federal Decree-Law No. 38 of 2024 on medical products, pharmacy profession and pharmaceutical establishments: clean, searchable Arabic text",
+      "effective_kind": "obtainable_not_fetched"
+    },
+    {
+      "id": "OECD-LEGAL-0352-ADHERENTS",
+      "title": "List of adherents to the OECD Recommendation on Cross-border Co-operation in the Enforcement of Laws Protecting Privacy (2007)",
+      "effective_kind": "obtainable_not_fetched"
+    }
+  ],
+  "register_problems": [],
+  "candidates": [
+    {
+      "candidate_id": "CAND-003",
+      "title": "Neither country is in the international device-incident exchange",
+      "status": "OPEN_CANDIDATE",
+      "unmet_conditions": [
+        {
+          "condition": "no_obtainable_refuter",
+          "detail": "Obtainable document not yet fetched could refute this: CH-EU-MRA-1999."
+        }
+      ],
+      "notes": [
+        "Not known to exist, so not blocking: A bilateral UAE-Swiss memorandum on device vigilance (not known to exist).",
+        "Not known to exist, so not blocking: IMDRF membership or NCAR participant changes after March 2025."
+      ],
+      "quotes": [
+        {
+          "chunk_id": "IMDRF-NCAR-N14-2025:p9:c1",
+          "quote": "Participation in the NCAR Exchange Program will be limited to the IMDRF Management Committee (MC) Regulators. A list of NCAR Participant Countries is provided in Annex1.",
+          "verified": true,
+          "failure": "",
+          "doc_id": "IMDRF-NCAR-N14-2025",
+          "jurisdiction": "GLOBAL",
+          "language": "en",
+          "role": "global_comparator"
+        },
+        {
+          "chunk_id": "IMDRF-NCAR-N14-2025:p9:c2",
+          "quote": "IMDRF MC Regulators who intend to participate in the NCAR Exchange Program will need where possible to have confidentiality arrangements in place with other participating NCAs and the NCAR Secretariat.",
+          "verified": true,
+          "failure": "",
+          "doc_id": "IMDRF-NCAR-N14-2025",
+          "jurisdiction": "GLOBAL",
+          "language": "en",
+          "role": "global_comparator"
+        },
+        {
+          "chunk_id": "IMDRF-NCAR-N14-2025:p16:c1",
+          "quote": "Annex 1– IMDRF NCAR Participant Countries",
+          "verified": true,
+          "failure": "",
+          "doc_id": "IMDRF-NCAR-N14-2025",
+          "jurisdiction": "GLOBAL",
+          "language": "en",
+          "role": "context"
+        }
+      ],
+      "searches": [
+        {
+          "search_id": "SEARCH-NCAR-PARTICIPANTS-001",
+          "exists": true,
+          "problems": []
+        }
+      ],
+      "blocking_documents": [
+        "CH-EU-MRA-1999"
+      ],
+      "unobtainable_documents": [],
+      "reviewed_by_legal_professional": false,
+      "is_legal_conclusion": false
+    },
+    {
+      "candidate_id": "CAND-002",
+      "title": "The UAE rule for approving AI software upgrades is undefined",
+      "status": "OPEN_CANDIDATE",
+      "unmet_conditions": [
+        {
+          "condition": "no_obtainable_refuter",
+          "detail": "Obtainable document not yet fetched could refute this: AE-FEDERAL-DECREE-LAW-38-2024-AR-CLEAN."
+        }
+      ],
+      "notes": [
+        "Not known to exist, so not blocking: EDE implementing rules for software changes under Federal Decree-Law No. 38 of 2024 (not known to exist).",
+        "Not known to exist, so not blocking: Any UAE AI-device guidance outside this knowledge base."
+      ],
+      "quotes": [
+        {
+          "chunk_id": "AE-DHA-AI-HEALTH-2021:p10:c1",
+          "quote": "Comply with all required certification of the AI software and its major upgraded versions from recognized international/local agencies.",
+          "verified": true,
+          "failure": "",
+          "doc_id": "AE-DHA-AI-HEALTH-2021",
+          "jurisdiction": "AE",
+          "language": "en",
+          "role": "host"
+        },
+        {
+          "chunk_id": "CH-HEALTH-MedDO:p13:c1",
+          "quote": "The conformity assessment procedure is governed by Articles 52 and 54 and by Annexes IX–XI to EU-MDR",
+          "verified": true,
+          "failure": "",
+          "doc_id": "CH-HEALTH-MedDO",
+          "jurisdiction": "CH",
+          "language": "en",
+          "role": "partner"
+        },
+        {
+          "chunk_id": "EU-MDR-2017-745:p202:c1",
+          "quote": "Changes to the approved device shall require approval from the notified body which issued the EU technical documentation assessment certificate where such changes could affect the safety and performance of the device or the conditions prescribed for use of the device.",
+          "verified": true,
+          "failure": "",
+          "doc_id": "EU-MDR-2017-745",
+          "jurisdiction": "GLOBAL",
+          "language": "en",
+          "role": "global_comparator"
+        },
+        {
+          "chunk_id": "EU-MDCG-2020-3-REV1:p13:c2",
+          "quote": "change of an algorithm which impact the operating principles or impact the control of the device and may alter the diagnosis or therapy delivered",
+          "verified": true,
+          "failure": "",
+          "doc_id": "EU-MDCG-2020-3-REV1",
+          "jurisdiction": "GLOBAL",
+          "language": "en",
+          "role": "global_comparator"
+        },
+        {
+          "chunk_id": "IMDRF-AIML-N88-2025:p8:c2",
+          "quote": "when models are retrained after deployment, there are appropriate controls in place to manage risks of overfitting, unintended bias, or degradation of the model (for example, dataset drift) that may impact the safety and performance of the model.",
+          "verified": true,
+          "failure": "",
+          "doc_id": "IMDRF-AIML-N88-2025",
+          "jurisdiction": "GLOBAL",
+          "language": "en",
+          "role": "global_comparator"
+        },
+        {
+          "chunk_id": "US-FDA-PCCP-AI-2025:p7:c2",
+          "quote": "1) a detailed description of the specific, planned device modifications, which is referred to as the “Description of Modifications”; 2) the associated methodology to develop, validate, and implement those modifications in a manner that ensures the continued safety and effectiveness of the device across the intended use populations, which is referred to as the “Modification Protocol”; and 3) the assessment of the benefits and risks of the planned modifications and risk mitigations, which is referred to as the “Impact Assessment.”",
+          "verified": true,
+          "failure": "",
+          "doc_id": "US-FDA-PCCP-AI-2025",
+          "jurisdiction": "GLOBAL",
+          "language": "en",
+          "role": "global_comparator"
+        }
+      ],
+      "searches": [
+        {
+          "search_id": "SEARCH-AI-CHANGE-CONTROL-001",
+          "exists": true,
+          "problems": []
+        },
+        {
+          "search_id": "SEARCH-AI-CHANGE-CONTROL-002",
+          "exists": true,
+          "problems": []
+        }
+      ],
+      "blocking_documents": [
+        "AE-FEDERAL-DECREE-LAW-38-2024-AR-CLEAN"
+      ],
+      "unobtainable_documents": [],
+      "reviewed_by_legal_professional": false,
+      "is_legal_conclusion": false
+    },
+    {
+      "candidate_id": "CAND-001",
+      "title": "No clearly competent UAE counterpart for protecting UAE health data abroad",
+      "status": "OPEN_CANDIDATE",
+      "unmet_conditions": [
+        {
+          "condition": "no_obtainable_refuter",
+          "detail": "Obtainable document not yet fetched could refute this: OECD-LEGAL-0352-ADHERENTS."
+        }
+      ],
+      "notes": [
+        "AE-HEALTH-DATA-EXEMPTIONS-MR51-2021 is not publicly accessible to the project after documented attempts; it does not block this candidate but could still refute it.",
+        "Not known to exist, so not blocking: Any Emirates Data Office cooperation agreement with the FDPIC (not known to exist).",
+        "Not known to exist, so not blocking: PDPL Executive Regulations (reportedly not issued as of mid-2026; not verified)."
+      ],
+      "quotes": [
+        {
+          "chunk_id": "AE-DATA-PDPL-2021-EN:p6:c2",
+          "quote": "Provisions of this Decree by Law shall not apply to the following:",
+          "verified": true,
+          "failure": "",
+          "doc_id": "AE-DATA-PDPL-2021-EN",
+          "jurisdiction": "AE",
+          "language": "en",
+          "role": "host"
+        },
+        {
+          "chunk_id": "AE-DATA-PDPL-2021-EN:p6:c2",
+          "quote": "e. Personal Health Data that has legislation regulating its protection and processing.",
+          "verified": true,
+          "failure": "",
+          "doc_id": "AE-DATA-PDPL-2021-EN",
+          "jurisdiction": "AE",
+          "language": "en",
+          "role": "host"
+        },
+        {
+          "chunk_id": "AE-HEALTH-ICT-LAW-2019:p8:c1",
+          "quote": "It is not permissible to store, process, generate or transform the health data and information outside State -which are related to the health services provided inside State- except in the case where a resolution is issued from the Health Authority in coordination with the Ministry.",
+          "verified": true,
+          "failure": "",
+          "doc_id": "AE-HEALTH-ICT-LAW-2019",
+          "jurisdiction": "AE",
+          "language": "en",
+          "role": "host"
+        },
+        {
+          "chunk_id": "AE-DHA-HEALTH-DATA-PROTECTION-PP11-2022:p27:c1",
+          "quote": "Protected health information should not be transferred to a country or territory outside the UAE; except for transfer of PHI within the category of UAE ICT Health Law exemptions",
+          "verified": true,
+          "failure": "",
+          "doc_id": "AE-DHA-HEALTH-DATA-PROTECTION-PP11-2022",
+          "jurisdiction": "AE",
+          "language": "en",
+          "role": "host"
+        },
+        {
+          "chunk_id": "AE-DHA-HEALTH-DATA-PROTECTION-PP11-2022:p35:c1",
+          "quote": "must inform the UAE Information Office and DHA the contact details of the appointed DPO.",
+          "verified": true,
+          "failure": "",
+          "doc_id": "AE-DHA-HEALTH-DATA-PROTECTION-PP11-2022",
+          "jurisdiction": "AE",
+          "language": "en",
+          "role": "host"
+        },
+        {
+          "chunk_id": "AE-DHA-HEALTH-INFO-SHARING-PP13-2024:p30:c2",
+          "quote": "Protected health information should not be transferred to a country or territory outside the UAE; except for transfer of PHI within the category of Cabinet Decision No. (51) of year 2021",
+          "verified": true,
+          "failure": "",
+          "doc_id": "AE-DHA-HEALTH-INFO-SHARING-PP13-2024",
+          "jurisdiction": "AE",
+          "language": "en",
+          "role": "host"
+        },
+        {
+          "chunk_id": "AE-DHA-HEALTH-INFO-SHARING-PP13-2024:p18:c2",
+          "quote": "For the purposes of scientific and clinical research, provided that the ethics and rules of scientific research are followed as per ICH_GCP principles and guidelines. Non-identifiable If Identifiable data needed, then Patient consent required",
+          "verified": true,
+          "failure": "",
+          "doc_id": "AE-DHA-HEALTH-INFO-SHARING-PP13-2024",
+          "jurisdiction": "AE",
+          "language": "en",
+          "role": "host"
+        },
+        {
+          "chunk_id": "AE-DATA-OFFICE-LAW-44-2021:p2:c2",
+          "quote": "Propose joining or signing the international conventions and agreements and propose the partnership agreements with the gulf, regional and international states, organisations, and bodies with regards to the activities and competencies of the Office",
+          "verified": true,
+          "failure": "",
+          "doc_id": "AE-DATA-OFFICE-LAW-44-2021",
+          "jurisdiction": "AE",
+          "language": "en",
+          "role": "host"
+        },
+        {
+          "chunk_id": "CH-DATA-FADP:p24:c1",
+          "quote": "The FDPIC may exchange information or personal data with foreign authorities that are responsible for data protection in order that they may fulfil their respective statutory duties in relation to data protection, provided the following requirements are satisfied: a. Reciprocity with regard to administrative assistance is guaranteed.",
+          "verified": true,
+          "failure": "",
+          "doc_id": "CH-DATA-FADP",
+          "jurisdiction": "CH",
+          "language": "en",
+          "role": "partner"
+        },
+        {
+          "chunk_id": "OECD-LEGAL-0352:p9:c1",
+          "quote": "Member countries should designate a national contact point for co-operation and mutual assistance under this Recommendation",
+          "verified": true,
+          "failure": "",
+          "doc_id": "OECD-LEGAL-0352",
+          "jurisdiction": "GLOBAL",
+          "language": "en",
+          "role": "global_comparator"
+        }
+      ],
+      "searches": [
+        {
+          "search_id": "SEARCH-HEALTH-DATA-AUTHORITY-001",
+          "exists": true,
+          "problems": []
+        }
+      ],
+      "blocking_documents": [
+        "OECD-LEGAL-0352-ADHERENTS"
+      ],
+      "unobtainable_documents": [
+        "AE-HEALTH-DATA-EXEMPTIONS-MR51-2021"
+      ],
+      "reviewed_by_legal_professional": false,
+      "is_legal_conclusion": false
+    },
+    {
+      "candidate_id": "CAND-004",
+      "title": "Resolution No. 51 of 2021 is not publicly accessible to the project after documented attempts",
+      "status": "SUPPORTED_CANDIDATE",
+      "unmet_conditions": [],
+      "notes": [
+        "Not known to exist, so not blocking: A public, official copy of Resolution No. 51 of 2021 (the Arabic PP-11, registered but excluded from retrieval, was not searched)."
+      ],
+      "quotes": [
+        {
+          "chunk_id": "AE-HEALTH-ICT-LAW-2019:p8:c1",
+          "quote": "except in the case where a resolution is issued from the Health Authority in coordination with the Ministry.",
+          "verified": true,
+          "failure": "",
+          "doc_id": "AE-HEALTH-ICT-LAW-2019",
+          "jurisdiction": "AE",
+          "language": "en",
+          "role": "host"
+        },
+        {
+          "chunk_id": "AE-DHA-HEALTH-DATA-PROTECTION-PP11-2022:p27:c1",
+          "quote": "a. Cabinet Decision No. (51) of year 2021 on exemption for storage and transfer of health records and information must be abide to: https://www.dha.gov.ae/uploads/112021/fd2757c0-7f87-4f1d-b6c34c8eb9045393.pdf",
+          "verified": true,
+          "failure": "",
+          "doc_id": "AE-DHA-HEALTH-DATA-PROTECTION-PP11-2022",
+          "jurisdiction": "AE",
+          "language": "en",
+          "role": "host"
+        },
+        {
+          "chunk_id": "AE-DHA-HEALTH-INFO-SHARING-PP13-2024:p30:c2",
+          "quote": "within the category of Cabinet Decision No. (51) of year 2021 on exemption for storage and transfer of health records and information",
+          "verified": true,
+          "failure": "",
+          "doc_id": "AE-DHA-HEALTH-INFO-SHARING-PP13-2024",
+          "jurisdiction": "AE",
+          "language": "en",
+          "role": "host"
+        },
+        {
+          "chunk_id": "EU-MDR-2017-745:p30:c1",
+          "quote": "of the national provisions introduced pursuant to this paragraph and the grounds for introducing them. The Commission shall keep the information publicly available.",
+          "verified": true,
+          "failure": "",
+          "doc_id": "EU-MDR-2017-745",
+          "jurisdiction": "GLOBAL",
+          "language": "en",
+          "role": "global_comparator",
+          "note": "Analogy only: EU national derogations (reprocessing of single-use devices) are notified and kept publicly available."
+        }
+      ],
+      "searches": [
+        {
+          "search_id": "SEARCH-RESOLUTION-51-REFERENCES-001",
+          "exists": true,
+          "problems": []
+        }
+      ],
+      "blocking_documents": [],
+      "unobtainable_documents": [],
+      "reviewed_by_legal_professional": false,
+      "is_legal_conclusion": false
+    }
+  ]
+}
