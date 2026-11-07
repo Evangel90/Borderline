@@ -8,9 +8,12 @@ A candidate becomes SUPPORTED_CANDIDATE only when all four conditions hold:
 3. at least one verified quote from a GLOBAL source is marked as a comparator;
 4. no known-missing document that is still obtainable could refute it.
 
-Known-missing documents come in two kinds. "Unobtainable after documented attempts" does not
+Known-missing documents come in three kinds. "Unobtainable after documented attempts" does not
 block (it needs at least one documented attempt; without one it counts as obtainable). Each such
-document should have its own accessibility candidate. "Obtainable but not fetched" blocks.
+document should have its own accessibility candidate, unless the register records a reason in
+`accessibility_candidate_exempt_reason`. "Obtainable but not fetched" blocks.
+"Question answered by a registered source" does not block, but only when every answering quote
+verifies; otherwise it counts as obtainable.
 
 This only sets candidate status. It is not used by the drill, so missing documents never stop a
 drill from running. Nothing here is a legal conclusion; every result is marked unreviewed.
@@ -32,7 +35,10 @@ SUPPORTED = "SUPPORTED_CANDIDATE"
 OPEN = "OPEN_CANDIDATE"
 UNOBTAINABLE = "unobtainable_after_documented_attempts"
 OBTAINABLE = "obtainable_not_fetched"
-MISSING_KINDS = {UNOBTAINABLE, OBTAINABLE}
+# The document itself was not fetched, but the specific question it could settle is answered
+# by quotes from a registered source. Counts only if every answering quote verifies.
+ANSWERED = "question_answered_by_registered_source"
+MISSING_KINDS = {UNOBTAINABLE, OBTAINABLE, ANSWERED}
 QUOTE_ROLES = {"host", "partner", "global_comparator", "context"}
 
 
@@ -47,6 +53,7 @@ class Assessment:
     searches: list[dict[str, Any]] = field(default_factory=list)
     blocking_documents: list[str] = field(default_factory=list)
     unobtainable_documents: list[str] = field(default_factory=list)
+    answered_documents: list[str] = field(default_factory=list)
     reviewed_by_legal_professional: bool = False
 
     def fail(self, condition: str, detail: str) -> None:
@@ -63,6 +70,7 @@ class Assessment:
             "searches": self.searches,
             "blocking_documents": self.blocking_documents,
             "unobtainable_documents": self.unobtainable_documents,
+            "answered_documents": self.answered_documents,
             "reviewed_by_legal_professional": self.reviewed_by_legal_professional,
             "is_legal_conclusion": False,
         }
@@ -88,13 +96,32 @@ def load_search(search_dir: str, search_id: str) -> dict[str, Any] | None:
         return json.load(handle)
 
 
-def missing_document_kind(document: dict[str, Any]) -> tuple[str, str]:
+def answering_quotes(document: dict[str, Any], chunks: dict[str, Chunk]) -> list[dict[str, Any]]:
+    return [
+        verify_quote(item["chunk_id"], item["quote"], item.get("translation", ""), chunks)
+        for item in document.get("answered_by", [])
+    ]
+
+
+def missing_document_kind(document: dict[str, Any], chunks: dict[str, Chunk]) -> tuple[str, str]:
     """Return the effective kind and a note when the declared kind is not honoured."""
     kind = document.get("kind")
+    doc_id = document.get("id")
     if kind not in MISSING_KINDS:
-        return OBTAINABLE, f"{document.get('id')}: unknown kind '{kind}', treated as obtainable."
+        return OBTAINABLE, f"{doc_id}: unknown kind '{kind}', treated as obtainable."
     if kind == UNOBTAINABLE and not document.get("attempts"):
-        return OBTAINABLE, f"{document.get('id')}: marked unobtainable without a documented attempt, treated as obtainable."
+        return OBTAINABLE, f"{doc_id}: marked unobtainable without a documented attempt, treated as obtainable."
+    if kind == ANSWERED:
+        quotes = answering_quotes(document, chunks)
+        if not quotes:
+            return OBTAINABLE, f"{doc_id}: marked answered without any answering quote, treated as obtainable."
+        failed = [q for q in quotes if not q["verified"]]
+        if failed:
+            return OBTAINABLE, (
+                f"{doc_id}: answering quote failed verification ("
+                + "; ".join(f"{q['chunk_id']}: {q['failure']}" for q in failed)
+                + "), treated as obtainable."
+            )
     return kind, ""
 
 
@@ -158,15 +185,20 @@ def assess_candidate(candidate: dict[str, Any], missing: dict[str, dict[str, Any
             result.fail("no_obtainable_refuter",
                         f"Refuting document '{doc_id}' is not in the missing-documents list; treated as obtainable.")
             continue
-        kind, note = missing_document_kind(document)
+        kind, note = missing_document_kind(document, chunks)
         if note:
             result.notes.append(note)
-        if kind == UNOBTAINABLE:
-            result.unobtainable_documents.append(doc_id)
+        if kind == ANSWERED:
+            result.answered_documents.append(doc_id)
             result.notes.append(
-                f"{doc_id} is not publicly accessible to the project after documented attempts; "
-                "it does not block this candidate but could still refute it."
+                f"{doc_id} was not fetched; the question it could settle is answered by verified quotes from "
+                + ", ".join(item["chunk_id"] for item in document["answered_by"])
+                + (f". Limits: {document['limits']}" if document.get("limits") else ".")
             )
+        elif kind == UNOBTAINABLE:
+            result.unobtainable_documents.append(doc_id)
+            status = document.get("status_note") or "is not publicly accessible to the project after documented attempts"
+            result.notes.append(f"{doc_id} {status}; it does not block this candidate but could still refute it.")
         else:
             result.blocking_documents.append(doc_id)
             result.fail("no_obtainable_refuter", f"Obtainable document not yet fetched could refute this: {doc_id}.")
@@ -187,10 +219,11 @@ def assess_register(register: dict[str, Any], chunks: dict[str, Chunk],
     covered = {c.get("accessibility_of") for c in register.get("candidates", [])}
     register_notes = []
     for doc_id, document in missing.items():
-        kind, note = missing_document_kind(document)
+        kind, note = missing_document_kind(document, chunks)
         if note:
             register_notes.append(note)
-        if kind == UNOBTAINABLE and doc_id not in covered:
+        exempt = (document.get("accessibility_candidate_exempt_reason") or "").strip()
+        if kind == UNOBTAINABLE and doc_id not in covered and not exempt:
             register_notes.append(f"{doc_id} is unobtainable but has no accessibility candidate.")
 
     return {
@@ -206,7 +239,9 @@ def assess_register(register: dict[str, Any], chunks: dict[str, Chunk],
             "supports the hypothesis. Absence means absence from this knowledge base."
         ),
         "missing_documents": [
-            {"id": doc_id, "title": doc.get("title", ""), "effective_kind": missing_document_kind(doc)[0]}
+            {"id": doc_id, "title": doc.get("title", ""),
+             "declared_kind": doc.get("kind"), "effective_kind": missing_document_kind(doc, chunks)[0],
+             **({"answered_by": answering_quotes(doc, chunks)} if doc.get("answered_by") else {})}
             for doc_id, doc in missing.items()
         ],
         "register_problems": register_notes,

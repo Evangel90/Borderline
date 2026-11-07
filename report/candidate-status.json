@@ -10,22 +10,66 @@
     {
       "id": "AE-HEALTH-DATA-EXEMPTIONS-MR51-2021",
       "title": "Ministerial Resolution No. (51) of 2021 on the cases in which health data and information may be stored or transferred outside the State",
+      "declared_kind": "unobtainable_after_documented_attempts",
       "effective_kind": "unobtainable_after_documented_attempts"
     },
     {
       "id": "CH-EU-MRA-1999",
       "title": "Agreement between the European Community and the Swiss Confederation on mutual recognition in relation to conformity assessment (1999), medical devices chapter, as currently in force",
-      "effective_kind": "obtainable_not_fetched"
+      "declared_kind": "question_answered_by_registered_source",
+      "effective_kind": "question_answered_by_registered_source",
+      "answered_by": [
+        {
+          "chunk_id": "CH-EU-MRA-FACTSHEET-2025:p1:c2",
+          "quote": "However, the EU has refused to update the agreement since May 2021 due to unresolved institutional issues. This decision is currently affecting medical devices.",
+          "verified": true,
+          "failure": "",
+          "doc_id": "CH-EU-MRA-FACTSHEET-2025",
+          "jurisdiction": "CH",
+          "language": "en"
+        },
+        {
+          "chunk_id": "CH-EU-MRA-FACTSHEET-2025:p1:c3",
+          "quote": "Switzerland and the EU have set out the arrangements for their cooperation from the end of 2024 until the package comes into force.",
+          "verified": true,
+          "failure": "",
+          "doc_id": "CH-EU-MRA-FACTSHEET-2025",
+          "jurisdiction": "CH",
+          "language": "en"
+        },
+        {
+          "chunk_id": "CH-EU-MRA-FACTSHEET-2025:p2:c2",
+          "quote": "However, without resolving the institutional issues, Switzerland remains excluded from market surveillance with EU member states for medical devices.",
+          "verified": true,
+          "failure": "",
+          "doc_id": "CH-EU-MRA-FACTSHEET-2025",
+          "jurisdiction": "CH",
+          "language": "en"
+        }
+      ]
     },
     {
       "id": "AE-FEDERAL-DECREE-LAW-38-2024-AR-CLEAN",
       "title": "Federal Decree-Law No. 38 of 2024 on medical products, pharmacy profession and pharmaceutical establishments: clean, searchable Arabic text",
-      "effective_kind": "obtainable_not_fetched"
+      "declared_kind": "unobtainable_after_documented_attempts",
+      "effective_kind": "unobtainable_after_documented_attempts"
     },
     {
       "id": "OECD-LEGAL-0352-ADHERENTS",
       "title": "List of adherents to the OECD Recommendation on Cross-border Co-operation in the Enforcement of Laws Protecting Privacy (2007)",
-      "effective_kind": "obtainable_not_fetched"
+      "declared_kind": "question_answered_by_registered_source",
+      "effective_kind": "question_answered_by_registered_source",
+      "answered_by": [
+        {
+          "chunk_id": "OECD-LEGAL-0352-ADHERENTS-2026:p8:c1",
+          "quote": "Spain Sweden Switzerland Türkiye United Kingdom United States Non-Members None",
+          "verified": true,
+          "failure": "",
+          "doc_id": "OECD-LEGAL-0352-ADHERENTS-2026",
+          "jurisdiction": "GLOBAL",
+          "language": "en"
+        }
+      ]
     }
   ],
   "register_problems": [],
@@ -33,14 +77,10 @@
     {
       "candidate_id": "CAND-003",
       "title": "Neither country is in the international device-incident exchange",
-      "status": "OPEN_CANDIDATE",
-      "unmet_conditions": [
-        {
-          "condition": "no_obtainable_refuter",
-          "detail": "Obtainable document not yet fetched could refute this: CH-EU-MRA-1999."
-        }
-      ],
+      "status": "SUPPORTED_CANDIDATE",
+      "unmet_conditions": [],
       "notes": [
+        "CH-EU-MRA-1999 was not fetched; the question it could settle is answered by verified quotes from CH-EU-MRA-FACTSHEET-2025:p1:c2, CH-EU-MRA-FACTSHEET-2025:p1:c3, CH-EU-MRA-FACTSHEET-2025:p2:c2. Limits: The status question (is the medical-devices chapter in effect for Swiss participation in EU device cooperation?) is answered by an official Federal Council factsheet dated 13 June 2025. It is not the agreement text, it does not mention the IMDRF NCAR programme by name, and it does not prove the agreement's status after June 2025 (the Switzerland-EU package was not yet in force then).",
         "Not known to exist, so not blocking: A bilateral UAE-Swiss memorandum on device vigilance (not known to exist).",
         "Not known to exist, so not blocking: IMDRF membership or NCAR participant changes after March 2025."
       ],
@@ -74,6 +114,17 @@
           "jurisdiction": "GLOBAL",
           "language": "en",
           "role": "context"
+        },
+        {
+          "chunk_id": "CH-EU-MRA-FACTSHEET-2025:p2:c2",
+          "quote": "However, without resolving the institutional issues, Switzerland remains excluded from market surveillance with EU member states for medical devices. This makes it more difficult for Swiss authorities to access the information they need to respond quickly to unsafe products.",
+          "verified": true,
+          "failure": "",
+          "doc_id": "CH-EU-MRA-FACTSHEET-2025",
+          "jurisdiction": "CH",
+          "language": "en",
+          "role": "partner",
+          "note": "Official Federal Council factsheet, 13 June 2025; does not name NCAR and does not prove the status after June 2025."
         }
       ],
       "searches": [
@@ -83,24 +134,21 @@
           "problems": []
         }
       ],
-      "blocking_documents": [
+      "blocking_documents": [],
+      "unobtainable_documents": [],
+      "answered_documents": [
         "CH-EU-MRA-1999"
       ],
-      "unobtainable_documents": [],
       "reviewed_by_legal_professional": false,
       "is_legal_conclusion": false
     },
     {
       "candidate_id": "CAND-002",
       "title": "The UAE rule for approving AI software upgrades is undefined",
-      "status": "OPEN_CANDIDATE",
-      "unmet_conditions": [
-        {
-          "condition": "no_obtainable_refuter",
-          "detail": "Obtainable document not yet fetched could refute this: AE-FEDERAL-DECREE-LAW-38-2024-AR-CLEAN."
-        }
-      ],
+      "status": "SUPPORTED_CANDIDATE",
+      "unmet_conditions": [],
       "notes": [
+        "AE-FEDERAL-DECREE-LAW-38-2024-AR-CLEAN could not be obtained as clean machine-readable Arabic text after documented attempts (the official PDF is public and readable by people; its text layer is defective), so the controlling Arabic text was not searched; it does not block this candidate but could still refute it.",
         "Not known to exist, so not blocking: EDE implementing rules for software changes under Federal Decree-Law No. 38 of 2024 (not known to exist).",
         "Not known to exist, so not blocking: Any UAE AI-device guidance outside this knowledge base."
       ],
@@ -178,24 +226,21 @@
           "problems": []
         }
       ],
-      "blocking_documents": [
+      "blocking_documents": [],
+      "unobtainable_documents": [
         "AE-FEDERAL-DECREE-LAW-38-2024-AR-CLEAN"
       ],
-      "unobtainable_documents": [],
+      "answered_documents": [],
       "reviewed_by_legal_professional": false,
       "is_legal_conclusion": false
     },
     {
       "candidate_id": "CAND-001",
       "title": "No clearly competent UAE counterpart for protecting UAE health data abroad",
-      "status": "OPEN_CANDIDATE",
-      "unmet_conditions": [
-        {
-          "condition": "no_obtainable_refuter",
-          "detail": "Obtainable document not yet fetched could refute this: OECD-LEGAL-0352-ADHERENTS."
-        }
-      ],
+      "status": "SUPPORTED_CANDIDATE",
+      "unmet_conditions": [],
       "notes": [
+        "OECD-LEGAL-0352-ADHERENTS was not fetched; the question it could settle is answered by verified quotes from OECD-LEGAL-0352-ADHERENTS-2026:p8:c1. Limits: Registered as OECD-LEGAL-0352-ADHERENTS-2026, a browser print of the OECD instrument page taken 7 November 2026 18:35, not an official OECD PDF. It shows the adherents on that date only: 38 OECD Members including Switzerland, and no non-members, so the UAE was not an adherent.",
         "AE-HEALTH-DATA-EXEMPTIONS-MR51-2021 is not publicly accessible to the project after documented attempts; it does not block this candidate but could still refute it.",
         "Not known to exist, so not blocking: Any Emirates Data Office cooperation agreement with the FDPIC (not known to exist).",
         "Not known to exist, so not blocking: PDPL Executive Regulations (reportedly not issued as of mid-2026; not verified)."
@@ -300,6 +345,17 @@
           "jurisdiction": "GLOBAL",
           "language": "en",
           "role": "global_comparator"
+        },
+        {
+          "chunk_id": "OECD-LEGAL-0352-ADHERENTS-2026:p8:c1",
+          "quote": "Spain Sweden Switzerland Türkiye United Kingdom United States Non-Members None",
+          "verified": true,
+          "failure": "",
+          "doc_id": "OECD-LEGAL-0352-ADHERENTS-2026",
+          "jurisdiction": "GLOBAL",
+          "language": "en",
+          "role": "context",
+          "note": "Browser print of the OECD instrument page, 7 November 2026: Switzerland adheres; there are no non-member adherents, so the UAE did not."
         }
       ],
       "searches": [
@@ -309,11 +365,12 @@
           "problems": []
         }
       ],
-      "blocking_documents": [
-        "OECD-LEGAL-0352-ADHERENTS"
-      ],
+      "blocking_documents": [],
       "unobtainable_documents": [
         "AE-HEALTH-DATA-EXEMPTIONS-MR51-2021"
+      ],
+      "answered_documents": [
+        "OECD-LEGAL-0352-ADHERENTS"
       ],
       "reviewed_by_legal_professional": false,
       "is_legal_conclusion": false
@@ -378,6 +435,7 @@
       ],
       "blocking_documents": [],
       "unobtainable_documents": [],
+      "answered_documents": [],
       "reviewed_by_legal_professional": false,
       "is_legal_conclusion": false
     }

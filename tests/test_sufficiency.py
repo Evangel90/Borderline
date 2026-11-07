@@ -139,6 +139,31 @@ def test_comparator_must_be_verified_and_global(search_dir):
 
 # 4. Known-missing documents.
 
+ANSWERED_DOC = {"id": "DOC-ANSWERED", "kind": "question_answered_by_registered_source",
+                "answered_by": [{"chunk_id": "GL-TEST:p1:c1",
+                                 "quote": "Regulators should agree a protocol for planned model changes"}],
+                "limits": "Answers the status question only."}
+
+
+def test_question_answered_by_verified_quotes_does_not_block(search_dir):
+    result = assess(with_(could_be_refuted_by=["DOC-ANSWERED"]), search_dir, {"DOC-ANSWERED": ANSWERED_DOC})
+    assert result.status == SUPPORTED
+    assert result.answered_documents == ["DOC-ANSWERED"]
+    assert any("Limits: Answers the status question only." in n for n in result.notes)
+
+
+@pytest.mark.parametrize("answered_by", [
+    [],
+    [{"chunk_id": "GL-TEST:p1:c1", "quote": "Regulators must always approve every model change in advance."}],
+    [{"chunk_id": "NOT-IN-KB:p1:c1", "quote": "Regulators should agree a protocol for planned model changes"}],
+])
+def test_answered_without_verified_quotes_counts_as_obtainable(search_dir, answered_by):
+    document = {**ANSWERED_DOC, "answered_by": answered_by}
+    result = assess(with_(could_be_refuted_by=["DOC-ANSWERED"]), search_dir, {"DOC-ANSWERED": document})
+    assert result.status == OPEN
+    assert result.blocking_documents == ["DOC-ANSWERED"]
+    assert any("treated as obtainable" in n for n in result.notes)
+
 def test_obtainable_missing_document_blocks(search_dir):
     result = assess(with_(could_be_refuted_by=["DOC-OBTAINABLE"]), search_dir)
     assert result.status == OPEN
@@ -176,6 +201,23 @@ def test_unobtainable_document_needs_an_accessibility_candidate(search_dir):
     assert assess_register(register, CHUNKS, search_dir)["register_problems"] == []
 
 
+@pytest.mark.parametrize("reason, problems", [
+    ("Public and readable by people; only the text layer is defective.", 0),
+    ("   ", 1),
+])
+def test_accessibility_candidate_exemption_needs_a_written_reason(search_dir, reason, problems):
+    document = {**MISSING["DOC-UNOBTAINABLE"], "accessibility_candidate_exempt_reason": reason}
+    register = {"missing_documents": [document], "candidates": [GOOD]}
+    assert len(assess_register(register, CHUNKS, search_dir)["register_problems"]) == problems
+
+
+def test_unobtainable_document_can_carry_its_own_status_wording(search_dir):
+    document = {**MISSING["DOC-UNOBTAINABLE"], "status_note": "could not be obtained as clean text"}
+    result = assess(with_(could_be_refuted_by=["DOC-UNOBTAINABLE"]), search_dir, {"DOC-UNOBTAINABLE": document})
+    assert result.status == SUPPORTED
+    assert any(n.startswith("DOC-UNOBTAINABLE could not be obtained as clean text") for n in result.notes)
+
+
 # The checked-in register.
 
 @pytest.fixture(scope="module")
@@ -192,11 +234,14 @@ def test_checked_in_quotes_all_verify(checked_in):
 
 def test_checked_in_statuses(checked_in):
     assert {cid: c["status"] for cid, c in checked_in.items()} == {
-        "CAND-001": OPEN, "CAND-002": OPEN, "CAND-003": OPEN, "CAND-004": SUPPORTED,
+        "CAND-001": SUPPORTED, "CAND-002": SUPPORTED, "CAND-003": SUPPORTED, "CAND-004": SUPPORTED,
     }
-    # The three open ones wait only on an obtainable document.
-    for cid in ("CAND-001", "CAND-002", "CAND-003"):
-        assert {u["condition"] for u in checked_in[cid]["unmet_conditions"]} == {"no_obtainable_refuter"}
+    # The controlling Arabic text of Law 38/2024 was not searched; that limit stays visible.
+    assert checked_in["CAND-002"]["unobtainable_documents"] == ["AE-FEDERAL-DECREE-LAW-38-2024-AR-CLEAN"]
+    assert any("the controlling Arabic text was not searched" in n for n in checked_in["CAND-002"]["notes"])
+    assert checked_in["CAND-003"]["answered_documents"] == ["CH-EU-MRA-1999"]
+    assert checked_in["CAND-001"]["answered_documents"] == ["OECD-LEGAL-0352-ADHERENTS"]
+    assert any("does not prove the" in n for n in checked_in["CAND-003"]["notes"])
 
 
 def test_resolution_51_stays_missing_and_is_worded_as_inaccessible(checked_in):
@@ -207,6 +252,7 @@ def test_resolution_51_stays_missing_and_is_worded_as_inaccessible(checked_in):
     title = checked_in["CAND-004"]["title"]
     assert "not publicly accessible to the project after documented attempts" in title
     assert "does not exist" not in json.dumps(register)
+    assert assess_register(register, load_chunks())["register_problems"] == []
 
 
 def test_register_never_calls_a_candidate_a_finding_or_violation():

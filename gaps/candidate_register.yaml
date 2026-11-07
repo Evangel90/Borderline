@@ -14,6 +14,10 @@
 #   unobtainable_after_documented_attempts: does not block; needs at least one documented attempt
 #     (without one it is treated as obtainable). Recorded as its own accessibility candidate.
 #   obtainable_not_fetched: blocks every candidate it could refute until it is fetched.
+#   question_answered_by_registered_source: the document was not fetched, but the question it could
+#     settle is answered by `answered_by` quotes from a registered source; does not block, but only if
+#     every answering quote verifies (otherwise it is treated as obtainable). `limits` says what the
+#     answering source does not prove.
 # Documents not known to exist (e.g. "any bilateral memorandum") are not listed here; they go
 # under a candidate's refuting_evidence_to_look_for and do not block.
 missing_documents:
@@ -34,21 +38,58 @@ missing_documents:
 
   - id: CH-EU-MRA-1999
     title: "Agreement between the European Community and the Swiss Confederation on mutual recognition in relation to conformity assessment (1999), medical devices chapter, as currently in force"
-    kind: obtainable_not_fetched
+    kind: question_answered_by_registered_source
     where: "EUR-Lex (Official Journal L 114, 30.4.2002) and later Joint Committee decisions"
     note: "Could show whether Swissmedic reaches NCAR reports through the European Commission."
+    attempts:
+      - date: "2026-11-07"
+        attempt: "Download the agreement text from Fedlex and EUR-Lex"
+        outcome: "Downloads failed for the user; the agreement text itself was not fetched."
+    answered_by:
+      - chunk_id: "CH-EU-MRA-FACTSHEET-2025:p1:c2"
+        quote: "However, the EU has refused to update the agreement since May 2021 due to unresolved institutional issues. This decision is currently affecting medical devices."
+      - chunk_id: "CH-EU-MRA-FACTSHEET-2025:p1:c3"
+        quote: "Switzerland and the EU have set out the arrangements for their cooperation from the end of 2024 until the package comes into force."
+      - chunk_id: "CH-EU-MRA-FACTSHEET-2025:p2:c2"
+        quote: "However, without resolving the institutional issues, Switzerland remains excluded from market surveillance with EU member states for medical devices."
+    limits: >-
+      The status question (is the medical-devices chapter in effect for Swiss participation in EU device
+      cooperation?) is answered by an official Federal Council factsheet dated 13 June 2025. It is not the
+      agreement text, it does not mention the IMDRF NCAR programme by name, and it does not prove the
+      agreement's status after June 2025 (the Switzerland-EU package was not yet in force then).
 
   - id: AE-FEDERAL-DECREE-LAW-38-2024-AR-CLEAN
     title: "Federal Decree-Law No. 38 of 2024 on medical products, pharmacy profession and pharmaceutical establishments: clean, searchable Arabic text"
-    kind: obtainable_not_fetched
-    where: "uaelegislation.gov.ae (refuses automated download; the user can download manually)"
-    note: "The registered Arabic file extracts garbled; only the official English translation was searched, and the Arabic controls."
+    kind: unobtainable_after_documented_attempts
+    where: "uaelegislation.gov.ae (refuses automated download; the user downloaded it manually)"
+    note: "The registered Arabic files extract garbled; only the official English translation was searched, and the Arabic controls."
+    attempts:
+      - date: "2026-11-02"
+        attempt: "Print-to-PDF copy of the official Arabic text (registered as AE-FEDERAL-DECREE-LAW-38-2024-AR)"
+        outcome: "Text layer garbled: presentation-form glyphs, broken ligatures, stray Latin and Syriac-range characters."
+      - date: "2026-11-07"
+        attempt: "Official Arabic PDF downloaded manually from uaelegislation.gov.ae (registered as AE-FEDERAL-DECREE-LAW-38-2024-AR-OFFICIAL)"
+        outcome: "Text layer defective: lam ligatures reversed, letters dropped inside some ligatures, fa extracted as waw-hamza, kashida as repeated alifs. Not repairable by rule without guessing letters."
+      - date: "2026-11-07"
+        attempt: "OCR of the official PDF with scripts/ocr_pdf.py"
+        outcome: "Worse: reversed word order."
+    status_note: "could not be obtained as clean machine-readable Arabic text after documented attempts (the official PDF is public and readable by people; its text layer is defective), so the controlling Arabic text was not searched"
+    accessibility_candidate_exempt_reason: >-
+      The law is public and readable by a person; only its PDF text layer is defective. That limits the
+      project's tools, not public access to the law, so it is not recorded as an accessibility gap candidate.
 
   - id: OECD-LEGAL-0352-ADHERENTS
     title: "List of adherents to the OECD Recommendation on Cross-border Co-operation in the Enforcement of Laws Protecting Privacy (2007)"
-    kind: obtainable_not_fetched
+    kind: question_answered_by_registered_source
     where: "legalinstruments.oecd.org, instrument OECD-LEGAL-0352"
     note: "Would show whether the UAE (not an OECD member) adheres and has a designated contact point."
+    answered_by:
+      - chunk_id: "OECD-LEGAL-0352-ADHERENTS-2026:p8:c1"
+        quote: "Spain Sweden Switzerland Türkiye United Kingdom United States Non-Members None"
+    limits: >-
+      Registered as OECD-LEGAL-0352-ADHERENTS-2026, a browser print of the OECD instrument page taken
+      7 November 2026 18:35, not an official OECD PDF. It shows the adherents on that date only:
+      38 OECD Members including Switzerland, and no non-members, so the UAE was not an adherent.
 
 candidates:
   - id: CAND-003
@@ -69,6 +110,10 @@ candidates:
       - chunk_id: "IMDRF-NCAR-N14-2025:p16:c1"
         role: context
         quote: "Annex 1– IMDRF NCAR Participant Countries"
+      - chunk_id: "CH-EU-MRA-FACTSHEET-2025:p2:c2"
+        role: partner
+        quote: "However, without resolving the institutional issues, Switzerland remains excluded from market surveillance with EU member states for medical devices. This makes it more difficult for Swiss authorities to access the information they need to respond quickly to unsafe products."
+        note: "Official Federal Council factsheet, 13 June 2025; does not name NCAR and does not prove the status after June 2025."
     searches:
       - search_id: SEARCH-NCAR-PARTICIPANTS-001
         absent_terms: ["Switzerland", "Swissmedic", "United Arab Emirates", "UAE"]
@@ -152,6 +197,10 @@ candidates:
       - chunk_id: "OECD-LEGAL-0352:p9:c1"
         role: global_comparator
         quote: "Member countries should designate a national contact point for co-operation and mutual assistance under this Recommendation"
+      - chunk_id: "OECD-LEGAL-0352-ADHERENTS-2026:p8:c1"
+        role: context
+        quote: "Spain Sweden Switzerland Türkiye United Kingdom United States Non-Members None"
+        note: "Browser print of the OECD instrument page, 7 November 2026: Switzerland adheres; there are no non-member adherents, so the UAE did not."
     searches:
       - search_id: SEARCH-HEALTH-DATA-AUTHORITY-001
         absent_terms: ["foreign authorit", "reciproc"]

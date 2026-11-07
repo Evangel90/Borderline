@@ -67,5 +67,11 @@ def passage_matches_action(action: str, passage: str) -> bool:
 
 
 def reference_only_for_retrieval(chunk: Chunk) -> bool:
-    """Keep archived chunks resolvable while excluding known bibliography pages."""
-    return chunk.doc_id == "AE-DHA-SENTINEL-2025" and chunk.page in {21, 22}
+    """Keep chunks resolvable for quote checks while excluding them from search.
+
+    - DHA sentinel standard pp. 21-22: bibliography.
+    - OECD instrument-page print pp. 1-7: a repeat of the Recommendation text registered as
+      OECD-LEGAL-0352; only the adherents list (p. 8) is new, and duplicates displace other evidence.
+    """
+    return ((chunk.doc_id == "AE-DHA-SENTINEL-2025" and chunk.page in {21, 22})
+            or (chunk.doc_id == "OECD-LEGAL-0352-ADHERENTS-2026" and chunk.page <= 7))
