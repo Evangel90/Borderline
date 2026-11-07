@@ -74,6 +74,7 @@ class ActionExecutor:
         "assess_regulatory_competence": ("regulatory_competence_review", "human_review_required"),
         "refer_to_competent_authority": ("competent_authority_referral", "requested"),
         "assess_health_data_localization": ("health_data_localization_review", "human_review_required"),
+        "assess_secondary_use_claim": ("dha_secondary_use_review", "human_review_required"),
     }
 
     def __init__(self, state: dict[str, Any] | None = None,

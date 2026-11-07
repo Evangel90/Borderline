@@ -30,6 +30,8 @@ available_actions:
     description: Request a human review of patient follow-up needs.
   - name: assess_screening_suspension
     description: Record a review of suspension impacts and patient-safety risks.
+  - name: assess_secondary_use_claim
+    description: Record a review of a claimed research or development use of patient health data against DHA's stated conditions, for human decision.
   - name: request_regulatory_evidence
     description: Send a formal request to a foreign counterpart through the liaison channel; no patient data is attached.
 

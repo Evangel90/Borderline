@@ -81,6 +81,25 @@ class InstitutionalAgent:
         )
         return results
 
+    def _with_check_evidence(self, evidence: List[Chunk], checks: List[str],
+                             per_check: int = 2) -> List[Chunk]:
+        """Add a few passages found by each expected policy check, without displacing any.
+
+        The main search uses the event and payload only, so a check that names a source
+        (e.g. a DHA policy) would otherwise never reach retrieval. Each check runs its own
+        small search; its hits are appended after the main results. Nothing is pinned.
+        """
+        if not self.knowledge_index or not checks:
+            return evidence
+        present = {chunk.chunk_id for chunk in evidence}
+        added = []
+        for check in checks:
+            for chunk in self.knowledge_index.search(check, self.allowed_jurisdictions, top_k=per_check):
+                if chunk.chunk_id not in present:
+                    present.add(chunk.chunk_id)
+                    added.append(chunk)
+        return [*evidence, *added]
+
     @staticmethod
     def _keywords(event: str, payload: dict[str, Any], institution: Institution) -> list[str]:
         terms = list(institution.regulatory_scope) + [institution.id]
@@ -183,6 +202,7 @@ class InstitutionalAgent:
             self._keywords(event, payload, self.institution),
             query_context=f"{event} {json.dumps(payload, ensure_ascii=False)}",
         )
+        evidence = self._with_check_evidence(evidence, expected_policy_checks or [])
         declared_actions = {item.name: item for item in self.institution.available_actions}
         selected_actions = allowed_actions or list(declared_actions)
         unknown_actions = set(selected_actions) - set(declared_actions)
