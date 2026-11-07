@@ -1,0 +1,490 @@
+{
+  "search_id": "SEARCH-AI-CHANGE-CONTROL-002",
+  "date": "2026-11-07",
+  "question": "Do the registered UAE, Swiss and EU device sources set an AI-specific mechanism for controlling changes (such as retraining) to an authorized AI medical device?",
+  "searched_for": [
+    "predetermined change control",
+    "change control plan",
+    "modification protocol",
+    "machine learning",
+    "model update",
+    "retrain",
+    "software update",
+    "significant change",
+    "substantial change",
+    "changes to the approved",
+    "change of an algorithm",
+    "major upgraded versions"
+  ],
+  "searched_in": [
+    {
+      "doc_id": "AE-AI-CHARTER-2024",
+      "title": "The UAE Charter for the Development & Use of Artificial Intelligence",
+      "binding": "guidance",
+      "chunks": 6
+    },
+    {
+      "doc_id": "AE-AI-ETHICS-GUIDELINES",
+      "title": "UAE AI Ethics Principles and Guidelines",
+      "binding": "guidelines",
+      "chunks": 24
+    },
+    {
+      "doc_id": "AE-AI-GOV-GUIDELINES",
+      "title": "AI Adoption Guidelines in Government Services",
+      "binding": "guidance",
+      "chunks": 64
+    },
+    {
+      "doc_id": "AE-AI-STRATEGY-2031",
+      "title": "UAE National Strategy for Artificial Intelligence 2031",
+      "binding": "national_strategy",
+      "chunks": 33
+    },
+    {
+      "doc_id": "AE-CYBER-LAW34",
+      "title": "Federal Decree-Law No. 34 of 2021 on Countering Rumors and Cybercrimes",
+      "binding": "law",
+      "chunks": 78
+    },
+    {
+      "doc_id": "AE-DATA-DUBAI-LAW26",
+      "title": "Dubai Law No. 26 of 2015 Regulating Data Dissemination and Exchange in Dubai",
+      "binding": "law",
+      "chunks": 12
+    },
+    {
+      "doc_id": "AE-DATA-OFFICE-LAW-44-2021",
+      "title": "Federal Decree by Law No. (44) of 2021 Establishing the Emirates Data Office",
+      "binding": "law",
+      "chunks": 9
+    },
+    {
+      "doc_id": "AE-DATA-PDPL-2021-EN",
+      "title": "Federal Decree by Law No. (45) of 2021 Concerning the Protection of Personal Data (PDPL), English text from the UAE Legislation portal",
+      "binding": "law",
+      "chunks": 56
+    },
+    {
+      "doc_id": "AE-DHA-AI-HEALTH-2021",
+      "title": "DHA Policy on Artificial Intelligence in Healthcare",
+      "binding": "policy",
+      "chunks": 23
+    },
+    {
+      "doc_id": "AE-DHA-HEALTH-DATA-PROTECTION-PP11-2022",
+      "title": "DHA Policy for Data and Health Information Protection and Confidentiality (DHA/HRS/HISHD/PP-11), English",
+      "binding": "policy",
+      "chunks": 58
+    },
+    {
+      "doc_id": "AE-DHA-HEALTH-INFO-SHARING-PP13-2024",
+      "title": "DHA Policy for Health Data and Information Sharing (DHA/HISHD/PP-13), English",
+      "binding": "policy",
+      "chunks": 69
+    },
+    {
+      "doc_id": "AE-DHA-REFERRAL-2022",
+      "title": "Patient Referral and Inter-Facility Transfer Policy Version 2.1",
+      "binding": "policy",
+      "chunks": 29
+    },
+    {
+      "doc_id": "AE-DHA-REFERRAL-CIRCULAR-2022",
+      "title": "DHA External Circular DHA/OUT/2022/0003632: Patient Referral and Inter-Facility Transfer Policy",
+      "binding": "circular",
+      "chunks": 5
+    },
+    {
+      "doc_id": "AE-DHA-SENTINEL-2025",
+      "title": "Standards for Sentinel Events Notification and Management in Health Facilities Version 1.1",
+      "binding": "standard",
+      "chunks": 45
+    },
+    {
+      "doc_id": "AE-EDE-PHARMACOVIGILANCE-GUIDELINE-AR",
+      "title": "EDE Guideline on Controls and Conditions for Good Pharmacovigilance Practices for Medical Products (Arabic)",
+      "binding": "guideline",
+      "chunks": 43
+    },
+    {
+      "doc_id": "AE-FEDERAL-DECREE-LAW-28-2023-EDE-AR",
+      "title": "Federal Decree-Law No. 28 of 2023 Establishing the Emirates Drug Establishment (Arabic)",
+      "binding": "law",
+      "chunks": 14
+    },
+    {
+      "doc_id": "AE-FEDERAL-DECREE-LAW-38-2024-AR",
+      "title": "Federal Decree-Law No. 38 of 2024 Governing Medical Products, Pharmacists and Pharmaceutical Establishments (Arabic)",
+      "binding": "law",
+      "chunks": 224
+    },
+    {
+      "doc_id": "AE-FEDERAL-DECREE-LAW-38-2024-EN",
+      "title": "Federal Decree-Law No. 38 of 2024 Governing Medical Products, Pharmacists and Pharmaceutical Establishments (English translation)",
+      "binding": "law_translation",
+      "chunks": 283
+    },
+    {
+      "doc_id": "AE-HEALTH-ICT-EXEC-REG-2020",
+      "title": "Cabinet Resolution No. (32) of 2020 Concerning the Executive Regulation of Federal Law No. (2) of 2019 on the Use of ICT in the Areas of Health",
+      "binding": "regulation",
+      "chunks": 15
+    },
+    {
+      "doc_id": "AE-HEALTH-ICT-LAW-2019",
+      "title": "Federal Law No. (2) of 2019 Concerning the Use of ICT in Health Fields",
+      "binding": "law",
+      "chunks": 22
+    },
+    {
+      "doc_id": "CH-CYBER-BACS-FACTSHEET-2025",
+      "title": "BACS information sheet on reporting obligation for cyberattacks on critical infrastructure",
+      "binding": "guidance",
+      "chunks": 3
+    },
+    {
+      "doc_id": "CH-CYBER-ISA-AMENDMENT-2023",
+      "title": "Amendment to the Information Security Act introducing mandatory reporting of cyberattacks on critical infrastructure",
+      "binding": "law_amendment",
+      "chunks": 25
+    },
+    {
+      "doc_id": "CH-CYBER-ORDINANCE-2025",
+      "title": "Cybersecurity Ordinance (CSO)",
+      "binding": "ordinance",
+      "chunks": 15
+    },
+    {
+      "doc_id": "CH-DATA-DPO",
+      "title": "Data Protection Ordinance (DPO, SR 235.11) including Annex 1",
+      "binding": "ordinance",
+      "chunks": 30
+    },
+    {
+      "doc_id": "CH-DATA-FADP",
+      "title": "Federal Act on Data Protection (FADP, SR 235.1)",
+      "binding": "law",
+      "chunks": 52
+    },
+    {
+      "doc_id": "CH-HEALTH-HRA",
+      "title": "Human Research Act (HRA, SR 810.30)",
+      "binding": "law",
+      "chunks": 39
+    },
+    {
+      "doc_id": "CH-HEALTH-MedDO",
+      "title": "Medical Devices Ordinance (MedDO, SR 812.213)",
+      "binding": "ordinance",
+      "chunks": 104
+    },
+    {
+      "doc_id": "CH-HEALTH-TPA",
+      "title": "Therapeutic Products Act (TPA, SR 812.21)",
+      "binding": "law",
+      "chunks": 138
+    },
+    {
+      "doc_id": "EU-MDCG-2020-3-REV1",
+      "title": "MDCG 2020-3 Rev.1 Guidance on significant changes regarding the transitional provision under Article 120 of the MDR",
+      "binding": "guidance",
+      "chunks": 42
+    },
+    {
+      "doc_id": "EU-MDR-2017-745",
+      "title": "Regulation (EU) 2017/745 on medical devices (MDR), consolidated text of 10 January 2025",
+      "binding": "law",
+      "chunks": 233
+    },
+    {
+      "doc_id": "G7-HIROSHIMA-AI-CODE",
+      "title": "G7 Hiroshima Process International Code of Conduct for Advanced AI Systems",
+      "binding": "international_code",
+      "chunks": 20
+    },
+    {
+      "doc_id": "IMDRF-AIML-N88-2025",
+      "title": "IMDRF/AIML WG/N88 FINAL:2025 Good machine learning practice for medical device development: Guiding principles",
+      "binding": "guidance",
+      "chunks": 15
+    },
+    {
+      "doc_id": "IMDRF-NCAR-N14-2025",
+      "title": "IMDRF/NCAR WG/N14 (Edition 5) Medical Devices: Post Market Surveillance: National Competent Authority Report Exchange Criteria and Report Form",
+      "binding": "guidance",
+      "chunks": 35
+    },
+    {
+      "doc_id": "ITU-REPORT-AI-READY-2025",
+      "title": "ITU AI Ready Analysis Towards a Standardized Readiness Framework (Report 2.0)",
+      "binding": "framework_report",
+      "chunks": 58
+    },
+    {
+      "doc_id": "ITU-STANDARDS-Y3172",
+      "title": "Recommendation ITU-T Y.3172: Architectural framework for machine learning in future networks",
+      "binding": "international_standard",
+      "chunks": 59
+    },
+    {
+      "doc_id": "OECD-LEGAL-0352",
+      "title": "OECD Recommendation of the Council on Cross-border Co-operation in the Enforcement of Laws Protecting Privacy",
+      "binding": "recommendation",
+      "chunks": 12
+    },
+    {
+      "doc_id": "UN-AI-GOVERNANCE-2024",
+      "title": "Governing AI for Humanity — UN High-Level Advisory Body on AI Final Report",
+      "binding": "international_report",
+      "chunks": 135
+    },
+    {
+      "doc_id": "US-FDA-PCCP-AI-2025",
+      "title": "Marketing Submission Recommendations for a Predetermined Change Control Plan for Artificial Intelligence-Enabled Device Software Functions (final guidance)",
+      "binding": "guidance",
+      "chunks": 159
+    },
+    {
+      "doc_id": "WHO-GUIDELINES-AI-HEALTH",
+      "title": "WHO Ethics and Governance of Artificial Intelligence for Health",
+      "binding": "guidance",
+      "chunks": 211
+    }
+  ],
+  "found": {
+    "predetermined change control": [
+      "US-FDA-PCCP-AI-2025:p1:c1",
+      "US-FDA-PCCP-AI-2025:p3:c2",
+      "US-FDA-PCCP-AI-2025:p5:c1",
+      "US-FDA-PCCP-AI-2025:p6:c2",
+      "US-FDA-PCCP-AI-2025:p7:c2",
+      "US-FDA-PCCP-AI-2025:p8:c4",
+      "US-FDA-PCCP-AI-2025:p13:c3",
+      "US-FDA-PCCP-AI-2025:p14:c1"
+    ],
+    "change control plan": [
+      "US-FDA-PCCP-AI-2025:p1:c1",
+      "US-FDA-PCCP-AI-2025:p3:c2",
+      "US-FDA-PCCP-AI-2025:p5:c1",
+      "US-FDA-PCCP-AI-2025:p6:c2",
+      "US-FDA-PCCP-AI-2025:p7:c2",
+      "US-FDA-PCCP-AI-2025:p8:c4",
+      "US-FDA-PCCP-AI-2025:p13:c3",
+      "US-FDA-PCCP-AI-2025:p14:c1",
+      "US-FDA-PCCP-AI-2025:p18:c1"
+    ],
+    "modification protocol": [
+      "US-FDA-PCCP-AI-2025:p3:c2",
+      "US-FDA-PCCP-AI-2025:p7:c2",
+      "US-FDA-PCCP-AI-2025:p12:c1",
+      "US-FDA-PCCP-AI-2025:p13:c3",
+      "US-FDA-PCCP-AI-2025:p13:c4",
+      "US-FDA-PCCP-AI-2025:p14:c2",
+      "US-FDA-PCCP-AI-2025:p14:c3",
+      "US-FDA-PCCP-AI-2025:p15:c2",
+      "US-FDA-PCCP-AI-2025:p16:c2",
+      "US-FDA-PCCP-AI-2025:p18:c4",
+      "US-FDA-PCCP-AI-2025:p19:c2",
+      "US-FDA-PCCP-AI-2025:p20:c1",
+      "US-FDA-PCCP-AI-2025:p20:c2",
+      "US-FDA-PCCP-AI-2025:p20:c4",
+      "US-FDA-PCCP-AI-2025:p25:c1",
+      "US-FDA-PCCP-AI-2025:p25:c2",
+      "US-FDA-PCCP-AI-2025:p26:c1",
+      "US-FDA-PCCP-AI-2025:p27:c3",
+      "US-FDA-PCCP-AI-2025:p27:c4",
+      "US-FDA-PCCP-AI-2025:p28:c1",
+      "US-FDA-PCCP-AI-2025:p28:c2",
+      "US-FDA-PCCP-AI-2025:p28:c3",
+      "US-FDA-PCCP-AI-2025:p28:c4",
+      "US-FDA-PCCP-AI-2025:p29:c1",
+      "US-FDA-PCCP-AI-2025:p29:c2",
+      "US-FDA-PCCP-AI-2025:p30:c2",
+      "US-FDA-PCCP-AI-2025:p30:c3",
+      "US-FDA-PCCP-AI-2025:p30:c4",
+      "US-FDA-PCCP-AI-2025:p31:c2",
+      "US-FDA-PCCP-AI-2025:p31:c4",
+      "US-FDA-PCCP-AI-2025:p32:c2",
+      "US-FDA-PCCP-AI-2025:p32:c3",
+      "US-FDA-PCCP-AI-2025:p33:c2",
+      "US-FDA-PCCP-AI-2025:p33:c3",
+      "US-FDA-PCCP-AI-2025:p33:c4",
+      "US-FDA-PCCP-AI-2025:p34:c1",
+      "US-FDA-PCCP-AI-2025:p34:c4",
+      "US-FDA-PCCP-AI-2025:p35:c1",
+      "US-FDA-PCCP-AI-2025:p35:c2",
+      "US-FDA-PCCP-AI-2025:p35:c3",
+      "US-FDA-PCCP-AI-2025:p35:c4",
+      "US-FDA-PCCP-AI-2025:p42:c2",
+      "US-FDA-PCCP-AI-2025:p42:c3",
+      "US-FDA-PCCP-AI-2025:p43:c2",
+      "US-FDA-PCCP-AI-2025:p43:c3",
+      "US-FDA-PCCP-AI-2025:p44:c1",
+      "US-FDA-PCCP-AI-2025:p44:c2",
+      "US-FDA-PCCP-AI-2025:p45:c3",
+      "US-FDA-PCCP-AI-2025:p46:c1",
+      "US-FDA-PCCP-AI-2025:p46:c2",
+      "US-FDA-PCCP-AI-2025:p47:c3",
+      "US-FDA-PCCP-AI-2025:p48:c3"
+    ],
+    "machine learning": [
+      "AE-AI-STRATEGY-2031:p8:c1",
+      "AE-AI-STRATEGY-2031:p21:c1",
+      "AE-AI-ETHICS-GUIDELINES:p24:c1",
+      "AE-AI-GOV-GUIDELINES:p13:c1",
+      "AE-AI-GOV-GUIDELINES:p14:c1",
+      "AE-AI-GOV-GUIDELINES:p15:c1",
+      "AE-AI-GOV-GUIDELINES:p16:c1",
+      "AE-AI-GOV-GUIDELINES:p43:c1",
+      "AE-AI-GOV-GUIDELINES:p63:c1",
+      "AE-AI-GOV-GUIDELINES:p64:c1",
+      "AE-DHA-AI-HEALTH-2021:p3:c2",
+      "AE-DHA-AI-HEALTH-2021:p5:c2",
+      "ITU-STANDARDS-Y3172:p1:c1",
+      "ITU-STANDARDS-Y3172:p3:c1",
+      "ITU-STANDARDS-Y3172:p7:c1",
+      "ITU-STANDARDS-Y3172:p8:c1",
+      "ITU-STANDARDS-Y3172:p9:c1",
+      "ITU-STANDARDS-Y3172:p10:c2",
+      "ITU-STANDARDS-Y3172:p12:c2",
+      "ITU-STANDARDS-Y3172:p13:c1",
+      "ITU-STANDARDS-Y3172:p18:c1",
+      "ITU-STANDARDS-Y3172:p18:c3",
+      "ITU-STANDARDS-Y3172:p20:c2",
+      "ITU-STANDARDS-Y3172:p21:c1",
+      "ITU-STANDARDS-Y3172:p25:c3",
+      "ITU-STANDARDS-Y3172:p31:c2",
+      "ITU-REPORT-AI-READY-2025:p8:c1",
+      "ITU-REPORT-AI-READY-2025:p19:c1",
+      "ITU-REPORT-AI-READY-2025:p26:c1",
+      "ITU-REPORT-AI-READY-2025:p51:c1",
+      "ITU-REPORT-AI-READY-2025:p52:c1",
+      "ITU-REPORT-AI-READY-2025:p53:c1",
+      "WHO-GUIDELINES-AI-HEALTH:p14:c1",
+      "WHO-GUIDELINES-AI-HEALTH:p17:c1",
+      "WHO-GUIDELINES-AI-HEALTH:p20:c1",
+      "WHO-GUIDELINES-AI-HEALTH:p29:c1",
+      "WHO-GUIDELINES-AI-HEALTH:p31:c1",
+      "WHO-GUIDELINES-AI-HEALTH:p41:c1",
+      "WHO-GUIDELINES-AI-HEALTH:p42:c1",
+      "WHO-GUIDELINES-AI-HEALTH:p55:c1",
+      "WHO-GUIDELINES-AI-HEALTH:p58:c1",
+      "WHO-GUIDELINES-AI-HEALTH:p70:c1",
+      "WHO-GUIDELINES-AI-HEALTH:p71:c1",
+      "WHO-GUIDELINES-AI-HEALTH:p114:c1",
+      "WHO-GUIDELINES-AI-HEALTH:p122:c1",
+      "WHO-GUIDELINES-AI-HEALTH:p130:c2",
+      "WHO-GUIDELINES-AI-HEALTH:p131:c1",
+      "WHO-GUIDELINES-AI-HEALTH:p133:c1",
+      "WHO-GUIDELINES-AI-HEALTH:p137:c4",
+      "WHO-GUIDELINES-AI-HEALTH:p139:c1",
+      "WHO-GUIDELINES-AI-HEALTH:p140:c2",
+      "WHO-GUIDELINES-AI-HEALTH:p141:c2",
+      "WHO-GUIDELINES-AI-HEALTH:p145:c1",
+      "WHO-GUIDELINES-AI-HEALTH:p150:c1",
+      "US-FDA-PCCP-AI-2025:p5:c2",
+      "US-FDA-PCCP-AI-2025:p6:c3",
+      "US-FDA-PCCP-AI-2025:p7:c4",
+      "US-FDA-PCCP-AI-2025:p8:c1",
+      "US-FDA-PCCP-AI-2025:p8:c2",
+      "US-FDA-PCCP-AI-2025:p8:c3",
+      "US-FDA-PCCP-AI-2025:p12:c2",
+      "US-FDA-PCCP-AI-2025:p13:c4",
+      "US-FDA-PCCP-AI-2025:p18:c2",
+      "US-FDA-PCCP-AI-2025:p28:c5",
+      "US-FDA-PCCP-AI-2025:p30:c5",
+      "IMDRF-AIML-N88-2025:p1:c1",
+      "IMDRF-AIML-N88-2025:p4:c2",
+      "IMDRF-AIML-N88-2025:p5:c1",
+      "IMDRF-AIML-N88-2025:p6:c3"
+    ],
+    "model update": [
+      "ITU-STANDARDS-Y3172:p18:c2",
+      "ITU-STANDARDS-Y3172:p25:c3",
+      "UN-AI-GOVERNANCE-2024:p50:c1",
+      "US-FDA-PCCP-AI-2025:p35:c4"
+    ],
+    "retrain": [
+      "AE-AI-STRATEGY-2031:p17:c1",
+      "AE-AI-GOV-GUIDELINES:p58:c1",
+      "WHO-GUIDELINES-AI-HEALTH:p18:c1",
+      "WHO-GUIDELINES-AI-HEALTH:p75:c1",
+      "WHO-GUIDELINES-AI-HEALTH:p76:c1",
+      "US-FDA-PCCP-AI-2025:p26:c3",
+      "US-FDA-PCCP-AI-2025:p30:c4",
+      "US-FDA-PCCP-AI-2025:p48:c3",
+      "IMDRF-AIML-N88-2025:p8:c2"
+    ],
+    "software update": [
+      "CH-HEALTH-MedDO:p4:c1",
+      "US-FDA-PCCP-AI-2025:p18:c2",
+      "US-FDA-PCCP-AI-2025:p33:c2"
+    ],
+    "significant change": [
+      "AE-FEDERAL-DECREE-LAW-38-2024-EN:p28:c2",
+      "CH-DATA-DPO:p12:c1",
+      "CH-HEALTH-MedDO:p38:c1",
+      "WHO-GUIDELINES-AI-HEALTH:p87:c1",
+      "US-FDA-PCCP-AI-2025:p9:c3",
+      "US-FDA-PCCP-AI-2025:p10:c1",
+      "US-FDA-PCCP-AI-2025:p10:c3",
+      "US-FDA-PCCP-AI-2025:p23:c5",
+      "EU-MDR-2017-745:p6:c1",
+      "EU-MDR-2017-745:p120:c1",
+      "EU-MDCG-2020-3-REV1:p1:c1",
+      "EU-MDCG-2020-3-REV1:p2:c2",
+      "EU-MDCG-2020-3-REV1:p3:c2",
+      "EU-MDCG-2020-3-REV1:p3:c3",
+      "EU-MDCG-2020-3-REV1:p4:c2",
+      "EU-MDCG-2020-3-REV1:p5:c2",
+      "EU-MDCG-2020-3-REV1:p5:c3",
+      "EU-MDCG-2020-3-REV1:p6:c2",
+      "EU-MDCG-2020-3-REV1:p7:c2",
+      "EU-MDCG-2020-3-REV1:p8:c2",
+      "EU-MDCG-2020-3-REV1:p11:c2",
+      "EU-MDCG-2020-3-REV1:p12:c1",
+      "EU-MDCG-2020-3-REV1:p12:c2",
+      "EU-MDCG-2020-3-REV1:p13:c2",
+      "EU-MDCG-2020-3-REV1:p14:c2",
+      "EU-MDCG-2020-3-REV1:p16:c1"
+    ],
+    "substantial change": [
+      "AE-FEDERAL-DECREE-LAW-38-2024-EN:p28:c2",
+      "EU-MDR-2017-745:p199:c1",
+      "EU-MDCG-2020-3-REV1:p3:c2",
+      "EU-MDCG-2020-3-REV1:p3:c3"
+    ],
+    "changes to the approved": [
+      "EU-MDR-2017-745:p202:c1",
+      "EU-MDR-2017-745:p209:c1",
+      "EU-MDCG-2020-3-REV1:p3:c2"
+    ],
+    "change of an algorithm": [
+      "EU-MDCG-2020-3-REV1:p13:c2",
+      "EU-MDCG-2020-3-REV1:p19:c1"
+    ],
+    "major upgraded versions": [
+      "AE-DHA-AI-HEALTH-2021:p10:c1"
+    ]
+  },
+  "not_found": [],
+  "coverage_limits": {
+    "excluded_from_retrieval": [
+      "AE-DATA-PDPL-2021",
+      "AE-DHA-HEALTH-DATA-PROTECTION-PP11-2022-AR",
+      "AE-EDE-NATIONAL-ESSENTIAL-MEDICINES-2025",
+      "AE-FEDERAL-DECREE-LAW-21-2025-VETERINARY-AR",
+      "AE-HEALTH-DATA-EXEMPTIONS-MR51-2021",
+      "EU-IVDR-2017-746",
+      "EU-MDR-2017-745-OJ"
+    ],
+    "mostly_arabic_not_covered_by_english_terms": [
+      "AE-EDE-PHARMACOVIGILANCE-GUIDELINE-AR",
+      "AE-FEDERAL-DECREE-LAW-28-2023-EDE-AR",
+      "AE-FEDERAL-DECREE-LAW-38-2024-AR"
+    ],
+    "method": "Exact case-insensitive phrase match over ingested English text; no synonyms, no semantic search.",
+    "meaning": "Absence here means absence from this knowledge base, not from the jurisdiction's law."
+  }
+}

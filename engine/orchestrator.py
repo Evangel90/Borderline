@@ -174,7 +174,7 @@ class DrillOrchestrator:
             "The synthetic drill exposed this data-use fact to the FDPIC agent; its real-world truth is not independently established."
         ))
         evidence.extend(self._retrieve_evidence(
-            "AE", "AE-DATA-PDPL-2021",
+            "AE", "AE-DATA-PDPL-2021-EN",
             ["adequate level of protection", "transferred outside the State", "approved by the Office"],
             "Candidate passage for outbound UAE transfer scope; exact support and applicability unreviewed.",
             limit=2,

@@ -1,0 +1,347 @@
+{
+  "search_id": "SEARCH-HEALTH-DATA-AUTHORITY-001",
+  "date": "2026-11-07",
+  "question": "Which UAE authority do the registered sources make responsible for protecting UAE patients' health data once it is stored or processed abroad, and for cooperating with foreign data-protection authorities about it?",
+  "searched_for": [
+    "outside the state",
+    "outside state",
+    "outside the uae",
+    "personal health data",
+    "the bureau",
+    "data office",
+    "information office",
+    "foreign authorit",
+    "international cooperation",
+    "partnership agreements",
+    "health authority",
+    "reciproc"
+  ],
+  "searched_in": [
+    {
+      "doc_id": "AE-AI-CHARTER-2024",
+      "title": "The UAE Charter for the Development & Use of Artificial Intelligence",
+      "binding": "guidance",
+      "chunks": 6
+    },
+    {
+      "doc_id": "AE-AI-ETHICS-GUIDELINES",
+      "title": "UAE AI Ethics Principles and Guidelines",
+      "binding": "guidelines",
+      "chunks": 24
+    },
+    {
+      "doc_id": "AE-AI-GOV-GUIDELINES",
+      "title": "AI Adoption Guidelines in Government Services",
+      "binding": "guidance",
+      "chunks": 64
+    },
+    {
+      "doc_id": "AE-AI-STRATEGY-2031",
+      "title": "UAE National Strategy for Artificial Intelligence 2031",
+      "binding": "national_strategy",
+      "chunks": 33
+    },
+    {
+      "doc_id": "AE-CYBER-LAW34",
+      "title": "Federal Decree-Law No. 34 of 2021 on Countering Rumors and Cybercrimes",
+      "binding": "law",
+      "chunks": 78
+    },
+    {
+      "doc_id": "AE-DATA-DUBAI-LAW26",
+      "title": "Dubai Law No. 26 of 2015 Regulating Data Dissemination and Exchange in Dubai",
+      "binding": "law",
+      "chunks": 12
+    },
+    {
+      "doc_id": "AE-DATA-OFFICE-LAW-44-2021",
+      "title": "Federal Decree by Law No. (44) of 2021 Establishing the Emirates Data Office",
+      "binding": "law",
+      "chunks": 9
+    },
+    {
+      "doc_id": "AE-DATA-PDPL-2021-EN",
+      "title": "Federal Decree by Law No. (45) of 2021 Concerning the Protection of Personal Data (PDPL), English text from the UAE Legislation portal",
+      "binding": "law",
+      "chunks": 56
+    },
+    {
+      "doc_id": "AE-DHA-AI-HEALTH-2021",
+      "title": "DHA Policy on Artificial Intelligence in Healthcare",
+      "binding": "policy",
+      "chunks": 23
+    },
+    {
+      "doc_id": "AE-DHA-HEALTH-DATA-PROTECTION-PP11-2022",
+      "title": "DHA Policy for Data and Health Information Protection and Confidentiality (DHA/HRS/HISHD/PP-11), English",
+      "binding": "policy",
+      "chunks": 58
+    },
+    {
+      "doc_id": "AE-DHA-HEALTH-INFO-SHARING-PP13-2024",
+      "title": "DHA Policy for Health Data and Information Sharing (DHA/HISHD/PP-13), English",
+      "binding": "policy",
+      "chunks": 69
+    },
+    {
+      "doc_id": "AE-DHA-REFERRAL-2022",
+      "title": "Patient Referral and Inter-Facility Transfer Policy Version 2.1",
+      "binding": "policy",
+      "chunks": 29
+    },
+    {
+      "doc_id": "AE-DHA-REFERRAL-CIRCULAR-2022",
+      "title": "DHA External Circular DHA/OUT/2022/0003632: Patient Referral and Inter-Facility Transfer Policy",
+      "binding": "circular",
+      "chunks": 5
+    },
+    {
+      "doc_id": "AE-DHA-SENTINEL-2025",
+      "title": "Standards for Sentinel Events Notification and Management in Health Facilities Version 1.1",
+      "binding": "standard",
+      "chunks": 45
+    },
+    {
+      "doc_id": "AE-EDE-PHARMACOVIGILANCE-GUIDELINE-AR",
+      "title": "EDE Guideline on Controls and Conditions for Good Pharmacovigilance Practices for Medical Products (Arabic)",
+      "binding": "guideline",
+      "chunks": 43
+    },
+    {
+      "doc_id": "AE-FEDERAL-DECREE-LAW-28-2023-EDE-AR",
+      "title": "Federal Decree-Law No. 28 of 2023 Establishing the Emirates Drug Establishment (Arabic)",
+      "binding": "law",
+      "chunks": 14
+    },
+    {
+      "doc_id": "AE-FEDERAL-DECREE-LAW-38-2024-AR",
+      "title": "Federal Decree-Law No. 38 of 2024 Governing Medical Products, Pharmacists and Pharmaceutical Establishments (Arabic)",
+      "binding": "law",
+      "chunks": 224
+    },
+    {
+      "doc_id": "AE-FEDERAL-DECREE-LAW-38-2024-EN",
+      "title": "Federal Decree-Law No. 38 of 2024 Governing Medical Products, Pharmacists and Pharmaceutical Establishments (English translation)",
+      "binding": "law_translation",
+      "chunks": 283
+    },
+    {
+      "doc_id": "AE-HEALTH-ICT-EXEC-REG-2020",
+      "title": "Cabinet Resolution No. (32) of 2020 Concerning the Executive Regulation of Federal Law No. (2) of 2019 on the Use of ICT in the Areas of Health",
+      "binding": "regulation",
+      "chunks": 15
+    },
+    {
+      "doc_id": "AE-HEALTH-ICT-LAW-2019",
+      "title": "Federal Law No. (2) of 2019 Concerning the Use of ICT in Health Fields",
+      "binding": "law",
+      "chunks": 22
+    }
+  ],
+  "found": {
+    "outside the state": [
+      "AE-DATA-PDPL-2021-EN:p3:c1",
+      "AE-DATA-PDPL-2021-EN:p5:c2",
+      "AE-DATA-PDPL-2021-EN:p6:c2",
+      "AE-DATA-PDPL-2021-EN:p15:c1",
+      "AE-DATA-PDPL-2021-EN:p17:c1",
+      "AE-DATA-PDPL-2021-EN:p25:c2",
+      "AE-DATA-PDPL-2021-EN:p26:c2",
+      "AE-FEDERAL-DECREE-LAW-38-2024-EN:p17:c2",
+      "AE-FEDERAL-DECREE-LAW-38-2024-EN:p18:c2",
+      "AE-FEDERAL-DECREE-LAW-38-2024-EN:p44:c2",
+      "AE-FEDERAL-DECREE-LAW-38-2024-EN:p54:c2",
+      "AE-FEDERAL-DECREE-LAW-38-2024-EN:p89:c2",
+      "AE-DATA-OFFICE-LAW-44-2021:p3:c2"
+    ],
+    "outside state": [
+      "AE-HEALTH-ICT-LAW-2019:p8:c1",
+      "AE-HEALTH-ICT-LAW-2019:p10:c1"
+    ],
+    "outside the uae": [
+      "AE-CYBER-LAW34:p29:c1",
+      "AE-CYBER-LAW34:p33:c2",
+      "AE-CYBER-LAW34:p35:c1",
+      "AE-DHA-HEALTH-DATA-PROTECTION-PP11-2022:p27:c1",
+      "AE-DHA-HEALTH-INFO-SHARING-PP13-2024:p15:c1",
+      "AE-DHA-HEALTH-INFO-SHARING-PP13-2024:p30:c2"
+    ],
+    "personal health data": [
+      "AE-DATA-PDPL-2021-EN:p6:c2",
+      "AE-HEALTH-ICT-EXEC-REG-2020:p2:c2",
+      "AE-HEALTH-ICT-EXEC-REG-2020:p3:c1",
+      "AE-FEDERAL-DECREE-LAW-38-2024-EN:p9:c2"
+    ],
+    "the bureau": [
+      "AE-DATA-PDPL-2021-EN:p7:c1",
+      "AE-DATA-PDPL-2021-EN:p11:c2",
+      "AE-DATA-PDPL-2021-EN:p12:c2",
+      "AE-DATA-PDPL-2021-EN:p13:c1",
+      "AE-DATA-PDPL-2021-EN:p13:c2",
+      "AE-DATA-PDPL-2021-EN:p14:c2",
+      "AE-DATA-PDPL-2021-EN:p15:c1",
+      "AE-DATA-PDPL-2021-EN:p15:c2",
+      "AE-DATA-PDPL-2021-EN:p16:c1",
+      "AE-DATA-PDPL-2021-EN:p18:c1",
+      "AE-DATA-PDPL-2021-EN:p24:c2",
+      "AE-DATA-PDPL-2021-EN:p25:c1",
+      "AE-DATA-PDPL-2021-EN:p26:c3",
+      "AE-DATA-PDPL-2021-EN:p27:c1",
+      "AE-DATA-PDPL-2021-EN:p27:c2",
+      "AE-DATA-PDPL-2021-EN:p28:c1"
+    ],
+    "data office": [
+      "AE-DATA-PDPL-2021-EN:p1:c1",
+      "AE-DATA-OFFICE-LAW-44-2021:p1:c1",
+      "AE-DATA-OFFICE-LAW-44-2021:p2:c1",
+      "AE-DATA-OFFICE-LAW-44-2021:p2:c2",
+      "AE-DATA-OFFICE-LAW-44-2021:p3:c1",
+      "AE-DATA-OFFICE-LAW-44-2021:p4:c1",
+      "AE-DATA-OFFICE-LAW-44-2021:p5:c1"
+    ],
+    "information office": [
+      "AE-DHA-HEALTH-DATA-PROTECTION-PP11-2022:p32:c1",
+      "AE-DHA-HEALTH-DATA-PROTECTION-PP11-2022:p35:c1",
+      "AE-DHA-HEALTH-DATA-PROTECTION-PP11-2022:p36:c1",
+      "AE-DHA-HEALTH-INFO-SHARING-PP13-2024:p35:c1"
+    ],
+    "foreign authorit": [],
+    "international cooperation": [
+      "AE-AI-GOV-GUIDELINES:p22:c1",
+      "AE-DATA-OFFICE-LAW-44-2021:p2:c2"
+    ],
+    "partnership agreements": [
+      "AE-DATA-OFFICE-LAW-44-2021:p2:c2"
+    ],
+    "health authority": [
+      "AE-AI-STRATEGY-2031:p12:c1",
+      "AE-HEALTH-ICT-EXEC-REG-2020:p4:c2",
+      "AE-HEALTH-ICT-LAW-2019:p3:c1",
+      "AE-HEALTH-ICT-LAW-2019:p6:c1",
+      "AE-HEALTH-ICT-LAW-2019:p7:c1",
+      "AE-HEALTH-ICT-LAW-2019:p7:c2",
+      "AE-HEALTH-ICT-LAW-2019:p8:c1",
+      "AE-HEALTH-ICT-LAW-2019:p10:c1",
+      "AE-HEALTH-ICT-LAW-2019:p11:c1",
+      "AE-HEALTH-ICT-LAW-2019:p12:c2",
+      "AE-HEALTH-ICT-LAW-2019:p13:c2",
+      "AE-HEALTH-ICT-LAW-2019:p13:c3",
+      "AE-DHA-SENTINEL-2025:p2:c1",
+      "AE-DHA-SENTINEL-2025:p4:c1",
+      "AE-DHA-SENTINEL-2025:p8:c2",
+      "AE-DHA-SENTINEL-2025:p9:c1",
+      "AE-DHA-SENTINEL-2025:p21:c1",
+      "AE-DHA-REFERRAL-2022:p1:c2",
+      "AE-DHA-REFERRAL-2022:p10:c2",
+      "AE-DHA-AI-HEALTH-2021:p1:c1",
+      "AE-DHA-AI-HEALTH-2021:p2:c1",
+      "AE-DHA-AI-HEALTH-2021:p16:c2",
+      "AE-DHA-REFERRAL-CIRCULAR-2022:p1:c3",
+      "AE-FEDERAL-DECREE-LAW-38-2024-EN:p20:c1",
+      "AE-FEDERAL-DECREE-LAW-38-2024-EN:p35:c2",
+      "AE-FEDERAL-DECREE-LAW-38-2024-EN:p39:c1",
+      "AE-FEDERAL-DECREE-LAW-38-2024-EN:p41:c1",
+      "AE-FEDERAL-DECREE-LAW-38-2024-EN:p44:c2",
+      "AE-FEDERAL-DECREE-LAW-38-2024-EN:p47:c2",
+      "AE-FEDERAL-DECREE-LAW-38-2024-EN:p48:c1",
+      "AE-FEDERAL-DECREE-LAW-38-2024-EN:p49:c1",
+      "AE-FEDERAL-DECREE-LAW-38-2024-EN:p49:c2",
+      "AE-FEDERAL-DECREE-LAW-38-2024-EN:p51:c2",
+      "AE-FEDERAL-DECREE-LAW-38-2024-EN:p54:c2",
+      "AE-FEDERAL-DECREE-LAW-38-2024-EN:p55:c2",
+      "AE-FEDERAL-DECREE-LAW-38-2024-EN:p57:c1",
+      "AE-FEDERAL-DECREE-LAW-38-2024-EN:p57:c2",
+      "AE-FEDERAL-DECREE-LAW-38-2024-EN:p58:c1",
+      "AE-FEDERAL-DECREE-LAW-38-2024-EN:p63:c1",
+      "AE-FEDERAL-DECREE-LAW-38-2024-EN:p64:c2",
+      "AE-FEDERAL-DECREE-LAW-38-2024-EN:p65:c2",
+      "AE-FEDERAL-DECREE-LAW-38-2024-EN:p66:c3",
+      "AE-FEDERAL-DECREE-LAW-38-2024-EN:p67:c1",
+      "AE-FEDERAL-DECREE-LAW-38-2024-EN:p67:c2",
+      "AE-FEDERAL-DECREE-LAW-38-2024-EN:p68:c1",
+      "AE-FEDERAL-DECREE-LAW-38-2024-EN:p68:c2",
+      "AE-FEDERAL-DECREE-LAW-38-2024-EN:p69:c2",
+      "AE-FEDERAL-DECREE-LAW-38-2024-EN:p70:c1",
+      "AE-FEDERAL-DECREE-LAW-38-2024-EN:p70:c2",
+      "AE-FEDERAL-DECREE-LAW-38-2024-EN:p71:c1",
+      "AE-FEDERAL-DECREE-LAW-38-2024-EN:p72:c2",
+      "AE-FEDERAL-DECREE-LAW-38-2024-EN:p73:c1",
+      "AE-FEDERAL-DECREE-LAW-38-2024-EN:p73:c2",
+      "AE-FEDERAL-DECREE-LAW-38-2024-EN:p75:c2",
+      "AE-FEDERAL-DECREE-LAW-38-2024-EN:p76:c2",
+      "AE-FEDERAL-DECREE-LAW-38-2024-EN:p81:c1",
+      "AE-FEDERAL-DECREE-LAW-38-2024-EN:p85:c2",
+      "AE-FEDERAL-DECREE-LAW-38-2024-EN:p89:c2",
+      "AE-FEDERAL-DECREE-LAW-38-2024-EN:p94:c1",
+      "AE-FEDERAL-DECREE-LAW-38-2024-EN:p98:c1",
+      "AE-FEDERAL-DECREE-LAW-38-2024-EN:p98:c3",
+      "AE-FEDERAL-DECREE-LAW-38-2024-EN:p99:c2",
+      "AE-FEDERAL-DECREE-LAW-38-2024-EN:p100:c1",
+      "AE-FEDERAL-DECREE-LAW-38-2024-EN:p101:c1",
+      "AE-FEDERAL-DECREE-LAW-38-2024-EN:p102:c2",
+      "AE-FEDERAL-DECREE-LAW-38-2024-EN:p103:c2",
+      "AE-FEDERAL-DECREE-LAW-38-2024-EN:p104:c2",
+      "AE-FEDERAL-DECREE-LAW-38-2024-EN:p105:c2",
+      "AE-FEDERAL-DECREE-LAW-38-2024-EN:p105:c3",
+      "AE-FEDERAL-DECREE-LAW-38-2024-EN:p106:c2",
+      "AE-FEDERAL-DECREE-LAW-38-2024-EN:p107:c2",
+      "AE-FEDERAL-DECREE-LAW-38-2024-EN:p108:c2",
+      "AE-FEDERAL-DECREE-LAW-38-2024-EN:p108:c3",
+      "AE-FEDERAL-DECREE-LAW-38-2024-EN:p109:c1",
+      "AE-FEDERAL-DECREE-LAW-38-2024-EN:p109:c2",
+      "AE-FEDERAL-DECREE-LAW-38-2024-EN:p111:c2",
+      "AE-FEDERAL-DECREE-LAW-38-2024-EN:p112:c2",
+      "AE-FEDERAL-DECREE-LAW-38-2024-EN:p113:c2",
+      "AE-FEDERAL-DECREE-LAW-38-2024-EN:p114:c2",
+      "AE-FEDERAL-DECREE-LAW-38-2024-EN:p115:c2",
+      "AE-FEDERAL-DECREE-LAW-38-2024-EN:p116:c2",
+      "AE-FEDERAL-DECREE-LAW-38-2024-EN:p117:c2",
+      "AE-FEDERAL-DECREE-LAW-38-2024-EN:p118:c2",
+      "AE-FEDERAL-DECREE-LAW-38-2024-EN:p119:c2",
+      "AE-FEDERAL-DECREE-LAW-38-2024-EN:p119:c3",
+      "AE-FEDERAL-DECREE-LAW-38-2024-EN:p120:c1",
+      "AE-FEDERAL-DECREE-LAW-38-2024-EN:p120:c2",
+      "AE-FEDERAL-DECREE-LAW-38-2024-EN:p121:c1",
+      "AE-FEDERAL-DECREE-LAW-38-2024-EN:p121:c2",
+      "AE-FEDERAL-DECREE-LAW-38-2024-EN:p122:c1",
+      "AE-FEDERAL-DECREE-LAW-38-2024-EN:p122:c2",
+      "AE-FEDERAL-DECREE-LAW-38-2024-EN:p124:c2",
+      "AE-FEDERAL-DECREE-LAW-38-2024-EN:p126:c2",
+      "AE-FEDERAL-DECREE-LAW-38-2024-EN:p127:c1",
+      "AE-FEDERAL-DECREE-LAW-38-2024-EN:p128:c1",
+      "AE-DHA-HEALTH-DATA-PROTECTION-PP11-2022:p1:c2",
+      "AE-DHA-HEALTH-DATA-PROTECTION-PP11-2022:p6:c1",
+      "AE-DHA-HEALTH-DATA-PROTECTION-PP11-2022:p7:c1",
+      "AE-DHA-HEALTH-DATA-PROTECTION-PP11-2022:p10:c1",
+      "AE-DHA-HEALTH-DATA-PROTECTION-PP11-2022:p48:c1",
+      "AE-DHA-HEALTH-DATA-PROTECTION-PP11-2022:p49:c2",
+      "AE-DHA-HEALTH-INFO-SHARING-PP13-2024:p1:c2",
+      "AE-DHA-HEALTH-INFO-SHARING-PP13-2024:p8:c1",
+      "AE-DHA-HEALTH-INFO-SHARING-PP13-2024:p9:c1",
+      "AE-DHA-HEALTH-INFO-SHARING-PP13-2024:p17:c2",
+      "AE-DHA-HEALTH-INFO-SHARING-PP13-2024:p38:c2",
+      "AE-DHA-HEALTH-INFO-SHARING-PP13-2024:p39:c2"
+    ],
+    "reciproc": []
+  },
+  "not_found": [
+    "foreign authorit",
+    "reciproc"
+  ],
+  "coverage_limits": {
+    "excluded_from_retrieval": [
+      "AE-DATA-PDPL-2021",
+      "AE-DHA-HEALTH-DATA-PROTECTION-PP11-2022-AR",
+      "AE-EDE-NATIONAL-ESSENTIAL-MEDICINES-2025",
+      "AE-FEDERAL-DECREE-LAW-21-2025-VETERINARY-AR",
+      "AE-HEALTH-DATA-EXEMPTIONS-MR51-2021"
+    ],
+    "mostly_arabic_not_covered_by_english_terms": [
+      "AE-EDE-PHARMACOVIGILANCE-GUIDELINE-AR",
+      "AE-FEDERAL-DECREE-LAW-28-2023-EDE-AR",
+      "AE-FEDERAL-DECREE-LAW-38-2024-AR"
+    ],
+    "method": "Exact case-insensitive phrase match over ingested English text; no synonyms, no semantic search.",
+    "meaning": "Absence here means absence from this knowledge base, not from the jurisdiction's law."
+  }
+}
