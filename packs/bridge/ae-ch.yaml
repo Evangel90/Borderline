@@ -54,7 +54,8 @@ liaison:
   request_types:
     cross_border_evidence_request:
       answer: UNCLEAR
-      reason: "No UAE-Switzerland cooperation instrument between health or data-protection regulators is registered in this bridge pack. Each authority's domestic information powers do not by themselves establish a basis to request evidence from, or answer, a foreign regulator."
+      reason: "Swiss TPA Art. 64 lets Swiss enforcement authorities disclose non-public information to foreign authorities that enforce therapeutic-product regulations, if the requester is bound by official secrecy, uses it only in that enforcement and passes nothing on; health data needs further conditions such as averting a serious health risk. No UAE assurance meeting these conditions, and no UAE-Switzerland cooperation instrument, is registered in this bridge pack."
+      sources: [CH-HEALTH-TPA]
     incident_notification:
       answer: UNCLEAR
       reason: "No UAE-Switzerland vigilance or incident-notification exchange instrument is registered in this bridge pack."
