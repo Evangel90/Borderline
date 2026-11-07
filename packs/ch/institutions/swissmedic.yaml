@@ -32,6 +32,8 @@ available_actions:
     description: Request the manufacturer's incident report through the simulated process.
   - name: consider_field_safety_action
     description: Record whether a field safety action merits further review in the synthetic drill.
+  - name: share_patient_data_via_liaison
+    description: Send patient data to a foreign counterpart through the liaison channel; it is delivered only if the liaison check finds verified legal-basis and transfer-rules quotes.
 
 drill_behavior:
   strictness: high

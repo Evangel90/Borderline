@@ -30,7 +30,8 @@ from dataclasses import dataclass, field
 from typing import Any, Protocol
 
 from engine.quotes import (  # re-exported for callers of the liaison channel
-    MIN_QUOTE_WORDS, TRANSLATION_LABEL, garbled_arabic, normalize_whitespace, verify_quote,
+    MIN_QUOTE_WORDS, TRANSLATION_LABEL, garbled_arabic, locate_quote, normalize_whitespace,
+    verify_quote,
 )
 from engine.models import (
     LIAISON_ANSWERS, LIAISON_GAP_TYPES, BridgeConfig, Chunk, Institution,
@@ -46,6 +47,36 @@ QUESTIONS = {
 CANDIDATE_GAP_TYPES = ("policy_gap", "implementation_gap", "conflict")
 
 
+def question_notes(payload: dict[str, Any]) -> dict[str, str]:
+    """Explain what each question means for this letter, so 'transfer' is not misread."""
+    if payload.get("patient_data_included") is False and payload.get("personal_data_included", False) is False:
+        transfer = (
+            "This letter carries no personal or patient data. Answer whether sending this letter, and "
+            "disclosing the information it asks for, is allowed under the sender's and the receiver's rules."
+        )
+    else:
+        transfer = (
+            "This letter carries patient or personal data. Answer whether the sending side's rules permit "
+            "this disclosure abroad and the receiving side's rules allow it to be received, for this purpose."
+        )
+    return {
+        "legal_basis": "Name the provision that lets the receiver (or sender) share or act on this, if one is shown.",
+        "transfer_rules": transfer,
+        "counterpart": "Is the receiver the authority the quoted provisions make responsible for this subject?",
+    }
+
+
+def final_decided_by(check: dict[str, Any], reviewer_model: str) -> str:
+    """Who made the final answer: the AI reviewer, or a code rule that changed it."""
+    if check["proposed_answer"] is None:
+        return "code: reviewer gave no usable answer"
+    if check["answer"] != check["proposed_answer"]:
+        return "code: " + next(
+            (note for note in check["adjustments"] if "set to UNCLEAR" in note), "answer changed by code check"
+        )
+    return f"AI liaison reviewer ({reviewer_model})"
+
+
 class Reviewer(Protocol):
     model_name: str
 
@@ -59,10 +90,10 @@ class Reviewer(Protocol):
 class LiaisonReviewer:
     """AI liaison reviewer. It is not the sender, so it has no stake in delivery."""
 
-    def __init__(self, llm: Any, index: Any, top_k: int = 4):
+    def __init__(self, llm: Any, index: Any, per_side: int = 2):
         self.llm = llm
         self.index = index
-        self.top_k = top_k
+        self.per_side = per_side
 
     @property
     def model_name(self) -> str:
@@ -70,20 +101,30 @@ class LiaisonReviewer:
 
     def gather_evidence(self, sender: Institution, receiver: Institution,
                         request_type: str, payload: dict[str, Any]) -> list[Chunk]:
-        jurisdictions = sorted({sender.jurisdiction, receiver.jurisdiction, "GLOBAL"})
-        facts = json.dumps(payload, ensure_ascii=False)
+        # One query per question, worded like the statutes rather than built from the letter (the
+        # letter's facts are already in the prompt; adding them to the search pulled it towards policy
+        # text). Phrasings were checked to surface the provisions each question turns on, e.g. UAE
+        # Health Data Law Art. 13, PDPL Art. 2, FADP Arts. 16 and 55, TPA Art. 64. Each side is
+        # searched on its own so one country's passages cannot crowd out the other's rules. Global
+        # sources are context, never a legal basis, so only one is shown.
         queries = [
-            f"legal basis to disclose information to a foreign authority; {request_type}; "
-            f"cooperation between {sender.name} and {receiver.name}; official secrecy; {facts}",
-            "transfer or disclosure of personal or health data outside the State or abroad; "
-            f"adequacy, safeguards, exceptions; {facts}",
-            f"competent authority; foreign authorities responsible for {', '.join(receiver.regulatory_scope)}; "
-            f"{receiver.name}; {sender.name}; {receiver.mandate}",
+            ("administrative assistance; disclose information to foreign authorities responsible for "
+             "enforcement or for data protection; official secrecy; reciprocity; "
+             f"{request_type.replace('_', ' ')}", True),
+            ("store, process or transfer health data and information outside the State; resolution of the "
+             "Health Authority; disclosure of personal data abroad; adequate level of protection; exceptions",
+             False),
+            ("scope of application; competent authority; controller or processor residing outside the State "
+             "processing personal data of data subjects inside the State; foreign authorities responsible for "
+             f"{', '.join(receiver.regulatory_scope).replace('_', ' ')}", False),
         ]
+        sides = list(dict.fromkeys([sender.jurisdiction, receiver.jurisdiction]))
         seen: dict[str, Chunk] = {}
-        for query in queries:
-            for chunk in self.index.search(query, jurisdictions, top_k=self.top_k):
-                seen.setdefault(chunk.chunk_id, chunk)
+        for query, with_global in queries:
+            for jurisdiction in sides + (["GLOBAL"] if with_global else []):
+                top_k = 1 if jurisdiction == "GLOBAL" else self.per_side
+                for chunk in self.index.search(query, [jurisdiction], top_k=top_k):
+                    seen.setdefault(chunk.chunk_id, chunk)
         return list(seen.values())
 
     @staticmethod
@@ -122,6 +163,7 @@ class LiaisonReviewer:
                 "patient_data_included": payload.get("patient_data_included", "not stated"),
             },
             "questions": QUESTIONS,
+            "question_notes": question_notes(payload),
             "passages": [
                 {
                     "chunk_id": chunk.chunk_id,
@@ -184,7 +226,10 @@ def finalize_answer(key: str, proposed: LiaisonAnswer | None,
             "adjustments": ["No reviewer answer; set to UNCLEAR / missing_evidence."],
             "human_review_required": False, "human_review_note": "",
         }
-    quotes = [verify_quote(q.chunk_id, q.quote, q.translation, shown) for q in proposed.quotes]
+    quotes = [locate_quote(q.chunk_id, q.quote, q.translation, shown) for q in proposed.quotes]
+    for q in quotes:
+        if q.get("chunk_id_corrected_from"):
+            adjustments.append(q["correction"])
     verified = [q for q in quotes if q["verified"]]
     failed = [q for q in quotes if not q["verified"]]
     answer = proposed.answer if proposed.answer in LIAISON_ANSWERS else "UNCLEAR"
@@ -350,6 +395,7 @@ class LiaisonChannel:
         for key in QUESTIONS:
             check = finalize_answer(key, getattr(review, key) if review else None, shown)
             check["decided_by"] = review_record["reviewer_model"]
+            check["final_decided_by"] = final_decided_by(check, review_record["reviewer_model"])
             check["reference_answer"] = reference[key].answer
             check["reference_reason"] = reference[key].reason
             check["agrees_with_reference"] = reference[key].answer == check["answer"]
@@ -369,7 +415,14 @@ class LiaisonChannel:
         hard_floor_applied = carries_patient_data and not basis_verified
         if hard_floor_applied:
             status = "BLOCK"
+        if hard_floor_applied:
+            status_by = "code: patient-data rule (no verified legal-basis and transfer-rules quotes)"
+        elif status == "ROUTE":
+            status_by = "code routing rule: all three final answers YES"
+        else:
+            status_by = "code routing rule: at least one final answer is not YES"
         review_record.update(
+            status_decided_by=status_by,
             patient_data_carried=carries_patient_data,
             hard_floor_applied=hard_floor_applied,
             quotes_checked=sum(len(check["quotes"]) for check in checks),

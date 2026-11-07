@@ -24,6 +24,14 @@ class ActionExecutor:
     LIAISON_REQUEST_TYPES = {
         "request_regulatory_evidence": "cross_border_evidence_request",
         "route_regulatory_notification": "incident_notification",
+        "share_patient_data_via_liaison": "patient_data_disclosure",
+    }
+
+    # State key recorded for each kind of letter; the per-sender key is "<key>.<institution id>".
+    LIAISON_RECORD_KEYS = {
+        "request_regulatory_evidence": "regulatory_evidence_request",
+        "route_regulatory_notification": "regulatory_notification",
+        "share_patient_data_via_liaison": "patient_data_disclosure",
     }
 
     GATED_ACTIONS = {
@@ -87,11 +95,7 @@ class ActionExecutor:
     ) -> ActionResult:
         request_type = payload.get("request_type", self.LIAISON_REQUEST_TYPES[action])
         decision = self.liaison.check(institution, payload["target"], request_type, payload)
-        record_key = (
-            "regulatory_evidence_request"
-            if action == "request_regulatory_evidence"
-            else "regulatory_notification"
-        )
+        record_key = self.LIAISON_RECORD_KEYS[action]
         # The shared key keeps the latest outcome; the per-sender key lets a scenario
         # branch on one institution's letter when several are in flight.
         sender_key = f"{record_key}.{institution.id}"

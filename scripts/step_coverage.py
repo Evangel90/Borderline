@@ -1,7 +1,7 @@
 """Show which drill steps each run reached, and which liaison branches have been exercised.
 
 Usage:
-  python scripts/step_coverage.py retinopathy-ae-ch=RUN_A retinopathy-ae-ch-cooperation=RUN_B
+  python scripts/step_coverage.py retinopathy-governed=RUN_A retinopathy-ae-ch=RUN_B retinopathy-insufficient-evidence=RUN_C
 
 A conditional step runs only when an earlier letter was delivered (or blocked), so one run can
 never reach both branches of the same letter. This report shows, across all the runs given,

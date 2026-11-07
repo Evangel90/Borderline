@@ -38,7 +38,11 @@ audit-evidence:
 assess-candidates:
 	$(PYTHON) scripts/assess_candidates.py
 
-# Usage: make step-coverage RUNS="retinopathy-ae-ch=<run> retinopathy-ae-ch-cooperation=<run>"
+decision-trail:
+	@if [ -z "$(RUN)" ]; then echo "Error: specify RUN=<run_id>"; exit 1; fi
+	$(PYTHON) scripts/decision_trail.py --run $(RUN)
+
+# Usage: make step-coverage RUNS="retinopathy-governed=<run> retinopathy-ae-ch=<run> retinopathy-insufficient-evidence=<run>"
 step-coverage:
 	$(PYTHON) scripts/step_coverage.py $(RUNS)
 

@@ -81,3 +81,39 @@ def verify_quote(chunk_id: str, quote: str, translation: str,
     else:
         record["verified"] = True
     return record
+
+
+RELOCATABLE_FAILURES = (
+    "Quote does not appear verbatim in the cited chunk.",
+    "Chunk ID was not among the passages available to this check (shown to the reviewer, or in the knowledge base).",
+)
+
+
+def locate_quote(chunk_id: str, quote: str, translation: str,
+                 shown: dict[str, Chunk]) -> dict[str, Any]:
+    """Verify a quote; if it is real but labelled with the wrong passage, move it to the right one.
+
+    Only the label is corrected, never the text: the quote must still appear word for word (after
+    whitespace normalisation) in exactly one other passage that was shown, and pass every other
+    check there (length, Arabic rules). A quote found nowhere, or in several passages, still fails.
+    """
+    record = verify_quote(chunk_id, quote, translation, shown)
+    if record["verified"] or record["failure"] not in RELOCATABLE_FAILURES:
+        return record
+    matches = [
+        candidate for other_id in shown if other_id != chunk_id
+        for candidate in [verify_quote(other_id, quote, translation, shown)] if candidate["verified"]
+    ]
+    if len(matches) == 1:
+        corrected = matches[0]
+        corrected["chunk_id_corrected_from"] = chunk_id
+        corrected["correction"] = (
+            f"Exact quote found in {corrected['chunk_id']}, not in the cited {chunk_id}; "
+            "chunk ID corrected by code. The quote text was not changed."
+        )
+        return corrected
+    if len(matches) > 1:
+        record["failure"] += (
+            f" The same text appears in {len(matches)} other passages, so the code cannot tell which was meant."
+        )
+    return record

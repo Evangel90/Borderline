@@ -1,0 +1,172 @@
+id: retinopathy-insufficient-evidence
+title: "Drill C, Insufficient-Evidence Path: Relevant Sources Present, Decisive Document Missing"
+version: "1.0.0"
+
+# Purpose: each question here has relevant registered sources, but the document or fact that would
+# decide it is not in the knowledge base. The expected honest answer is UNCLEAR / missing_evidence,
+# recorded as homework, not a gap claim. Nothing forces that outcome: the AI agents and the AI
+# liaison reviewer decide, and code checks every quote.
+#
+#   step 1  MoHAP: is the Zurich storage covered by a Health Authority resolution or exception under
+#           UAE Federal Law No. 2 of 2019 Art. 13? The exceptions resolution (MR51/2021) is not
+#           obtainable (see gaps/candidate_register.yaml).
+#   step 2  UAE Data Office -> FDPIC with no reciprocity assurance; FADP Art. 55(1)(a) needs
+#           reciprocity "guaranteed", and no UAE-Switzerland instrument is registered.
+#   step 5  EDE: Decree-Law 38/2024 Art. 68 / 70 powers depend on a report or case the file does not show.
+#   step 6  Swissmedic: the CH-EU MRA fact sheet (June 2025) does not show the agreement's status today.
+#   step 7  NCSC: the Swiss cyberattack reporting duty depends on critical-infrastructure status, unverified.
+
+standard_alignment:
+  itu_recommendation: "ITU-T Y.3172"
+  adaptation_note: "Healthcare governance simulation inspired by pipeline concepts; not a telecom implementation or conformance claim."
+  components:
+    ml_intent: "Test whether the liaison channel routes UAE requests that are scoped to the Swiss conditions for administrative assistance."
+    src: "Synthetic staged incident facts and registered policy-source records."
+    collector: "Source ingestion and hybrid lexical/vector evidence retrieval."
+    pre_processor: "PDF text/OCR extraction, passage chunking, and provenance metadata."
+    model: "Configured AI agent proposes a permitted synthetic drill action with a concise rationale."
+    policy: "Institution action allow-lists, citation triage, the liaison-channel border gate, and human-approval state."
+    distributor: "Orchestrator dispatches the selected action to a synthetic action handler."
+    sink: "Synthetic state changes and recorded tool outcomes; no external system is connected."
+    ml_function_orchestrator: "engine/orchestrator.py releases events and invokes role-specific agents."
+    sandbox: "Borderline local isolated multi-agent drill execution runtime."
+
+context:
+  domain: health
+  host_country: AE
+  partner_country: CH
+  description: >
+    Same fictional incident as the main drill: RetinaVision-DX v2.4, made and
+    operated by the fictional RetinaSwiss AG in Zurich, misses referable
+    diabetic retinopathy in Dubai clinics after an update pushed from a
+    compromised vendor account, and UAE patients' images were retained in
+    Zurich. Each authority faces a question its registered sources speak to,
+    but where the deciding document or fact is missing. All scenario data is
+    synthetic.
+
+actors:
+  ae:
+    - mohap                  # Federal health ministry
+    - uae_data_office        # PDPL regulator
+    - ede                    # Emirates Drug Establishment, medical products authority
+  ch:
+    - retina_swiss_ag        # Fictional vendor
+    - fodio                  # Federal Data Protection and Information Commissioner (FDPIC)
+    - swissmedic             # Medical-device regulator
+    - ncsc                   # National Cyber Security Centre
+  neutral:
+    - policy_adviser
+
+timeline:
+  - step: 1
+    time_offset: "T+7h"
+    phase: "MoHAP asks whether the Zurich storage was ever approved"
+    event: "MoHAP learns that UAE patients' retinal images were kept in Zurich and must decide whether any approval or exception covers this."
+    initiator: mohap
+    payload: {event_type: localization_question}
+    participants: [mohap]
+    agent_views:
+      mohap:
+        event: "UAE patients' retinal images were kept and processed in Zurich. Federal Law No. 2 of 2019 Art. 13 allows this only under a Health Authority resolution in coordination with the Ministry. The ministerial resolution listing exceptions could not be obtained by this project, and no approval for this vendor has been located."
+        payload: {data_origin: AE, data_location: CH, data_type: retinal_images, outside_state_approval: not_located, exceptions_resolution_in_knowledge_base: false}
+        expected_policy_checks: ["What does Art. 13 require, and what would you need to see to decide whether an exception covers this storage? Do not assume the content of a document you have not seen."]
+        allowed_actions: [assess_health_data_localization, issue_safety_inquiry]
+
+  - step: 2
+    time_offset: "T+8h"
+    phase: "The UAE Data Office asks the FDPIC for help without a reciprocity undertaking"
+    event: "The UAE Data Office sends the FDPIC a data-protection assistance request about UAE clinic staff data exposed through the compromised account."
+    initiator: uae_data_office
+    payload: {event_type: data_protection_assistance_request}
+    participants: [uae_data_office]
+    agent_views:
+      uae_data_office:
+        event: "The compromised vendor account could read a support portal holding names, work emails and login names of about 120 UAE clinic staff; no health data. Send a formal liaison request to the FDPIC asking what the account could reach. The request carries no personal data. No UAE-Switzerland reciprocity arrangement for administrative assistance is on record, and the Office has not given a reciprocity assurance."
+        payload: {target: fodio, request_type: data_protection_assistance_request, patient_data_included: false, personal_data_included: false, data_category: staff_contact_and_login_data, health_data_involved: false, requester_role: uae_data_protection_authority, reciprocity_assurance: not_given, uae_ch_reciprocity_instrument: not_located_in_knowledge_base}
+        expected_policy_checks: ["Which conditions does the Swiss provision on assistance to foreign data-protection authorities set, and which of them can be shown on the facts you have?"]
+        allowed_actions: [request_regulatory_evidence]
+
+  - step: 3
+    time_offset: "T+8h"
+    phase: "The FDPIC receives the UAE Data Office request"
+    event: "The liaison channel delivers the UAE Data Office's request to the FDPIC."
+    requires_state: {regulatory_evidence_request.uae_data_office: delivered}
+    initiator: uae_data_office
+    payload: {event_type: liaison_request_delivered}
+    participants: [fodio]
+    agent_views:
+      fodio:
+        event: "The UAE Data Office asks what a compromised vendor account could reach in a portal holding UAE clinic staff contact and login data. It gives no reciprocity assurance, and no UAE-Switzerland reciprocity arrangement is on record."
+        payload: {requesting_authority: uae_data_office, requesting_country: AE, data_category: staff_contact_and_login_data, reciprocity_assurance: not_given}
+        expected_policy_checks: ["FADP Art. 55(1)(a) needs reciprocity to be guaranteed. What evidence would show it, and can you assist without it?"]
+
+  - step: 4
+    time_offset: "T+8h"
+    phase: "The liaison channel blocks the UAE Data Office request"
+    event: "The liaison check blocks the UAE Data Office's request to the FDPIC; nothing crosses the border."
+    requires_state: {regulatory_evidence_request.uae_data_office: blocked_by_liaison_check}
+    initiator: uae_data_office
+    payload: {event_type: liaison_request_blocked}
+    participants: [policy_adviser]
+    agent_views:
+      policy_adviser:
+        event: "A UAE data-protection authority's request to its Swiss counterpart, with no reciprocity assurance, was blocked by the liaison check. Identify which check failed and which missing document or fact would settle it."
+        payload: {requesting_authority: uae_data_office, target: fodio, request_type: data_protection_assistance_request, reciprocity_assurance: not_given}
+        visible_state_keys: [regulatory_evidence_request.uae_data_office]
+        allowed_actions: [request_gap_supporting_evidence, prepare_policy_gap_review]
+
+  - step: 5
+    time_offset: "T+10h"
+    phase: "EDE weighs its investigation powers without the manufacturer's report"
+    event: "EDE must decide whether it can investigate or demand information from the manufacturer."
+    initiator: ede
+    payload: {event_type: investigation_power_question}
+    participants: [ede]
+    agent_views:
+      ede:
+        event: "A Swiss manufacturer's software update is linked to missed diagnoses in Dubai. Decree-Law 38/2024 gives EDE investigation and information powers in connection with reports or cases described in Articles 68 and 70. No manufacturer report to EDE is in the file, and whether this is an Article 70 case has not been established."
+        payload: {device: RetinaVision-DX, version: "2.4", article_68_report_status: not_in_file, article_70_case_status: not_established, scenario_product_classification: "EDE-classified medical equipment / SaMD (fictional letter)"}
+        expected_policy_checks: ["Which conditions in Articles 68 and 70 must be met before EDE acts, and which facts or documents are missing to show they are met?"]
+        allowed_actions: [request_ede_manufacturer_evidence, assess_ede_device_safety_action]
+
+  - step: 6
+    time_offset: "T+10h"
+    phase: "Swissmedic asks whether the EU route still applies"
+    event: "Swissmedic considers whether it can reach EU incident-exchange information about the device through the Swiss-EU agreement."
+    initiator: swissmedic
+    payload: {event_type: cooperation_route_question}
+    participants: [swissmedic]
+    agent_views:
+      swissmedic:
+        event: "The manufacturer is Swiss and the incident is in the UAE. Swissmedic considers whether EU device-incident cooperation could help. The registered Federal Council fact sheet on the Swiss-EU mutual recognition agreement is dated June 2025; the agreement text itself is not in the knowledge base."
+        payload: {manufacturer_location: CH, incident_country: AE, mra_text_in_knowledge_base: false, mra_fact_sheet_date: "2025-06-13"}
+        expected_policy_checks: ["What does the registered fact sheet say about medical devices under the Swiss-EU agreement, and what can it not show about the position today?"]
+        allowed_actions: [review_foreign_incident_report, request_manufacturer_report]
+
+  - step: 7
+    time_offset: "T+12h"
+    phase: "NCSC asks whether the reporting duty reaches the vendor"
+    event: "NCSC must decide whether the vendor had to report the compromised account."
+    initiator: retina_swiss_ag
+    payload: {event_type: reporting_duty_question}
+    participants: [ncsc]
+    agent_views:
+      ncsc:
+        event: "A Swiss medical-AI vendor reports that a production update was pushed from a compromised account. The Swiss cyberattack reporting duty applies to critical-infrastructure operators; whether this vendor is one has not been established."
+        payload: {reporting_entity: retina_swiss_ag, incident_type: credential_compromise, critical_infrastructure_status: not_established, affected_users_location: AE}
+        expected_policy_checks: ["Which entities does the reporting duty cover, and which fact about this vendor is missing to decide whether it applies?"]
+        allowed_actions: [assess_ncsc_reporting_duty, request_ncsc_security_evidence]
+
+  - step: 8
+    time_offset: "T+24h"
+    phase: "The homework list"
+    event: "The policy adviser lists what is missing and who could supply it."
+    initiator: policy_adviser
+    payload: {event_type: homework}
+    participants: [policy_adviser]
+    agent_views:
+      policy_adviser:
+        event: "Several questions in this drill have relevant sources but no deciding document or fact: an Art. 13 exception for the Zurich storage, a UAE-Switzerland reciprocity arrangement, a manufacturer report to EDE, the current status of the Swiss-EU agreement, and the vendor's critical-infrastructure status. For each, say which source speaks to it, what is missing, and who could supply it. Do not treat a missing document as proof that something does not exist."
+        payload: {open_questions: [art_13_exception, reciprocity_arrangement, manufacturer_report_to_ede, ch_eu_mra_current_status, critical_infrastructure_status], visible_outcomes: [regulatory_evidence_request.uae_data_office]}
+        visible_state_keys: [regulatory_evidence_request.uae_data_office]
+        allowed_actions: [request_gap_supporting_evidence, prepare_policy_gap_review]

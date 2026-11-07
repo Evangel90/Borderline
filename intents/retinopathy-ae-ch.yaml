@@ -337,3 +337,60 @@ timeline:
       policy_adviser:
         event: "A judge-injected allegation raises a new secondary-use question; distinguish allegation from established fact."
         payload: {claim: insurer_pricing_use, verification_status: unverified, required_next_step: evidence_collection}
+
+  # Patient data leaving the UAE (expected to be stopped). UAE Federal Law No. 2 of 2019 Art. 13
+  # bars storing or processing UAE health data outside the State without a Health Authority
+  # resolution, and none is in the knowledge base. The liaison reviewer and the patient-data rule
+  # decide; nothing here forces the outcome. Step 15 is the delivered branch, 16 the blocked one.
+  - step: 14
+    time_offset: "T+26h"
+    phase: "DHA tries to send the patients' images to Switzerland for investigation"
+    event: "To speed up the root-cause investigation, DHA tries to send Swissmedic the 47 patients' retinal images and screening records through the liaison channel."
+    initiator: dha
+    payload: {event_type: patient_data_disclosure}
+    participants: [dha]
+    agent_views:
+      dha:
+        event: "Swissmedic's investigation of the device fault would be faster with the original cases. Send Swissmedic the 47 patients' retinal images and screening records through the liaison channel. No Health Authority resolution allowing UAE health data to be processed outside the State has been located."
+        payload: {target: swissmedic, request_type: patient_data_disclosure, patient_data_included: true, data_subjects: 47, data_fields: [retinal_images, screening_records], images_included: true, purpose: device_root_cause_investigation, direction: AE_to_CH, data_origin: AE, outside_state_approval: not_located}
+        expected_policy_checks: ["May UAE health data be stored or processed outside the State for this purpose, and is any required resolution on record?"]
+        allowed_actions: [share_patient_data_via_liaison]
+
+  - step: 15
+    time_offset: "T+26h"
+    phase: "Swissmedic receives the patients' images"
+    event: "The liaison channel delivers DHA's patient images and records to Swissmedic."
+    requires_state: {patient_data_disclosure.dha: delivered}
+    initiator: dha
+    payload: {event_type: liaison_request_delivered}
+    participants: [swissmedic, policy_adviser]
+    agent_views:
+      swissmedic:
+        event: "DHA has sent the retinal images and screening records of 47 UAE patients for the device investigation."
+        payload: {sending_authority: dha, data_subjects: 47, images_included: true, purpose: device_root_cause_investigation}
+        allowed_actions: [review_foreign_incident_report, request_manufacturer_report]
+      policy_adviser:
+        event: "UAE patients' images were delivered to Switzerland through the liaison channel. Check which provisions the liaison check relied on, and flag anything a person must confirm."
+        payload: {sending_authority: dha, target: swissmedic, patient_data_included: true}
+        visible_state_keys: [patient_data_disclosure.dha]
+        allowed_actions: [prepare_policy_gap_review, request_gap_supporting_evidence]
+
+  - step: 16
+    time_offset: "T+26h"
+    phase: "The liaison channel stops the patients' images at the border"
+    event: "The liaison check blocks DHA's patient images and records; no patient data leaves the UAE."
+    requires_state: {patient_data_disclosure.dha: blocked_by_liaison_check}
+    initiator: dha
+    payload: {event_type: liaison_request_blocked}
+    participants: [dha, policy_adviser]
+    agent_views:
+      dha:
+        event: "Your patient images and records were not sent to Swissmedic. The investigation must proceed without them for now."
+        payload: {target: swissmedic, patient_data_sent: false, known_safety_signal: true}
+        visible_state_keys: [patient_data_disclosure.dha]
+        allowed_actions: [open_clinical_incident_review, request_patient_follow_up_review]
+      policy_adviser:
+        event: "UAE patients' images were stopped at the border by the liaison check. Identify which check failed and whether this reflects a rule that is working, a missing instrument, or missing evidence."
+        payload: {sending_authority: dha, target: swissmedic, request_type: patient_data_disclosure, patient_data_included: true}
+        visible_state_keys: [patient_data_disclosure.dha]
+        allowed_actions: [prepare_policy_gap_review]

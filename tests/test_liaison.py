@@ -167,7 +167,8 @@ def test_quote_check_normalizes_whitespace_only():
     (LiaisonQuote(chunk_id=CH_BASIS.chunk_id,
                   quote=CH_BASIS.text.replace("may disclose", "shall disclose")),
      "verbatim"),
-    (LiaisonQuote(chunk_id="CH-NOT-SHOWN:p9:c9", quote=" ".join(CH_BASIS.text.split())),
+    (LiaisonQuote(chunk_id="CH-NOT-SHOWN:p9:c9",
+                  quote="The authority may disclose information to any foreign body without conditions."),
      "not among the passages available"),
     (LiaisonQuote(chunk_id=CH_BASIS.chunk_id, quote="The authority may disclose"),
      "shorter than"),
@@ -510,7 +511,8 @@ def test_ai_reviewer_sees_full_passages_and_is_restricted_to_shown_chunk_ids():
     decision = send(chan)
     assert decision.status == "ROUTE"
     assert decision.review["reviewer_model"] == "fake-llm"
-    assert {tuple(j) for _, j in index.queries} == {("AE", "CH", "GLOBAL")}
+    # Each side is searched on its own, so one country's passages cannot crowd out the other's.
+    assert sorted({tuple(j) for _, j in index.queries}) == [("AE",), ("CH",), ("GLOBAL",)]
     system, user, schema, output_schema = llm.calls[0]
     assert schema is LiaisonReview
     allowed = output_schema["$defs"]["LiaisonQuote"]["properties"]["chunk_id"]["enum"]
@@ -519,7 +521,8 @@ def test_ai_reviewer_sees_full_passages_and_is_restricted_to_shown_chunk_ids():
     assert answer_schema["properties"]["quotes"]["minItems"] == 1
     assert "quotes" in answer_schema["required"]
     passages = json.loads(user)["passages"]
-    assert passages[0]["text"] == " ".join(CH_BASIS.text.split())  # not truncated
+    shown_basis = next(p for p in passages if p["chunk_id"] == CH_BASIS.chunk_id)
+    assert shown_basis["text"] == " ".join(CH_BASIS.text.split())  # not truncated
     assert "not legal conclusions" in system
 
 
@@ -600,3 +603,72 @@ def test_every_yes_is_flagged_for_human_review_and_others_are_not():
     assert flags == {"legal_basis": True, "transfer_rules": True, "counterpart": False}
     assert by_key(decision, "legal_basis")["human_review_note"]
     assert decision.review["yes_answers_for_human_review"] == ["legal_basis", "transfer_rules"]
+
+
+# --- Option 1 (2026-11-07): a real quote with the wrong passage label is relabelled, never rewritten. ---
+
+def test_real_quote_with_wrong_chunk_id_is_moved_to_the_right_passage():
+    review = all_yes().model_copy(update={"legal_basis": LiaisonAnswer(
+        answer="YES", reason="Mislabelled.",
+        quotes=[LiaisonQuote(chunk_id=CH_COUNTERPART.chunk_id, quote=" ".join(CH_BASIS.text.split()))])})
+    decision = send(channel(review))
+    basis = by_key(decision, "legal_basis")
+    q = basis["quotes"][0]
+    assert q["verified"] and q["chunk_id"] == CH_BASIS.chunk_id
+    assert q["chunk_id_corrected_from"] == CH_COUNTERPART.chunk_id
+    assert any("chunk ID corrected by code" in note for note in basis["adjustments"])
+    assert basis["answer"] == "YES" and basis["human_review_required"]
+    assert decision.status == "ROUTE"
+
+
+def test_altered_quote_is_not_relocated():
+    altered = " ".join(CH_BASIS.text.split()).replace("may disclose", "shall disclose")
+    review = all_yes().model_copy(update={"legal_basis": LiaisonAnswer(
+        answer="YES", reason="Altered.", quotes=[LiaisonQuote(chunk_id=CH_COUNTERPART.chunk_id, quote=altered)])})
+    basis = by_key(send(channel(review)), "legal_basis")
+    assert not basis["quotes"][0]["verified"] and basis["answer"] == "UNCLEAR"
+    assert "chunk_id_corrected_from" not in basis["quotes"][0]
+
+
+def test_quote_found_in_two_other_passages_is_ambiguous_and_fails():
+    twin = chunk("CH-TEST-TWIN:p1:c1", CH_BASIS.text)
+    review = all_yes().model_copy(update={"legal_basis": LiaisonAnswer(
+        answer="YES", reason="Ambiguous.",
+        quotes=[LiaisonQuote(chunk_id=CH_COUNTERPART.chunk_id, quote=" ".join(CH_BASIS.text.split()))])})
+    basis = by_key(send(channel(review, evidence=EVIDENCE + [twin])), "legal_basis")
+    assert not basis["quotes"][0]["verified"]
+    assert "2 other passages" in basis["quotes"][0]["failure"]
+
+
+def test_arabic_rules_still_apply_after_relocation():
+    no_translation = LiaisonQuote(chunk_id=CH_BASIS.chunk_id, quote=" ".join(AR_CLEAN.text.split()))
+    review = all_yes().model_copy(update={"transfer_rules": LiaisonAnswer(
+        answer="YES", reason="Arabic without translation.", quotes=[no_translation])})
+    rules = by_key(send(channel(review)), "transfer_rules")
+    assert not rules["quotes"][0]["verified"] and rules["answer"] == "UNCLEAR"
+    garbled = LiaisonQuote(chunk_id=CH_BASIS.chunk_id, quote=" ".join(AR_GARBLED.text.split()),
+                           translation="test translation")
+    review = all_yes().model_copy(update={"transfer_rules": LiaisonAnswer(
+        answer="YES", reason="Garbled.", quotes=[garbled])})
+    assert by_key(send(channel(review)), "transfer_rules")["answer"] == "UNCLEAR"
+
+
+def test_each_final_answer_and_the_status_say_who_decided():
+    review = all_yes().model_copy(update={"legal_basis": LiaisonAnswer(
+        answer="YES", reason="Invented.", quotes=[LiaisonQuote(
+            chunk_id=CH_BASIS.chunk_id, quote="The authority must disclose all information to anyone.")])})
+    decision = send(channel(review))
+    assert by_key(decision, "legal_basis")["final_decided_by"].startswith("code:")
+    assert by_key(decision, "counterpart")["final_decided_by"] == "AI liaison reviewer (fake-reviewer)"
+    assert decision.review["status_decided_by"].startswith("code routing rule")
+    floor = send(channel(LiaisonReview(legal_basis=LiaisonAnswer(answer="UNCLEAR", reason="r", quotes=[]),
+                                       transfer_rules=yes(AE_TRANSFER), counterpart=yes(CH_COUNTERPART))),
+                 {"patient_data_included": True})
+    assert floor.review["status_decided_by"].startswith("code: patient-data rule")
+
+
+def test_reviewer_is_told_what_the_transfer_question_means_for_this_letter():
+    from engine.liaison import question_notes
+    assert "no personal or patient data" in question_notes({"patient_data_included": False})["transfer_rules"]
+    assert "carries patient" in question_notes({"patient_data_included": True})["transfer_rules"]
+    assert "carries patient" in question_notes({})["transfer_rules"]  # not stated: treat as carrying data

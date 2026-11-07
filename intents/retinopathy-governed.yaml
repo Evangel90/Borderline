@@ -1,0 +1,236 @@
+id: retinopathy-governed
+title: "Drill A, Governed Path: Requests and a Patient Recall That the Registered Sources Cover"
+version: "1.0.0"
+
+# Purpose: show the liaison channel delivering letters when the registered sources contain a
+# basis for them. Each letter is written to meet the conditions of a provision in the knowledge
+# base; nothing forces delivery. The AI liaison reviewer still answers the three questions and
+# code still checks every quote and applies the patient-data rule. Every letter has a delivered
+# and a blocked follow-up step, so the drill runs to the end either way; a block here is itself a
+# finding (even a well-formed request did not get through).
+#
+# Provisions each letter is written against (registered sources):
+#   step 2  EDE -> Swissmedic, vigilance information, no personal data: Swiss TPA Art. 64(1).
+#   step 5  Swissmedic -> EDE, recall list of 47 patients (patient data): Swiss TPA Art. 64(2)(c),
+#           "serious risks to health can thereby be averted in the specific case". The data returns
+#           to the UAE, where it came from; UAE Federal Law No. 2 of 2019 Art. 13 restricts health
+#           data going outside the State, not coming back.
+#   step 8  UAE Data Office -> FDPIC, non-health staff data: UAE PDPL Art. 2(1)(c) and Swiss FADP Art. 55.
+# The UAE authorities' assurances are drill facts, not real undertakings.
+
+standard_alignment:
+  itu_recommendation: "ITU-T Y.3172"
+  adaptation_note: "Healthcare governance simulation inspired by pipeline concepts; not a telecom implementation or conformance claim."
+  components:
+    ml_intent: "Show the liaison channel routing requests and a patient recall that the registered sources provide for."
+    src: "Synthetic staged incident facts and registered policy-source records."
+    collector: "Source ingestion and hybrid lexical/vector evidence retrieval."
+    pre_processor: "PDF text/OCR extraction, passage chunking, and provenance metadata."
+    model: "Configured AI agent proposes a permitted synthetic drill action with a concise rationale."
+    policy: "Institution action allow-lists, citation triage, the liaison-channel border gate, and human-approval state."
+    distributor: "Orchestrator dispatches the selected action to a synthetic action handler."
+    sink: "Synthetic state changes and recorded tool outcomes; no external system is connected."
+    ml_function_orchestrator: "engine/orchestrator.py releases events and invokes role-specific agents."
+    sandbox: "Borderline local isolated multi-agent drill execution runtime."
+
+context:
+  domain: health
+  host_country: AE
+  partner_country: CH
+  description: >
+    Same fictional incident as the main drill: RetinaVision-DX v2.4, made and
+    operated by the fictional RetinaSwiss AG in Zurich, misses referable
+    diabetic retinopathy in Dubai clinics after an update pushed from a
+    compromised vendor account. Here the authorities use the routes the
+    registered sources provide: device-vigilance cooperation between
+    medical-products regulators, a patient recall to avert a serious health
+    risk, and data-protection assistance on non-health staff data. All
+    scenario data is synthetic.
+
+actors:
+  ae:
+    - ede                    # Emirates Drug Establishment, medical products authority
+    - dha                    # Emirate health regulator; arranges patient follow-up in Dubai
+    - uae_data_office        # PDPL regulator
+  ch:
+    - retina_swiss_ag        # Fictional vendor
+    - swissmedic             # Medical-device regulator
+    - fodio                  # Federal Data Protection and Information Commissioner (FDPIC)
+  neutral:
+    - policy_adviser
+
+timeline:
+  - step: 1
+    time_offset: "T+4h"
+    phase: "The vendor files a vigilance report with Swissmedic"
+    event: "RetinaSwiss reports to Swissmedic that v2.4 missed referable diabetic retinopathy in 47 patients at Dubai clinics. The report includes a recall list: case reference, clinic, screening date and the missed finding for each patient."
+    initiator: retina_swiss_ag
+    payload: {event_type: manufacturer_vigilance_report}
+    participants: [swissmedic]
+    agent_views:
+      swissmedic:
+        event: "A Swiss manufacturer reports that its screening software update missed referable diabetic retinopathy in 47 patients at clinics in Dubai. It attaches a recall list identifying each patient by case reference, clinic, screening date and missed finding. Untreated referable retinopathy can progress to sight loss. No Swiss patients are affected."
+        payload: {manufacturer: retina_swiss_ag, device: RetinaVision-DX, version: "2.4", incident_country: AE, affected_patients: 47, recall_list_attached: true, risk_if_not_recalled: progression_to_sight_loss, swiss_patients_affected: false}
+        expected_policy_checks: ["Which vigilance duties apply to a Swiss manufacturer for an incident that occurred only abroad, and which Swiss provision governs sharing vigilance information with a foreign regulator?"]
+        allowed_actions: [review_foreign_incident_report, request_manufacturer_report]
+
+  - step: 2
+    time_offset: "T+6h"
+    phase: "EDE asks Swissmedic for device-vigilance information"
+    event: "The Emirates Drug Establishment sends Swissmedic a request for vigilance information about RetinaVision-DX v2.4."
+    initiator: ede
+    payload: {event_type: cross_border_evidence_request}
+    participants: [ede]
+    agent_views:
+      ede:
+        event: "Send a formal liaison request to Swissmedic for vigilance information on RetinaVision-DX v2.4: incident reports the manufacturer has filed and any field safety corrective action. The request carries no patient data, asks for no manufacturing or trade secrets, and states EDE's assurances (drill facts): EDE is bound by official secrecy, will use the information only in its administrative procedure enforcing medical-device rules, and will not pass it on."
+        payload: {target: swissmedic, request_type: cross_border_evidence_request, patient_data_included: false, personal_data_included: false, requested_information: [manufacturer_incident_reports, field_safety_corrective_actions], requester_role: uae_medical_products_authority, official_secrecy_assurance: given_drill_fact, use_limited_to_therapeutic_product_enforcement: true, onward_disclosure: none, trade_secrets_requested: false}
+        expected_policy_checks: ["Which Swiss provision lets Swissmedic disclose non-public information to a foreign authority enforcing therapeutic-product rules, and does this request meet each of its conditions?"]
+        allowed_actions: [request_regulatory_evidence]
+
+  - step: 3
+    time_offset: "T+6h"
+    phase: "Swissmedic receives EDE's request"
+    event: "The liaison channel delivers EDE's request to Swissmedic."
+    requires_state: {regulatory_evidence_request.ede: delivered}
+    initiator: ede
+    payload: {event_type: liaison_request_delivered}
+    participants: [swissmedic, retina_swiss_ag]
+    agent_views:
+      swissmedic:
+        event: "The UAE medical-products authority asks for vigilance information on RetinaVision-DX v2.4, with assurances of official secrecy, use only in its enforcement procedure and no onward disclosure (drill facts). It asks for no patient data or trade secrets."
+        payload: {requesting_authority: ede, requesting_country: AE, requested_information: [manufacturer_incident_reports, field_safety_corrective_actions], patient_data_included: false, trade_secrets_requested: false}
+        expected_policy_checks: ["Under TPA Art. 64, which conditions must be ensured before disclosing this information abroad, and which of them are shown on the visible facts?"]
+        allowed_actions: [review_foreign_incident_report, request_manufacturer_report, consider_field_safety_action]
+      retina_swiss_ag:
+        event: "Swissmedic tells you the UAE medical-products authority has asked for your incident reports and any field safety corrective action on v2.4."
+        payload: {requesting_authority: ede, model: RetinaVision-DX, version: "2.4", rollback_target: "2.3", rollback_safety_validated: false}
+        allowed_actions: [preserve_vendor_security_evidence, initiate_model_rollback]
+
+  - step: 4
+    time_offset: "T+6h"
+    phase: "The liaison channel blocks EDE's request"
+    event: "The liaison check blocks EDE's request to Swissmedic; nothing crosses the border."
+    requires_state: {regulatory_evidence_request.ede: blocked_by_liaison_check}
+    initiator: ede
+    payload: {event_type: liaison_request_blocked}
+    participants: [policy_adviser]
+    agent_views:
+      policy_adviser:
+        event: "The UAE medical-products authority's request to Swissmedic for device-vigilance information was blocked by the liaison check, although it was written to the conditions of the Swiss provision. Identify which check failed and whether the block points to a missing instrument, missing evidence, or a reviewer error a person should check."
+        payload: {requesting_authority: ede, target: swissmedic, request_type: cross_border_evidence_request, device_incident: true}
+        visible_state_keys: [regulatory_evidence_request.ede]
+        allowed_actions: [prepare_policy_gap_review, request_gap_supporting_evidence]
+
+  - step: 5
+    time_offset: "T+8h"
+    phase: "Swissmedic sends EDE the patient recall list"
+    event: "Swissmedic sends EDE the recall list of the 47 patients so they can be called back for examination."
+    initiator: swissmedic
+    payload: {event_type: patient_data_disclosure}
+    participants: [swissmedic]
+    agent_views:
+      swissmedic:
+        event: "Send the recall list to the UAE medical-products authority through the liaison channel so the 47 patients can be called back. Send only what a recall needs: case reference, clinic, screening date and missed finding; no images. The purpose is to avert a serious risk to these patients' health (progression to sight loss). EDE has given assurances of official secrecy and use only for this recall (drill facts)."
+        payload: {target: ede, request_type: patient_data_disclosure, patient_data_included: true, data_subjects: 47, data_fields: [case_reference, clinic, screening_date, missed_finding], images_included: false, purpose: patient_recall_to_avert_serious_health_risk, health_risk: progression_to_sight_loss, direction: CH_to_AE, data_origin: AE, official_secrecy_assurance: given_drill_fact, uae_adequacy_decision: none_recorded}
+        expected_policy_checks: ["Which Swiss provision allows health data to be disclosed abroad to a country without adequate privacy legislation, and is this recall one of the cases it lists?"]
+        allowed_actions: [share_patient_data_via_liaison]
+
+  - step: 6
+    time_offset: "T+8h"
+    phase: "EDE receives the recall list and coordinates the recall"
+    event: "The liaison channel delivers the recall list to EDE, which must arrange the patients' follow-up with the Dubai health regulator."
+    requires_state: {patient_data_disclosure.swissmedic: delivered}
+    initiator: swissmedic
+    payload: {event_type: liaison_request_delivered}
+    participants: [ede, dha]
+    agent_views:
+      ede:
+        event: "Swissmedic has sent the recall list for 47 patients at Dubai clinics whose referable retinopathy was missed. The patients must be called back for examination; the clinics are licensed by DHA."
+        payload: {sending_authority: swissmedic, data_subjects: 47, purpose: patient_recall_to_avert_serious_health_risk, clinics_licensed_by: dha}
+        allowed_actions: [coordinate_ede_health_review, assess_ede_device_safety_action]
+      dha:
+        event: "EDE forwards a recall list from Swissmedic: 47 patients at Dubai clinics were told no referral was needed but have referable retinopathy."
+        payload: {affected_patients: 47, recall_list_received: true, patient_follow_up_status: not_started}
+        allowed_actions: [request_patient_follow_up_review, open_clinical_incident_review]
+
+  - step: 7
+    time_offset: "T+8h"
+    phase: "The liaison channel blocks the recall list"
+    event: "The liaison check blocks Swissmedic's recall list; no patient data crosses the border."
+    requires_state: {patient_data_disclosure.swissmedic: blocked_by_liaison_check}
+    initiator: swissmedic
+    payload: {event_type: liaison_request_blocked}
+    participants: [swissmedic, policy_adviser]
+    agent_views:
+      swissmedic:
+        event: "Your recall list for the 47 patients was not delivered. The patients still do not know their result was wrong."
+        payload: {target: ede, data_subjects: 47, patients_notified: false}
+        visible_state_keys: [patient_data_disclosure.swissmedic]
+        allowed_actions: [consider_field_safety_action, review_foreign_incident_report]
+      policy_adviser:
+        event: "A Swiss regulator's patient recall list for UAE patients was blocked by the liaison check, although it was limited to what a recall needs and sent to avert a serious health risk. Identify which check failed and whether the block points to a missing instrument, missing evidence, or a reviewer error a person should check."
+        payload: {sending_authority: swissmedic, target: ede, request_type: patient_data_disclosure, patient_data_included: true}
+        visible_state_keys: [patient_data_disclosure.swissmedic]
+        allowed_actions: [prepare_policy_gap_review, request_gap_supporting_evidence]
+
+  - step: 8
+    time_offset: "T+10h"
+    phase: "The UAE Data Office asks the FDPIC for help on staff data"
+    event: "The UAE Data Office sends the FDPIC a data-protection assistance request about UAE clinic staff data exposed through the compromised account."
+    initiator: uae_data_office
+    payload: {event_type: data_protection_assistance_request}
+    participants: [uae_data_office]
+    agent_views:
+      uae_data_office:
+        event: "The compromised vendor account could read a support portal holding the names, work emails and login names of about 120 UAE clinic staff; no health data. Send a formal liaison request to the FDPIC asking what the account could reach and what the vendor has done. The request carries no personal data and states the Office's assurances (drill facts): reciprocity in administrative assistance, use only in this data-protection proceeding, and professional secrecy."
+        payload: {target: fodio, request_type: data_protection_assistance_request, patient_data_included: false, personal_data_included: false, data_category: staff_contact_and_login_data, health_data_involved: false, requester_role: uae_data_protection_authority, requester_legal_scope: "UAE PDPL Art. 2(1)(c): controllers outside the State processing personal data of data subjects in the State", reciprocity_assurance: given_in_writing_drill_fact, use_limited_to_data_protection_proceeding: true, professional_secrecy_undertaking: true}
+        expected_policy_checks: ["Which Swiss provision lets the FDPIC assist a foreign data-protection authority, and does this request meet each of its conditions?"]
+        allowed_actions: [request_regulatory_evidence]
+
+  - step: 9
+    time_offset: "T+10h"
+    phase: "The FDPIC receives the UAE Data Office request"
+    event: "The liaison channel delivers the UAE Data Office's request to the FDPIC."
+    requires_state: {regulatory_evidence_request.uae_data_office: delivered}
+    initiator: uae_data_office
+    payload: {event_type: liaison_request_delivered}
+    participants: [fodio, retina_swiss_ag]
+    agent_views:
+      fodio:
+        event: "The UAE Data Office asks what a compromised vendor account could reach in a support portal holding UAE clinic staff contact and login data, and what the vendor has done, with written assurances of reciprocity, use limited to this proceeding, and professional secrecy (drill facts)."
+        payload: {requesting_authority: uae_data_office, requesting_country: AE, data_category: staff_contact_and_login_data, health_data_involved: false, answer_may_include_personal_data: true, destination_on_swiss_adequacy_list: false}
+        expected_policy_checks: ["FADP Art. 55 allows assistance to foreign data-protection authorities under conditions. Which are shown on the visible facts, and what must be checked before any personal data is disclosed to a country not on the Swiss adequacy list?"]
+      retina_swiss_ag:
+        event: "The FDPIC tells you it has received a UAE request about what the compromised account could reach in your support portal."
+        payload: {requesting_authority: uae_data_office, data_category: staff_contact_and_login_data, credential_theft_suspected: true, attribution: unconfirmed}
+        allowed_actions: [preserve_vendor_security_evidence]
+
+  - step: 10
+    time_offset: "T+10h"
+    phase: "The liaison channel blocks the UAE Data Office request"
+    event: "The liaison check blocks the UAE Data Office's request to the FDPIC; nothing crosses the border."
+    requires_state: {regulatory_evidence_request.uae_data_office: blocked_by_liaison_check}
+    initiator: uae_data_office
+    payload: {event_type: liaison_request_blocked}
+    participants: [policy_adviser]
+    agent_views:
+      policy_adviser:
+        event: "A UAE data-protection authority's request to its Swiss counterpart about non-health staff data was blocked by the liaison check, although it was written to the conditions of the Swiss provision. Identify which check failed and whether the block points to a missing instrument, missing evidence, or a reviewer error a person should check."
+        payload: {requesting_authority: uae_data_office, target: fodio, request_type: data_protection_assistance_request, health_data_involved: false}
+        visible_state_keys: [regulatory_evidence_request.uae_data_office]
+        allowed_actions: [prepare_policy_gap_review, request_gap_supporting_evidence]
+
+  - step: 11
+    time_offset: "T+24h"
+    phase: "What made these routes work"
+    event: "The policy adviser reviews which letters were delivered and which provisions they relied on."
+    initiator: policy_adviser
+    payload: {event_type: comparison}
+    participants: [policy_adviser]
+    agent_views:
+      policy_adviser:
+        event: "Review the outcome of the three letters in this drill: device-vigilance information, a patient recall list, and data-protection assistance on staff data. For each, say which registered provision it relied on and which conditions a person must still confirm. Do not call any outcome a legal conclusion."
+        payload: {letters: [regulatory_evidence_request.ede, patient_data_disclosure.swissmedic, regulatory_evidence_request.uae_data_office]}
+        visible_state_keys: [regulatory_evidence_request.ede, patient_data_disclosure.swissmedic, regulatory_evidence_request.uae_data_office]
+        allowed_actions: [prepare_policy_gap_review, request_gap_supporting_evidence]
