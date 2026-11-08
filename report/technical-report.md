@@ -4,15 +4,15 @@
 
 **Team:** Borderline · **Team leader:** Oladipo Evangel · **Members:** Oladipo Evangel, Professor James Agajo
 **Contact:** [oladipoevangel90@gmail.com](mailto:oladipoevangel90@gmail.com), +2348135001380 · **GitHub:** [github.com/Evangel90/Borderline](https://github.com/Evangel90/Borderline/tree/incident-drill) (branch `incident-drill`)
-**Status:** draft, 8 November 2026. Results come from four runs on commit `b229477` (listed under Error scenarios); Drill D's liaison answers are scripted, **not AI decisions**. Nothing here is a legal conclusion or has had legal review; policy gaps are **candidates**.
+**Status:** draft, 8 November 2026. Results come from four runs on commit `b229477` (listed in section 6); Drill D's liaison answers are scripted, **not AI decisions**. Nothing here is a legal conclusion or has had legal review; policy gaps are **candidates**.
 
-## Introduction
+## 1. Introduction
 
 When a medical AI made in one country fails in another, both countries' regulators, data-protection authorities and cyber agencies must share information fast, under different laws, each seeing part of the picture. Borderline is a multi-agent drill engine that rehearses this response in advance, recording which institution AI agent decided what, which letters may legally cross the border, and where the rules run out.
 
 Use case: RetinaVision-DX, a fictional diabetic-retinopathy screening AI from a fictional Swiss vendor, used at fictional Dubai clinics. An update pushed from a compromised vendor account misses referable disease in 47 synthetic patients; UAE retinal images held in Zurich were reused for retraining. The jurisdictions are the United Arab Emirates (UAE) and Switzerland (CH). Facts are synthetic; policy sources are real, public and registered with file hashes.
 
-## What role does AI play?
+## 2. What role does AI play?
 
 Three decision-makers take part, and each log entry names which one decided: **institution AI agents**, an **AI liaison reviewer**, and **code**. People decide whatever the drill flags.
 
@@ -23,7 +23,7 @@ Three decision-makers take part, and each log entry names which one decided: **i
 - Two roles:
   1. **12 institution AI agents.** UAE: Dubai Health Authority (DHA), Ministry of Health and Prevention (MoHAP), Emirates Drug Establishment (EDE), UAE Data Office, UAE cyber incident coordination, the screening service and the clinic operator. Switzerland: Swiss Agency for Therapeutic Products (Swissmedic), Federal Data Protection and Information Commissioner (FDPIC), National Cyber Security Centre (NCSC) and the vendor. Neutral: a policy adviser. Each stateless call picks one action and cites its reasons.
   2. **An AI liaison reviewer**, separate from the sender, answers three questions for every cross-border letter (legal basis to share? transfer allowed under both sides' rules? right counterpart?) with YES, NO or UNCLEAR and exact quotes.
-- The model is swappable by one setting; at this size it joins quotes and misreads questions (see results).
+- The model is swappable by one setting; at this size it joins quotes and misreads questions (see section 6).
 
 **Context provided by the knowledge base (KB).**
 
@@ -43,7 +43,7 @@ Three decision-makers take part, and each log entry names which one decided: **i
    - An uncited legal claim in an agent's explanation is returned once, then replaced by fixed wording or a review action, and logged.
    - Every UNCLEAR or NO is typed `policy_gap`, `implementation_gap`, `conflict` (possible gap candidates) or `missing_evidence` (homework).
 
-## Use-case requirements
+## 3. Use-case requirements
 
 - It is **critical** that every claim has an exact, code-verified quote and chunk ID, and that no output is presented as a legal conclusion.
 - It is **critical** that patient data never crosses the border without verified legal-basis and transfer-rules quotes and a recorded human approval.
@@ -51,7 +51,7 @@ Three decision-makers take part, and each log entry names which one decided: **i
 - It is **expected** that missing documents become homework, not proof of absence, and that each gap candidate has a verified global comparison.
 - It is **of added value** that the engine is country-agnostic: country packs, a bridge pack and drill intents are plain YAML (a readable configuration format) and can be swapped.
 
-## Demo scenarios: three AI drills and one scripted control
+## 4. Demo scenarios: three AI drills and one scripted control
 
 | Drill | What it tests | Steps | Expected | Actual (8 November 2026) |
 |---|---|---|---|---|
@@ -60,7 +60,7 @@ Three decision-makers take part, and each log entry names which one decided: **i
 | C, insufficient evidence (`retinopathy-insufficient-evidence`) | Questions whose deciding document is missing | 8 | homework, not candidates | **Not as expected**: letter blocked, but answers typed `policy_gap` and `implementation_gap`; no homework |
 | D, scripted control for A (`--reviewer scripted`) | A's letters, with hand-written reference answers replacing the AI reviewer: do A's blocks come from the AI or from law and code? Agents still AI; code checks unchanged | 11 | 3 delivered if law and code allow | 3 delivered; not an AI result |
 
-## Mapping to ITU-T Y.3172 and the AI Readiness Framework 2.0
+## 5. Mapping to ITU-T Y.3172 and the AI Readiness Framework 2.0
 
 Y.3172 is the International Telecommunication Union (ITU) architecture for machine learning (ML) in future networks; Borderline borrows its pipeline vocabulary, is **not a telecom implementation and claims no conformance**. Of the 13 Readiness 2.0 dimensions we claim relevance (not measured scores) to five: (4) Contextualization and Regional Impact; (5) Level of Integration of AI in Workflows; (7) Strategy Alignment; (8) Collaboration with AI; (10) AI & Policies.
 
@@ -74,7 +74,7 @@ Y.3172 is the International Telecommunication Union (ITU) architecture for machi
 | D (distributor) | Synthetic action handlers; letters delivered or blocked in drill state only | 5 | [`packs/bridge/ae-ch.yaml`](../packs/bridge/ae-ch.yaml) (counterparts, reference answers) |
 | SINK | Hash-chained log, decision trails, homework list, gap register | 8 | Decision trails for drills [A](decision-trail-governed-20261108-4.md), [B](decision-trail-ungoverned-20261108-3.md), [C](decision-trail-insufficient-20261108-3.md), [D](decision-trail-governed-scripted-20261108-3.md) |
 
-## Requirements mapped to domain-specific policies
+### 5a. Requirements mapped to domain-specific policies
 
 Each node's requirement is mapped to health-sector AI policy in the KB (exact, script-verified quotes; brackets give the text's type). A mapping shows that a text addresses the requirement, not that it applies to these synthetic facts.
 
@@ -82,14 +82,14 @@ Each node's requirement is mapped to health-sector AI policy in the KB (exact, s
 |---|---|---|
 | SRC | An AI failure seen at the clinic must reach the responsible bodies in both countries | DHA AI in Healthcare policy (DHA policy): "Report to DHA-HRS all known or suspected incidents or deficiencies related to AI solutions used in their respective healthcare facility." (`AE-DHA-AI-HEALTH-2021:p12:c1`; DHA-HRS: DHA's Health Regulation Sector). Swiss Medical Devices Ordinance (MedDO) Art. 66: manufacturers report "any serious incidents involving the device in question that have occurred in Switzerland, as soon as they become aware of them" (`CH-HEALTH-MedDO:p28:c1`). Drills A and B test how a Dubai incident reaches Swissmedic. |
 | C | Every source and decision is traceable to its origin | IMDRF good machine-learning practice, N88 (global, advisory): "design processes that can appropriately record and communicate decisions and rationale, as well as ensure traceability, reproducibility, data authenticity" (`IMDRF-AIML-N88-2025:p6:c2`) |
-| PP | Retinal images are processed in Zurich, outside the UAE | Health Data Law Art. 13 (UAE law), quoted under Local policy mapping (`AE-HEALTH-ICT-LAW-2019:p8:c1`); its exceptions are in Resolution 51/2021, not obtained (CAND-004). |
+| PP | Retinal images are processed in Zurich, outside the UAE | Health Data Law Art. 13 (UAE law), quoted in section 5b (`AE-HEALTH-ICT-LAW-2019:p8:c1`); its exceptions are in Resolution 51/2021, not obtained (CAND-004). |
 | M | A model update is controlled, and real-world results are compared with validation | DHA AI policy: "Comply with all required certification of the AI software and its major upgraded versions from recognized international/local agencies." (`AE-DHA-AI-HEALTH-2021:p10:c1`) and "actual outcomes must be compared to those obtained in training and validation. Any significant discrepancies must call for further inspection." (`AE-DHA-AI-HEALTH-2021:p10:c1`). IMDRF N88 (advisory): "Clinical evaluation includes the use of datasets that are representative of the intended patient population" (`IMDRF-AIML-N88-2025:p7:c2`) |
 | P | Humans keep oversight; failures can be traced and controlled | UAE Charter for the Development and Use of AI, 2024 (charter): "the irreplaceable value of human judgment and human oversight over AI" (`AE-AI-CHARTER-2024:p4:c1`). DHA AI policy: "AI solution developers must build systems whose failures can be traced, diagnosed, and controlled." (`AE-DHA-AI-HEALTH-2021:p7:c1`) |
 | D | A failing tool can be stopped safely, and adverse events are passed on | DHA AI policy: "AI tool must be equipped with “Graceful Degradation” mechanisms by means of automatic alerts and gradual operation cessation abilities" (`AE-DHA-AI-HEALTH-2021:p10:c1`) and "Adverse events should be timely reported to relevant oversight bodies for appropriate investigation and action." (`AE-DHA-AI-HEALTH-2021:p11:c1`) |
 | SINK | Results are audited; performance is judged for clinician and AI together | DHA AI policy: "Conduct regular audits of AI functionality by independent third party, and reporting to DHA-HRS as needed." (`AE-DHA-AI-HEALTH-2021:p13:c1`). IMDRF N88 (advisory): "including the performance of the human-AI team, rather than just the device in isolation." (`IMDRF-AIML-N88-2025:p7:c2`) |
 | Strategy alignment | Both countries work to compatible aims | UAE AI Charter: "serves as a guiding framework to protect the rights of the UAE community in the development or use of AI solutions and technologies." (`AE-AI-CHARTER-2024:p2:c1`). **No Swiss AI strategy is in the KB**, so alignment could not be mapped. |
 
-## Local policy mapping
+### 5b. Local policy mapping
 
 Each liaison question is answered from registered texts, for example:
 
@@ -98,7 +98,7 @@ Each liaison question is answered from registered texts, for example:
 
 The PDPL excludes "e. Personal Health Data that has legislation regulating its protection and processing." (`AE-DATA-PDPL-2021-EN:p6:c2`), so the Health Data Law governs patient images and the PDPL covers clinic staff data. Only official English translations were searchable; extracted Arabic is garbled, so none was quoted or retyped. Resolution 51/2021 (the Art. 13 exceptions) is registered as unobtainable after documented attempts and was not searched for again.
 
-## Error scenarios and results
+## 6. Error scenarios and results
 
 Drill B releases staged events: a model update with fewer referrals, confirmed missed disease, a compromised vendor account, retraining on UAE images in Zurich, the vendor's "research" claim, letters to Swiss authorities, a suspend-or-continue dispute, an optional judge-injected insurer claim, and DHA's attempt to send patient images.
 
@@ -123,18 +123,18 @@ What the runs show:
 
 Details: [`run-review-2026-11-08-final-runs.md`](run-review-2026-11-08-final-runs.md).
 
-## Policy and standards gap candidates derived from the mapping
+## 7. Policy and standards gap candidates derived from the mapping
 
 All four candidates in [`gaps/candidate_register.yaml`](../gaps/candidate_register.yaml) pass the four-part rule (`make assess-candidates`, 8 November 2026): quotes verify; an absence search is recorded; a verified global comparison (European Union (EU), IMDRF) is quoted; no obtainable missing document could refute it. They are **candidates, not findings**: unreviewed, and "absent" means absent from this KB.
 
 | ID | Type | Local evidence (verified quote) | Global comparison (verified quote) |
 |---|---|---|---|
 | CAND-003 | standards | Switzerland: "However, without resolving the institutional issues, Switzerland remains excluded from market surveillance with EU member states for medical devices." (`CH-EU-MRA-FACTSHEET-2025:p2:c2`). Neither country is an IMDRF National Competent Authority Report (NCAR) exchange participant (search [`SEARCH-NCAR-PARTICIPANTS-001`](../gaps/searches/SEARCH-NCAR-PARTICIPANTS-001.json)). | "Participation in the NCAR Exchange Program will be limited to the IMDRF Management Committee (MC) Regulators. A list of NCAR Participant Countries is provided in Annex1." (`IMDRF-NCAR-N14-2025:p9:c1`) |
-| CAND-002 | policy | DHA's AI policy requires certification of "major upgraded versions" without defining them (`AE-DHA-AI-HEALTH-2021:p10:c1`; full quote under node M above) | "Changes to the approved device shall require approval from the notified body which issued the EU technical documentation assessment certificate where such changes could affect the safety and performance of the device" (`EU-MDR-2017-745:p202:c1`) |
-| CAND-001 | implementation | The PDPL's health-data exclusion (`AE-DATA-PDPL-2021-EN:p6:c2`, quoted under Local policy mapping) leaves no UAE authority clearly competent to protect UAE health data held abroad. | The Organisation for Economic Co-operation and Development (OECD) 2007 privacy-enforcement Recommendation has 38 adherents, Switzerland among them and no non-members: "Spain Sweden Switzerland Türkiye United Kingdom United States Non-Members None" (`OECD-LEGAL-0352-ADHERENTS-2026:p8:c1`) |
+| CAND-002 | policy | DHA's AI policy requires certification of "major upgraded versions" without defining them (`AE-DHA-AI-HEALTH-2021:p10:c1`; full quote at node M, section 5a) | "Changes to the approved device shall require approval from the notified body which issued the EU technical documentation assessment certificate where such changes could affect the safety and performance of the device" (`EU-MDR-2017-745:p202:c1`) |
+| CAND-001 | implementation | The PDPL's health-data exclusion (`AE-DATA-PDPL-2021-EN:p6:c2`, quoted in section 5b) leaves no UAE authority clearly competent to protect UAE health data held abroad. | The Organisation for Economic Co-operation and Development (OECD) 2007 privacy-enforcement Recommendation has 38 adherents, Switzerland among them and no non-members: "Spain Sweden Switzerland Türkiye United Kingdom United States Non-Members None" (`OECD-LEGAL-0352-ADHERENTS-2026:p8:c1`) |
 | CAND-004 | policy | The Art. 13 exceptions are in a resolution the project could not obtain: "a. Cabinet Decision No. (51) of year 2021 on exemption for storage and transfer of health records and information must be abide to:" (`AE-DHA-HEALTH-DATA-PROTECTION-PP11-2022:p27:c1`) | By analogy only, EU national derogations are published: "The Commission shall keep the information publicly available." (`EU-MDR-2017-745:p30:c1`) |
 
-The drills bear on, but do not prove, these candidates. Their two typed gap records (B: UAE Data Office transfer rules, `policy_gap`, quoting PDPL Art. 23; C: see results) need human review.
+The drills bear on, but do not prove, these candidates. Their two typed gap records (B: UAE Data Office transfer rules, `policy_gap`, quoting PDPL Art. 23; C: see section 6) need human review.
 
 ## References
 
