@@ -60,6 +60,8 @@ class LiaisonRule(BaseModel):
     answer: str  # YES, NO, UNCLEAR
     reason: str
     sources: List[str] = Field(default_factory=list)
+    # Reference answer when the letter carries a drill-exhibit assurance (hand-written; never decides).
+    with_assurance: Optional["LiaisonRule"] = None
 
     @model_validator(mode="after")
     def validate_answer(self) -> "LiaisonRule":
@@ -149,6 +151,36 @@ class StepPayload(BaseModel):
         return self
 
 
+class DrillExhibit(BaseModel):
+    """A synthetic document inside the drill (for example a written assurance). Shown to the
+    liaison reviewer and quotable, but labelled as not real and never counted as a legal basis."""
+    id: str
+    title: str
+    issued_by: str  # institution ID of the (fictional) author
+    text: str
+
+
+class ApprovalBasis(BaseModel):
+    chunk_id: str
+    quote: str
+
+
+class StandingApproval(BaseModel):
+    """A human approval recorded before the drill for one patient-data disclosure (a drill fact).
+    Code accepts it only if its scope matches the letter exactly and its legal-basis quote verifies."""
+    id: str
+    approved_by: str  # a role, never a real person
+    sender: str
+    receiver: str
+    request_type: str
+    purpose: str
+    data_fields: List[str]
+    data_subjects: int
+    images_included: bool = False
+    legal_basis: ApprovalBasis
+    note: str = ""
+
+
 class DrillIntent(BaseModel):
     id: str
     title: str
@@ -157,6 +189,8 @@ class DrillIntent(BaseModel):
     context: Dict[str, Any]
     actors: Dict[str, List[str]]
     timeline: List[StepPayload]
+    exhibits: List[DrillExhibit] = Field(default_factory=list)
+    standing_approvals: List[StandingApproval] = Field(default_factory=list)
 
     @model_validator(mode="after")
     def validate_timeline_actors(self) -> "DrillIntent":

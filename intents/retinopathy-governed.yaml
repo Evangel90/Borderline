@@ -16,7 +16,10 @@ version: "1.0.0"
 #           to the UAE, where it came from; UAE Federal Law No. 2 of 2019 Art. 13 restricts health
 #           data going outside the State, not coming back.
 #   step 8  UAE Data Office -> FDPIC, non-health staff data: UAE PDPL Art. 2(1)(c) and Swiss FADP Art. 55.
-# The UAE authorities' assurances are drill facts, not real undertakings.
+# The UAE authorities' assurances are drill facts, not real undertakings. Since 8 November 2026
+# they are written out as drill exhibits (below) so the liaison reviewer can quote them; exhibits
+# are labelled synthetic and code never counts them as a legal basis. The recall list also needs
+# a recorded human approval (standing_approvals) whose scope matches the letter exactly.
 
 standard_alignment:
   itu_recommendation: "ITU-T Y.3172"
@@ -59,6 +62,66 @@ actors:
   neutral:
     - policy_adviser
 
+# Synthetic documents inside the drill. Shown to the liaison reviewer with every letter that
+# lists them; quotable; never a legal basis. Not real letters from any authority.
+exhibits:
+  - id: EXH-EDE-VIGILANCE-ASSURANCE
+    title: "Emirates Drug Establishment to Swissmedic: request for vigilance information and assurances (synthetic)"
+    issued_by: ede
+    text: >-
+      The Emirates Drug Establishment requests vigilance information on RetinaVision-DX version 2.4:
+      the incident reports the manufacturer has filed and any field safety corrective action.
+      The Emirates Drug Establishment is the authority responsible for enforcing medical-device
+      regulations in the United Arab Emirates. Its staff handling this request are bound by official
+      secrecy. The information received will be used exclusively in its administrative procedure
+      enforcing medical-device regulations in connection with this incident and will not be passed on
+      to third parties. The request is limited to the information required for that procedure. It does
+      not ask for manufacturing or trade secrets, and it asks for no personal data.
+  - id: EXH-EDE-RECALL-ASSURANCE
+    title: "Emirates Drug Establishment to Swissmedic: request for the patient recall list and assurances (synthetic)"
+    issued_by: ede
+    text: >-
+      The Emirates Drug Establishment asks Swissmedic for the recall list for the 47 patients in Dubai
+      whose referable diabetic retinopathy RetinaVision-DX version 2.4 missed, so that they can be called
+      back for examination. Untreated referable retinopathy can progress to sight loss; the recall is
+      needed to avert that serious risk to these patients' health. Only the fields a recall needs are
+      requested: case reference, clinic, screening date and missed finding. No images are requested.
+      Staff handling the list are bound by official secrecy. The list will be used only to recall these
+      patients and will be shared only with the treating clinics for that purpose.
+  - id: EXH-DATA-OFFICE-ASSURANCE
+    title: "UAE Data Office to the FDPIC: request for administrative assistance and assurances (synthetic)"
+    issued_by: uae_data_office
+    text: >-
+      The UAE Data Office asks the Federal Data Protection and Information Commissioner what a
+      compromised vendor account could reach in a support portal holding the names, work emails and
+      login names of about 120 UAE clinic staff, and what the vendor has done. No health data is
+      involved. The UAE Data Office is the authority responsible for data protection under Federal
+      Decree-Law No. 45 of 2021, which applies to controllers outside the State that process personal
+      data of data subjects inside the State. The UAE Data Office guarantees reciprocity: it will provide
+      the Commissioner with administrative assistance in comparable data-protection matters. Information
+      and personal data received will be used only in the data-protection proceeding that is the subject
+      of this request. The UAE Data Office undertakes to preserve professional secrecy as well as trade
+      and manufacturing secrecy, will not disclose the information to third parties without the
+      Commissioner's prior approval, and will comply with any requirements and restrictions the
+      Commissioner imposes.
+
+# Human approvals recorded before the drill (drill facts; roles, not real people). Patient data
+# crosses only if the liaison checks pass AND one of these matches the letter's scope exactly.
+standing_approvals:
+  - id: APPROVAL-SWISSMEDIC-RECALL-001
+    approved_by: "Swissmedic legal officer (role; drill fact)"
+    sender: swissmedic
+    receiver: ede
+    request_type: patient_data_disclosure
+    purpose: patient_recall_to_avert_serious_health_risk
+    data_fields: [case_reference, clinic, screening_date, missed_finding]
+    data_subjects: 47
+    images_included: false
+    legal_basis:
+      chunk_id: "CH-HEALTH-TPA:p40:c1"
+      quote: "c. serious risks to health can thereby be averted in the specific case"
+    note: "Approved in advance for this recall only: these fields, these 47 patients, Switzerland to the UAE, no images."
+
 timeline:
   - step: 1
     time_offset: "T+4h"
@@ -84,7 +147,7 @@ timeline:
     agent_views:
       ede:
         event: "Send a formal liaison request to Swissmedic for vigilance information on RetinaVision-DX v2.4: incident reports the manufacturer has filed and any field safety corrective action. The request carries no patient data, asks for no manufacturing or trade secrets, and states EDE's assurances (drill facts): EDE is bound by official secrecy, will use the information only in its administrative procedure enforcing medical-device rules, and will not pass it on."
-        payload: {target: swissmedic, request_type: cross_border_evidence_request, patient_data_included: false, personal_data_included: false, requested_information: [manufacturer_incident_reports, field_safety_corrective_actions], requester_role: uae_medical_products_authority, official_secrecy_assurance: given_drill_fact, use_limited_to_therapeutic_product_enforcement: true, onward_disclosure: none, trade_secrets_requested: false}
+        payload: {target: swissmedic, request_type: cross_border_evidence_request, patient_data_included: false, personal_data_included: false, requested_information: [manufacturer_incident_reports, field_safety_corrective_actions], requester_role: uae_medical_products_authority, official_secrecy_assurance: given_drill_fact, use_limited_to_therapeutic_product_enforcement: true, onward_disclosure: none, trade_secrets_requested: false, relied_on: ["CH-HEALTH-TPA:p40:c1"], relied_on_provision: "Swiss TPA Art. 64(1)", exhibits: [EXH-EDE-VIGILANCE-ASSURANCE]}
         expected_policy_checks: ["Which Swiss provision lets Swissmedic disclose non-public information to a foreign authority enforcing therapeutic-product rules, and does this request meet each of its conditions?"]
         allowed_actions: [request_regulatory_evidence]
 
@@ -132,7 +195,7 @@ timeline:
     agent_views:
       swissmedic:
         event: "Send the recall list to the UAE medical-products authority through the liaison channel so the 47 patients can be called back. Send only what a recall needs: case reference, clinic, screening date and missed finding; no images. The purpose is to avert a serious risk to these patients' health (progression to sight loss). EDE has given assurances of official secrecy and use only for this recall (drill facts)."
-        payload: {target: ede, request_type: patient_data_disclosure, patient_data_included: true, data_subjects: 47, data_fields: [case_reference, clinic, screening_date, missed_finding], images_included: false, purpose: patient_recall_to_avert_serious_health_risk, health_risk: progression_to_sight_loss, direction: CH_to_AE, data_origin: AE, official_secrecy_assurance: given_drill_fact, uae_adequacy_decision: none_recorded}
+        payload: {target: ede, request_type: patient_data_disclosure, patient_data_included: true, data_subjects: 47, data_fields: [case_reference, clinic, screening_date, missed_finding], images_included: false, purpose: patient_recall_to_avert_serious_health_risk, health_risk: progression_to_sight_loss, direction: CH_to_AE, data_origin: AE, official_secrecy_assurance: given_drill_fact, uae_adequacy_decision: none_recorded, relied_on: ["CH-HEALTH-TPA:p40:c1"], relied_on_provision: "Swiss TPA Art. 64(2)(c)", exhibits: [EXH-EDE-RECALL-ASSURANCE]}
         expected_policy_checks: ["Which Swiss provision allows health data to be disclosed abroad to a country without adequate privacy legislation, and is this recall one of the cases it lists?"]
         allowed_actions: [share_patient_data_via_liaison]
 
@@ -184,7 +247,7 @@ timeline:
     agent_views:
       uae_data_office:
         event: "The compromised vendor account could read a support portal holding the names, work emails and login names of about 120 UAE clinic staff; no health data. Send a formal liaison request to the FDPIC asking what the account could reach and what the vendor has done. The request carries no personal data and states the Office's assurances (drill facts): reciprocity in administrative assistance, use only in this data-protection proceeding, and professional secrecy."
-        payload: {target: fodio, request_type: data_protection_assistance_request, patient_data_included: false, personal_data_included: false, data_category: staff_contact_and_login_data, health_data_involved: false, requester_role: uae_data_protection_authority, requester_legal_scope: "UAE PDPL Art. 2(1)(c): controllers outside the State processing personal data of data subjects in the State", reciprocity_assurance: given_in_writing_drill_fact, use_limited_to_data_protection_proceeding: true, professional_secrecy_undertaking: true}
+        payload: {target: fodio, request_type: data_protection_assistance_request, patient_data_included: false, personal_data_included: false, data_category: staff_contact_and_login_data, health_data_involved: false, requester_role: uae_data_protection_authority, requester_legal_scope: "UAE PDPL Art. 2(1)(c): controllers outside the State processing personal data of data subjects in the State", reciprocity_assurance: given_in_writing_drill_fact, use_limited_to_data_protection_proceeding: true, professional_secrecy_undertaking: true, relied_on: ["CH-DATA-FADP:p24:c1", "AE-DATA-PDPL-2021-EN:p6:c2"], relied_on_provision: "Swiss FADP Art. 55(1); UAE PDPL Art. 2(1)(c)", exhibits: [EXH-DATA-OFFICE-ASSURANCE]}
         expected_policy_checks: ["Which Swiss provision lets the FDPIC assist a foreign data-protection authority, and does this request meet each of its conditions?"]
         allowed_actions: [request_regulatory_evidence]
 

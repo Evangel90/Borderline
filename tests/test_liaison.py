@@ -154,8 +154,14 @@ def test_verified_quotes_on_all_three_questions_route():
 def test_quote_check_normalizes_whitespace_only():
     spaced = CH_BASIS.text.replace(" ", "   \n ")
     assert verify_quote(CH_BASIS.chunk_id, spaced, "", {CH_BASIS.chunk_id: CH_BASIS})["verified"]
+    # One capital letter changed is a copy slip: accepted, but the logged quote is the exact source text.
     lowered = CH_BASIS.text.lower()
-    assert not verify_quote(CH_BASIS.chunk_id, lowered, "", {CH_BASIS.chunk_id: CH_BASIS})["verified"]
+    slipped = verify_quote(CH_BASIS.chunk_id, lowered, "", {CH_BASIS.chunk_id: CH_BASIS})
+    assert slipped["verified"] and slipped["quote"] == " ".join(CH_BASIS.text.split())
+    assert slipped["quote_corrected_from"] == lowered
+    # Three slips are too many.
+    three = CH_BASIS.text.replace("authority", "authorty").replace("foreign", "foriegn")
+    assert not verify_quote(CH_BASIS.chunk_id, three, "", {CH_BASIS.chunk_id: CH_BASIS})["verified"]
 
 
 # --- Fabricated, altered or uncited quotes become UNCLEAR / missing_evidence. ---
@@ -233,10 +239,104 @@ def test_patient_data_without_verified_basis_is_always_blocked(payload):
     assert "Patient-data floor" in decision.reason
 
 
-def test_patient_data_routes_only_with_verified_basis_and_transfer_quotes():
-    decision = send(channel(all_yes()), {"patient_data_included": True})
+RECALL = {"patient_data_included": True, "purpose": "patient_recall", "data_subjects": 3,
+          "data_fields": ["case_reference", "clinic"], "images_included": False}
+
+
+def approval(**changes):
+    from engine.models import ApprovalBasis, StandingApproval
+    fields = dict(id="APPROVAL-1", approved_by="test legal officer (role)", sender="ae_health",
+                  receiver="ch_device", request_type="cross_border_evidence_request",
+                  purpose="patient_recall", data_fields=["clinic", "case_reference"], data_subjects=3,
+                  images_included=False,
+                  legal_basis=ApprovalBasis(chunk_id=CH_BASIS.chunk_id, quote=CH_BASIS.text))
+    fields.update(changes)
+    return StandingApproval(**fields)
+
+
+def approved_channel(review, approvals):
+    return LiaisonChannel(bridge(), INSTITUTIONS, FakeReviewer(review),
+                          library={c.chunk_id: c for c in EVIDENCE}, approvals=approvals)
+
+
+def test_patient_data_with_verified_quotes_but_no_human_approval_is_blocked():
+    decision = send(channel(all_yes()), RECALL)
+    assert answers(decision) == {"legal_basis": "YES", "transfer_rules": "YES", "counterpart": "YES"}
+    assert decision.status == "BLOCK"
+    assert decision.review["hard_floor_applied"] is True
+    assert "no matching recorded human approval" in decision.review["status_decided_by"]
+
+
+def test_patient_data_routes_with_verified_quotes_and_a_matching_approval():
+    decision = send(approved_channel(all_yes(), [approval()]), RECALL)
     assert decision.status == "ROUTE"
     assert decision.review["hard_floor_applied"] is False
+    assert decision.review["human_approval"]["approval_id"] == "APPROVAL-1"
+    assert "APPROVAL-1" in decision.review["status_decided_by"]
+
+
+@pytest.mark.parametrize("change", [
+    {"data_fields": ["case_reference", "clinic", "retinal_image"]},
+    {"data_subjects": 4},
+    {"images_included": True},
+    {"receiver": "ae_emirate_health"},
+    {"purpose": "research"},
+])
+def test_an_approval_with_a_different_scope_does_not_count(change):
+    decision = send(approved_channel(all_yes(), [approval(**change)]), RECALL)
+    assert decision.status == "BLOCK"
+    assert decision.review["human_approval"]["checked"][0]["scope_mismatches"]
+
+
+def test_an_approval_resting_on_an_invented_quote_does_not_count():
+    from engine.models import ApprovalBasis
+    fake = approval(legal_basis=ApprovalBasis(
+        chunk_id=CH_BASIS.chunk_id, quote="The authority may send any patient data abroad without conditions."))
+    decision = send(approved_channel(all_yes(), [fake]), RECALL)
+    assert decision.status == "BLOCK"
+
+
+def test_patient_data_needs_national_law_not_only_an_exhibit():
+    from engine.models import DrillExhibit
+    exhibit = DrillExhibit(id="EXH-TEST", title="assurance", issued_by="ae_health",
+                           text="We confirm that the requesting authority is bound by official secrecy in this matter.")
+    chan = LiaisonChannel(bridge(), INSTITUTIONS, FakeReviewer(None), library={c.chunk_id: c for c in EVIDENCE},
+                          exhibits=[exhibit], approvals=[approval()])
+    shown = {**{c.chunk_id: c for c in EVIDENCE}, "EXH-TEST:p1:c1": chan.library["EXH-TEST:p1:c1"]}
+    review = all_yes().model_copy(update={"legal_basis": LiaisonAnswer(
+        answer="YES", reason="exhibit only", quotes=[LiaisonQuote(chunk_id="EXH-TEST:p1:c1",
+                                                                  quote=exhibit.text)])})
+    basis = finalize_answer("legal_basis", review.legal_basis, shown)
+    assert basis["answer"] == "UNCLEAR"
+    assert "non-national" in " ".join(basis["adjustments"])
+
+
+def test_letter_evidence_always_shows_the_relied_on_provision_and_exhibits():
+    from engine.models import DrillExhibit
+    exhibit = DrillExhibit(id="EXH-TEST", title="assurance", issued_by="ae_health",
+                           text="We confirm that the requesting authority is bound by official secrecy in this matter.")
+    shown_to_reviewer = {}
+
+    class Recording(FakeReviewer):
+        def review(self, sender, receiver, request_type, payload, evidence):
+            shown_to_reviewer.update({c.chunk_id: c for c in evidence})
+            return all_yes()
+
+    chan = LiaisonChannel(bridge(), INSTITUTIONS, Recording(evidence=[]),
+                          library={c.chunk_id: c for c in EVIDENCE}, exhibits=[exhibit])
+    send(chan, {"patient_data_included": False, "relied_on": [CH_BASIS.chunk_id], "exhibits": ["EXH-TEST"]})
+    assert {CH_BASIS.chunk_id, "EXH-TEST:p1:c1"} <= set(shown_to_reviewer)
+    assert shown_to_reviewer["EXH-TEST:p1:c1"].title.startswith("Drill exhibit")
+    with pytest.raises(ValueError, match="do not exist"):
+        send(chan, {"patient_data_included": False, "relied_on": ["CH-NOPE:p1:c1"]})
+
+
+def test_letter_facts_are_copied_from_the_letter_in_plain_words():
+    from engine.liaison import letter_facts
+    facts = letter_facts({"patient_data_included": False, "health_data_involved": False,
+                          "data_category": "staff_contact_and_login_data", "target": "x"})
+    assert facts == ["Patient data in this letter: none.", "Health data involved: no.",
+                     "Data category: staff contact and login data."]
 
 
 def test_floor_holds_even_if_the_routing_rule_is_bypassed(monkeypatch):

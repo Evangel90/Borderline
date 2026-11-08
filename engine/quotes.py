@@ -16,6 +16,8 @@ from engine.models import Chunk
 
 TRANSLATION_LABEL = "unofficial translation by the project, not an official text"
 MIN_QUOTE_WORDS = 6
+# Copy slips tolerated before code substitutes the exact source text (never for Arabic).
+MAX_COPY_SLIPS = 2
 
 ARABIC = re.compile(r"[\u0600-\u06FF\u0750-\u077F\u08A0-\u08FF\uFB50-\uFDFF\uFE70-\uFEFF]")
 # Some UAE PDFs extract badly. Text showing these signs is not the official wording, so it
@@ -39,6 +41,41 @@ def garbled_arabic(text: str) -> bool:
 
 def normalize_whitespace(text: str) -> str:
     return " ".join(text.split())
+
+
+def _edit_distance(a: str, b: str, limit: int) -> int:
+    """Levenshtein distance, stopping early once it exceeds `limit`."""
+    if abs(len(a) - len(b)) > limit:
+        return limit + 1
+    previous = list(range(len(b) + 1))
+    for i, char_a in enumerate(a, 1):
+        current = [i]
+        for j, char_b in enumerate(b, 1):
+            current.append(min(previous[j] + 1, current[j - 1] + 1, previous[j - 1] + (char_a != char_b)))
+        if min(current) > limit:
+            return limit + 1
+        previous = current
+    return previous[-1]
+
+
+def near_exact_passage(needle: str, text: str) -> str | None:
+    """The one continuous passage of `text` that `needle` copies with at most MAX_COPY_SLIPS
+    character slips, keeping the same words in the same order; None if there is none or more
+    than one. The caller uses the passage's exact text, so the logged quote is always real."""
+    quote_words, words = needle.split(), normalize_whitespace(text).split()
+    size = len(quote_words)
+    found = []
+    for start in range(len(words) - size + 1):
+        window = words[start:start + size]
+        slips = 0
+        for quoted, source in zip(quote_words, window):
+            if quoted != source:
+                slips += _edit_distance(quoted, source, MAX_COPY_SLIPS - slips)
+                if slips > MAX_COPY_SLIPS:
+                    break
+        if slips <= MAX_COPY_SLIPS:
+            found.append(" ".join(window))
+    return found[0] if len(found) == 1 else None
 
 
 def verify_quote(chunk_id: str, quote: str, translation: str,
@@ -69,7 +106,9 @@ def verify_quote(chunk_id: str, quote: str, translation: str,
         record["failure"] = "Chunk is Arabic; quote the Arabic original, not a translation."
     elif is_arabic and chunk.source_language != "ar":
         record["failure"] = "Arabic quote cited against a non-Arabic chunk."
-    elif needle not in normalize_whitespace(chunk.text):
+    elif needle not in normalize_whitespace(chunk.text) and (
+            is_arabic or len(needle.split()) < MIN_QUOTE_WORDS
+            or near_exact_passage(needle, chunk.text) is None):
         record["failure"] = "Quote does not appear verbatim in the cited chunk."
     elif is_arabic and not translation.strip():
         record["failure"] = "Arabic quote has no English translation."
@@ -80,6 +119,14 @@ def verify_quote(chunk_id: str, quote: str, translation: str,
         )
     else:
         record["verified"] = True
+        if needle not in normalize_whitespace(chunk.text):
+            exact = near_exact_passage(needle, chunk.text)
+            record["quote"] = exact
+            record["quote_corrected_from"] = quote
+            record["correction"] = (
+                "Quote matched one continuous passage except for at most "
+                f"{MAX_COPY_SLIPS} character slips; code replaced it with the exact source text."
+            )
     return record
 
 
@@ -107,10 +154,14 @@ def locate_quote(chunk_id: str, quote: str, translation: str,
     if len(matches) == 1:
         corrected = matches[0]
         corrected["chunk_id_corrected_from"] = chunk_id
-        corrected["correction"] = (
+        relabel = (
             f"Exact quote found in {corrected['chunk_id']}, not in the cited {chunk_id}; "
             "chunk ID corrected by code. The quote text was not changed."
         )
+        if corrected.get("quote_corrected_from"):
+            relabel = (f"Quote found in {corrected['chunk_id']}, not in the cited {chunk_id}; chunk ID "
+                       "corrected by code. " + corrected["correction"])
+        corrected["correction"] = relabel
         return corrected
     if len(matches) > 1:
         record["failure"] += (

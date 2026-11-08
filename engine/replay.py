@@ -30,8 +30,10 @@ from typing import Any
 import yaml
 
 from audit.hasher import HashChainedLogger
-from engine.liaison import QUESTIONS, decide_liaison
-from engine.models import Chunk, DrillIntent, LiaisonAnswer, LiaisonQuote, LiaisonReview, LiaisonRule
+from engine.liaison import QUESTIONS, carries_patient_data, decide_liaison, evaluate_approval, exhibit_chunk
+from engine.models import (
+    Chunk, DrillIntent, LiaisonAnswer, LiaisonQuote, LiaisonReview, LiaisonRule, StandingApproval,
+)
 
 # Logged state keys for each liaison action, as written by engine/actions.py.
 BLOCKED, DELIVERED = "blocked_by_liaison_check", "delivered"
@@ -124,7 +126,8 @@ def logged_reference(checks: list[dict[str, Any]]) -> dict[str, LiaisonRule]:
     }
 
 
-def replay_letter(entry: dict[str, Any], chunks: dict[str, Chunk]) -> LetterReplay:
+def replay_letter(entry: dict[str, Any], chunks: dict[str, Chunk],
+                  approvals: list[StandingApproval] | None = None) -> LetterReplay:
     review_log = entry.get("liaison_review") or {}
     checks = entry["liaison_checks"]
     shown_ids = review_log.get("evidence_shown", [])
@@ -136,7 +139,13 @@ def replay_letter(entry: dict[str, Any], chunks: dict[str, Chunk]) -> LetterRepl
     shown = {cid: chunks[cid] for cid in shown_ids if cid in chunks}
     review = proposed_review(checks, review_log.get("reviewer_status", "OK") == "OK")
     record = {"reviewer_model": review_log.get("reviewer_model", entry.get("model_name", ""))}
-    decision = decide_liaison(review, shown, entry.get("visible_payload", {}), record, logged_reference(checks))
+    payload = entry.get("visible_payload", {})
+    approval = None
+    if carries_patient_data(payload):
+        request_type = payload.get("request_type") or entry.get("action_taken", "")
+        approval = evaluate_approval(approvals or [], entry["actor_id"], payload.get("target", ""),
+                                     request_type, payload, chunks)
+    decision = decide_liaison(review, shown, payload, record, logged_reference(checks), approval)
 
     where = f"step {entry['step']} {entry['actor_id']}"
     if decision.status != entry.get("liaison_status"):
@@ -235,6 +244,11 @@ def replay_run(run: str, log_path: str | None = None, intent_path: str | None = 
     report = ReplayReport(run=run, log_path=log_path, hash_chain_ok=ok, hash_chain_message=message,
                           entries=len(entries))
     chunks = load_chunks(root)
+    intent_path = intent_path or infer_intent(entries, os.path.join(root, "intents"))
+    intent = load_intent(intent_path) if intent_path else None
+    if intent:
+        chunks.update({exhibit_chunk(e).chunk_id: exhibit_chunk(e) for e in intent.exhibits})
+    approvals = intent.standing_approvals if intent else []
 
     for entry in entries:
         offered = entry.get("authorized_actions") or []
@@ -242,13 +256,12 @@ def replay_run(run: str, log_path: str | None = None, intent_path: str | None = 
             report.differences.append(
                 f"step {entry['step']} {entry['actor_id']}: action {entry.get('action_taken')} was not offered"
             )
-    report.letters = [replay_letter(e, chunks) for e in entries if e.get("liaison_checks")]
+    report.letters = [replay_letter(e, chunks, approvals) for e in entries if e.get("liaison_checks")]
 
-    intent_path = intent_path or infer_intent(entries, os.path.join(root, "intents"))
-    if intent_path:
+    if intent:
         report.intent = os.path.basename(intent_path)
         report.steps, step_diffs = replay_steps(
-            load_intent(intent_path), entries, {letter.entry_id: letter for letter in report.letters},
+            intent, entries, {letter.entry_id: letter for letter in report.letters},
         )
         report.differences.extend(step_diffs)
     return report

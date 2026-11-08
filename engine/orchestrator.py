@@ -79,6 +79,9 @@ class DrillOrchestrator:
             LiaisonChannel(
                 self.bridge, {inst.id: inst for inst, _ in institutions},
                 LiaisonReviewer(self.llm, self.knowledge_index),
+                library={c.chunk_id: c for pack in self.chunks.values() for c in pack},
+                exhibits=self.intent.exhibits,
+                approvals=self.intent.standing_approvals,
             )
             if self.bridge.liaison else None
         )

@@ -59,14 +59,26 @@ liaison:
       answer: UNCLEAR
       reason: "Swiss TPA Art. 64 lets Swiss enforcement authorities disclose non-public information to foreign authorities that enforce therapeutic-product regulations, if the requester is bound by official secrecy, uses it only in that enforcement and passes nothing on; health data needs further conditions such as averting a serious health risk. No UAE assurance meeting these conditions, and no UAE-Switzerland cooperation instrument, is registered in this bridge pack."
       sources: [CH-HEALTH-TPA]
+      with_assurance:
+        answer: "YES"
+        reason: "Drill reference only. With the requester's written assurances registered as a drill exhibit (official secrecy, use only in its administrative procedure enforcing therapeutic-product rules, no onward disclosure, only the information needed, no trade secrets), the conditions of Swiss TPA Art. 64(1)(a)-(c) appear to be met on the drill's facts. Not a legal conclusion."
+        sources: [CH-HEALTH-TPA]
     data_protection_assistance_request:
       answer: UNCLEAR
       reason: "Swiss FADP Art. 55(1) lets the FDPIC exchange information with foreign authorities 'responsible for data protection' so they may fulfil 'their respective statutory duties in relation to data protection', if reciprocity is guaranteed and the recipient keeps secrecy and uses the information only in that proceeding. UAE PDPL Art. 2(2)(e) excludes 'Personal Health Data that has legislation regulating its protection and processing', so whether the UAE Data Office has a statutory data-protection duty over UAE patients' retinal images is unclear. No reciprocity assurance is registered in this bridge pack."
       sources: [CH-DATA-FADP, AE-DATA-PDPL-2021-EN]
+      with_assurance:
+        answer: "YES"
+        reason: "Drill reference only. The request concerns clinic staff contact and login data, not health data, and the UAE Data Office's written assurances are registered as a drill exhibit (reciprocity, use only in this proceeding, professional secrecy, no onward disclosure without approval). The conditions of Swiss FADP Art. 55(1)(a)-(e) appear to be met on the drill's facts, and UAE PDPL Art. 2(1)(c) covers controllers outside the State processing data of people in the State. Not a legal conclusion."
+        sources: [CH-DATA-FADP, AE-DATA-PDPL-2021-EN]
     patient_data_disclosure:
       answer: UNCLEAR
       reason: "Depends on direction and purpose. CH->AE: Swiss TPA Art. 64(2) lets Swiss enforcement authorities disclose health data abroad without adequate foreign legislation only if, among other grounds, 'serious risks to health can thereby be averted in the specific case'. AE->CH: UAE Federal Law No. 2 of 2019 Art. 13 bars storing or processing UAE health data outside the State without a Health Authority resolution, and none is in this knowledge base."
       sources: [CH-HEALTH-TPA, AE-HEALTH-ICT-LAW-2019]
+      with_assurance:
+        answer: "YES"
+        reason: "Drill reference only, for Switzerland to the UAE. Swiss TPA Art. 64(2)(c) allows disclosure of health data abroad without adequate foreign legislation where serious risks to health can thereby be averted in the specific case; the recall of 47 patients at risk of sight loss is written to that ground, the requester's assurances are a drill exhibit, and a human approval is recorded. Not a legal conclusion."
+        sources: [CH-HEALTH-TPA]
     incident_notification:
       answer: UNCLEAR
       reason: "No UAE-Switzerland vigilance or incident-notification exchange instrument is registered in this bridge pack."
@@ -79,3 +91,7 @@ liaison:
       answer: UNCLEAR
       reason: "The UAE is not on the checked Swiss DPO Annex 1 adequacy list, so a disclosure from Switzerland would need FADP Art. 16(2) safeguards or an Art. 17 exception. None is recorded."
       sources: [CH-DATA-FADP, CH-DATA-DPO]
+      with_assurance:
+        answer: "YES"
+        reason: "Drill reference only. For a Swiss enforcement authority's disclosure under the Therapeutic Products Act, TPA Art. 64(2) sets the conditions for disclosure abroad without adequate legislation, including (c) averting serious risks to health in the specific case; the recall letter is written to that ground. Not a legal conclusion."
+        sources: [CH-HEALTH-TPA]

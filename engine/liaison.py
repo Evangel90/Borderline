@@ -34,8 +34,8 @@ from engine.quotes import (  # re-exported for callers of the liaison channel
     verify_quote,
 )
 from engine.models import (
-    LIAISON_ANSWERS, LIAISON_GAP_TYPES, BridgeConfig, Chunk, Institution,
-    LiaisonAnswer, LiaisonReview, LiaisonRule,
+    LIAISON_ANSWERS, LIAISON_GAP_TYPES, BridgeConfig, Chunk, DrillExhibit, Institution,
+    LiaisonAnswer, LiaisonReview, LiaisonRule, StandingApproval,
 )
 
 QUESTIONS = {
@@ -45,6 +45,89 @@ QUESTIONS = {
 }
 
 CANDIDATE_GAP_TYPES = ("policy_gap", "implementation_gap", "conflict")
+
+# Drill exhibits (synthetic documents such as written assurances) can be quoted to show a
+# condition is met, but they are not law: like global guidance, they never count as a legal basis.
+EXHIBIT_JURISDICTION = "DRILL-EXHIBIT"
+NOT_LAW = {"GLOBAL", EXHIBIT_JURISDICTION}
+EXHIBIT_LABEL = "Drill exhibit: a synthetic document written for this drill, not a real document"
+
+
+def exhibit_chunk(exhibit: DrillExhibit) -> Chunk:
+    return Chunk(
+        chunk_id=f"{exhibit.id}:p1:c1", doc_id=exhibit.id, title=f"{EXHIBIT_LABEL}. {exhibit.title}",
+        jurisdiction=EXHIBIT_JURISDICTION, page=1, total_pages=1, chunk_index=0, text=exhibit.text,
+        source_file="intents (drill exhibit)", source_issuer=exhibit.issued_by, source_language="en",
+        source_binding="not law; synthetic drill exhibit",
+        source_notes="Can show that a condition in a quoted provision is met within the drill; never a legal basis.",
+    )
+
+
+FACT_WORDING = {
+    "patient_data_included": ("Patient data in this letter", {True: "yes", False: "none"}),
+    "personal_data_included": ("Personal data in this letter", {True: "yes", False: "none"}),
+    "health_data_involved": ("Health data involved", {True: "yes", False: "no"}),
+    "images_included": ("Images included", {True: "yes", False: "no"}),
+    "data_category": ("Data category", None),
+    "data_subjects": ("Number of people whose data is involved", None),
+    "data_fields": ("Data fields", None),
+    "purpose": ("Purpose", None),
+    "direction": ("Direction", None),
+    "data_origin": ("Where the data originates", None),
+    "relied_on_provision": ("Provision the sender says it relies on", None),
+}
+
+
+def letter_facts(payload: dict[str, Any]) -> list[str]:
+    """The letter's key facts in plain words, put first so the reviewer does not misread them.
+    Facts only, copied from the letter; no legal conclusion is added."""
+    facts = []
+    for key, (label, wording) in FACT_WORDING.items():
+        if key not in payload:
+            continue
+        value = payload[key]
+        if wording and value in wording:
+            value = wording[value]
+        elif isinstance(value, list):
+            value = ", ".join(str(item).replace("_", " ") for item in value)
+        else:
+            value = str(value).replace("_", " ")
+        facts.append(f"{label}: {value}.")
+    return facts
+
+
+def evaluate_approval(approvals: list[StandingApproval], sender_id: str, receiver_id: str,
+                      request_type: str, payload: dict[str, Any],
+                      library: dict[str, Chunk]) -> dict[str, Any]:
+    """Find a recorded human approval whose scope matches this patient-data letter exactly.
+
+    Pure. An approval counts only if sender, receiver, request type, purpose, data fields, number of
+    people and images all match, and its legal-basis quote verifies word for word against a national
+    law chunk. Returns what was checked, for the log."""
+    result: dict[str, Any] = {"valid": False, "approval_id": None, "checked": []}
+    for approval in approvals:
+        mismatches = [
+            name for name, expected, actual in (
+                ("sender", approval.sender, sender_id),
+                ("receiver", approval.receiver, receiver_id),
+                ("request_type", approval.request_type, request_type),
+                ("purpose", approval.purpose, payload.get("purpose")),
+                ("data_fields", sorted(approval.data_fields), sorted(payload.get("data_fields") or [])),
+                ("data_subjects", approval.data_subjects, payload.get("data_subjects")),
+                ("images_included", approval.images_included, bool(payload.get("images_included", False))),
+            ) if expected != actual
+        ]
+        basis = verify_quote(approval.legal_basis.chunk_id, approval.legal_basis.quote, "", library)
+        if basis["verified"] and basis.get("jurisdiction") in NOT_LAW:
+            basis = {**basis, "verified": False, "failure": "Approval's legal basis is not national law."}
+        entry = {"approval_id": approval.id, "approved_by": approval.approved_by,
+                 "scope_mismatches": mismatches, "legal_basis": basis}
+        result["checked"].append(entry)
+        if not mismatches and basis["verified"]:
+            result.update(valid=True, approval_id=approval.id, approved_by=approval.approved_by,
+                          legal_basis=basis)
+            break
+    return result
 
 
 def question_notes(payload: dict[str, Any]) -> dict[str, str]:
@@ -149,10 +232,21 @@ class LiaisonReviewer:
             "do not include the document you would need. For YES set gap_type to null. "
             "For a passage whose language is Arabic, quote the Arabic original exactly and put your "
             "English translation in translation; never quote only a translation. "
+            "Passages whose jurisdiction is DRILL-EXHIBIT are synthetic documents written for this drill "
+            "(for example a written assurance). Within the drill you may quote them to show that a "
+            "condition in a quoted provision is met, but they are not law and never a legal basis on "
+            "their own. If the letter names the provision it relies on, test that provision condition by "
+            "condition: for each condition, quote the provision and the passage showing it is met, or say "
+            "it is not shown. Read the letter_facts first; they are copied from the letter. "
             "Your answers are unreviewed drill outputs, not legal conclusions; say 'the passages show', "
             "never 'the law requires' or 'violation'. Keep each reason under 600 characters."
         )
         user = {
+            "letter_facts": letter_facts(payload),
+            "sender_relies_on": {
+                "provision": payload.get("relied_on_provision", "not stated"),
+                "chunk_ids": payload.get("relied_on", []),
+            },
             "letter": {
                 "sender": {"id": sender.id, "name": sender.name, "jurisdiction": sender.jurisdiction,
                            "mandate": sender.mandate},
@@ -228,7 +322,7 @@ def finalize_answer(key: str, proposed: LiaisonAnswer | None,
         }
     quotes = [locate_quote(q.chunk_id, q.quote, q.translation, shown) for q in proposed.quotes]
     for q in quotes:
-        if q.get("chunk_id_corrected_from"):
+        if q.get("correction"):
             adjustments.append(q["correction"])
     verified = [q for q in quotes if q["verified"]]
     failed = [q for q in quotes if not q["verified"]]
@@ -248,10 +342,11 @@ def finalize_answer(key: str, proposed: LiaisonAnswer | None,
         answer, gap_type = "UNCLEAR", "missing_evidence"
 
     if (key == "legal_basis" and answer == "YES"
-            and not any(q["jurisdiction"] != "GLOBAL" for q in verified)):
-        # A global recommendation or guideline is not a legal basis in either country.
+            and not any(q["jurisdiction"] not in NOT_LAW for q in verified)):
+        # A global recommendation, a guideline or a drill exhibit is not a legal basis in either country.
         adjustments.append(
-            "Legal-basis YES rests only on global (non-national) sources; set to UNCLEAR / missing_evidence."
+            "Legal-basis YES rests only on non-national sources (global guidance or drill exhibits); "
+            "set to UNCLEAR / missing_evidence."
         )
         answer, gap_type = "UNCLEAR", "missing_evidence"
 
@@ -303,36 +398,59 @@ class LiaisonDecision:
             for check in failed
         ]
         if self.review.get("hard_floor_applied"):
-            parts.append("Patient-data floor: no verified legal-basis and transfer-rules quotes, so the request is blocked.")
+            parts.append("Patient-data floor: " + self.review.get("floor_reason", "") + " so the request is blocked.")
         return " ".join(parts) or "All three liaison checks answered YES with verified quotes."
 
 
 class LiaisonChannel:
     def __init__(self, bridge: BridgeConfig, institutions: dict[str, Institution],
-                 reviewer: Reviewer):
+                 reviewer: Reviewer, library: dict[str, Chunk] | None = None,
+                 exhibits: list[DrillExhibit] | None = None,
+                 approvals: list[StandingApproval] | None = None):
         if bridge.liaison is None:
             raise ValueError(f"Bridge pack '{bridge.id}' has no liaison rules.")
         self.config = bridge.liaison
         self.institutions = institutions
         self.reviewer = reviewer
+        self.exhibits = {exhibit.id: exhibit_chunk(exhibit) for exhibit in (exhibits or [])}
+        # Every chunk code may need: the knowledge base plus this drill's exhibits.
+        self.library = {**(library or {}), **{c.chunk_id: c for c in self.exhibits.values()}}
+        self.approvals = list(approvals or [])
+
+    def letter_evidence(self, payload: dict[str, Any]) -> list[Chunk]:
+        """Passages the letter itself points to: the provision it relies on and its exhibits.
+        Always shown, so the reviewer can test the sender's claimed basis."""
+        wanted = list(payload.get("relied_on") or []) + [
+            f"{exhibit_id}:p1:c1" for exhibit_id in payload.get("exhibits") or []
+        ]
+        missing = [cid for cid in wanted if cid not in self.library]
+        if missing:
+            raise ValueError(f"Letter refers to passages that do not exist: {', '.join(missing)}.")
+        return [self.library[cid] for cid in wanted]
 
     # --- Hand-written reference answers (bridge-pack YAML). Logged, never decisive. ---
 
-    def _legal_basis(self, request_type: str) -> LiaisonRule:
-        return self.config.request_types.get(request_type) or LiaisonRule(
+    @staticmethod
+    def _assured(rule: LiaisonRule, payload: dict[str, Any]) -> LiaisonRule:
+        return rule.with_assurance if payload.get("exhibits") and rule.with_assurance else rule
+
+    def _legal_basis(self, request_type: str, payload: dict[str, Any]) -> LiaisonRule:
+        rule = self.config.request_types.get(request_type) or LiaisonRule(
             answer="UNCLEAR",
             reason=f"The bridge pack defines no legal basis for request type '{request_type}'.",
         )
+        return self._assured(rule, payload)
 
     def _transfer_rules(self, sender: Institution, receiver: Institution,
                         payload: dict[str, Any]) -> LiaisonRule:
         if payload.get("patient_data_included") is False:
             return LiaisonRule(answer="YES", reason="The request carries no personal data.")
         direction = f"{sender.jurisdiction}->{receiver.jurisdiction}"
-        return self.config.personal_data_transfers.get(direction) or LiaisonRule(
+        rule = self.config.personal_data_transfers.get(direction) or LiaisonRule(
             answer="UNCLEAR",
             reason=f"The request may carry personal data and the bridge pack has no {direction} transfer rule.",
         )
+        return self._assured(rule, payload)
 
     def _counterpart(self, sender: Institution, receiver: Institution) -> LiaisonRule:
         if any({sender.id, receiver.id} == set(pair) for pair in self.config.counterparts):
@@ -353,7 +471,7 @@ class LiaisonChannel:
     def reference(self, sender: Institution, receiver: Institution, request_type: str,
                   payload: dict[str, Any]) -> dict[str, LiaisonRule]:
         return {
-            "legal_basis": self._legal_basis(request_type),
+            "legal_basis": self._legal_basis(request_type, payload),
             "transfer_rules": self._transfer_rules(sender, receiver, payload),
             "counterpart": self._counterpart(sender, receiver),
         }
@@ -372,6 +490,9 @@ class LiaisonChannel:
               payload: dict[str, Any]) -> LiaisonDecision:
         receiver = self._receiver(sender, receiver_id)
         evidence = self.reviewer.gather_evidence(sender, receiver, request_type, payload)
+        for chunk in self.letter_evidence(payload):
+            if chunk.chunk_id not in {c.chunk_id for c in evidence}:
+                evidence.append(chunk)
         shown = {chunk.chunk_id: chunk for chunk in evidence}
         review_record: dict[str, Any] = {
             "reviewer": "liaison_reviewer",
@@ -391,12 +512,21 @@ class LiaisonChannel:
             review_record["reviewer_error"] = f"{type(exc).__name__}: {exc}"[:500]
 
         reference = self.reference(sender, receiver, request_type, payload)
-        return decide_liaison(review, shown, payload, review_record, reference)
+        approval = (
+            evaluate_approval(self.approvals, sender.id, receiver.id, request_type, payload, self.library)
+            if carries_patient_data(payload) else None
+        )
+        return decide_liaison(review, shown, payload, review_record, reference, approval)
+
+
+def carries_patient_data(payload: dict[str, Any]) -> bool:
+    return payload.get("patient_data_included") is not False
 
 
 def decide_liaison(review: LiaisonReview | None, shown: dict[str, Chunk], payload: dict[str, Any],
                    review_record: dict[str, Any],
-                   reference: dict[str, LiaisonRule]) -> LiaisonDecision:
+                   reference: dict[str, LiaisonRule],
+                   approval: dict[str, Any] | None = None) -> LiaisonDecision:
     """Code's whole decision on one letter, given the reviewer's proposed answers.
 
     Pure: no model call and no state. The drill calls it with the live review; `make replay`
@@ -417,26 +547,42 @@ def decide_liaison(review: LiaisonReview | None, shown: dict[str, Chunk], payloa
 
     # Patient-data floor (design rule 7). Checked on its own, after everything else,
     # so no change to the routing rule above can let patient data through without it.
-    carries_patient_data = payload.get("patient_data_included") is not False
+    # Two keys: verified national-law quotes behind YES on legal basis and transfer rules, AND a
+    # recorded human approval whose scope matches this letter (a real quote is not proof it applies).
+    patient_data = carries_patient_data(payload)
     by_key = {check["check"]: check for check in checks}
     basis_verified = all(
         by_key[key]["answer"] == "YES"
-        and any(quote["verified"] for quote in by_key[key]["quotes"])
+        and any(quote["verified"] and quote.get("jurisdiction") not in NOT_LAW
+                for quote in by_key[key]["quotes"])
         for key in ("legal_basis", "transfer_rules")
     )
-    hard_floor_applied = carries_patient_data and not basis_verified
+    approved = bool(approval and approval.get("valid"))
+    hard_floor_applied = patient_data and not (basis_verified and approved)
+    floor_reason = ""
+    if patient_data and not basis_verified:
+        floor_reason = "no verified national-law quotes behind YES on legal basis and transfer rules;"
+    elif patient_data and not approved:
+        floor_reason = "no recorded human approval matches this letter;"
     if hard_floor_applied:
         status = "BLOCK"
-    if hard_floor_applied:
+    if hard_floor_applied and not basis_verified:
         status_by = "code: patient-data rule (no verified legal-basis and transfer-rules quotes)"
+    elif hard_floor_applied:
+        status_by = "code: patient-data rule (no matching recorded human approval)"
+    elif patient_data:
+        status_by = (f"code routing rule: all three final answers YES, and human approval "
+                     f"{approval['approval_id']} ({approval['approved_by']}) matches this letter")
     elif status == "ROUTE":
         status_by = "code routing rule: all three final answers YES"
     else:
         status_by = "code routing rule: at least one final answer is not YES"
     review_record.update(
         status_decided_by=status_by,
-        patient_data_carried=carries_patient_data,
+        patient_data_carried=patient_data,
         hard_floor_applied=hard_floor_applied,
+        floor_reason=floor_reason,
+        human_approval=approval,
         quotes_checked=sum(len(check["quotes"]) for check in checks),
         quotes_verified=sum(q["verified"] for check in checks for q in check["quotes"]),
         yes_answers_for_human_review=[
