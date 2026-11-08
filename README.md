@@ -252,7 +252,8 @@ shasum -a 256 runs/repro-*/log.jsonl
 ```
 
 Logs contain no run IDs or timestamps, so a faithful re-run produces a
-byte-identical `log.jsonl`. Compare with the published logs:
+byte-identical `log.jsonl`. Compare with the published logs (also recorded in the
+annotated git tag `drills-final-20261108`):
 
 | Drill | SHA-256 of `log.jsonl` |
 |---|---|
@@ -363,7 +364,9 @@ verifiable without adding it to search.
 Borderline is a synthetic policy-drill prototype, not a clinical tool or legal
 opinion. Actions only update drill state and the local audit log; no clinical,
 regulatory or data-transfer system is connected. The hash chain is tamper-evident
-but not digitally signed. Citations and actions should be checked against current
+but not digitally signed. Each log entry names the model (`qwen3:8b`) but does not
+record its digest, a hash of the prompts or a seed; the digest and settings are
+given under Reproducibility, and the prompts are fixed by the code commit. Citations and actions should be checked against current
 authoritative sources before any real-world use.
 
 ## License

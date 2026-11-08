@@ -111,7 +111,7 @@ Drill B releases staged events: a model update with fewer referrals, confirmed m
 | C `insufficient-20261108-3` | 7 | verified | 0 / 1 | 6 of 6 | 1 | 0 |
 | D (scripted, not AI) `governed-scripted-20261108-3` | 11 | verified | 3 / 3 | 21 of 21 | 2 | 0 |
 
-**Decisions:** institution-agent actions logged. **Quotes verified:** liaison-reviewer quotes that code found in the passages shown. **Audit-screen flags:** agent citations that the citation screen (`make audit-evidence`) marks as missing or needing review. **Homework:** `missing_evidence` items. All four runs also **replay with 0 differences**: re-running every code decision over the logged AI answers, without the model, gives the same outcomes. Logs and a step-by-step reproducibility guide are in the repository's [README](../README.md#reproducibility-guide).
+**Decisions:** institution-agent actions logged. **Quotes verified:** liaison-reviewer quotes that code found in the passages shown. **Audit-screen flags:** agent citations that the citation screen (`make audit-evidence`) marks as missing or needing review. **Homework:** `missing_evidence` items. All four runs also **replay with 0 differences**: re-running every code decision over the logged AI answers, without the model, gives the same outcomes. The logs are fixed by git tag `drills-final-20261108`; their SHA-256 hashes begin `c59a3118` (A), `5366b973` (B), `d5f2d063` (C) and `7920a757` (D), with full values and a step-by-step reproducibility guide in the repository's [README](../README.md#reproducibility-guide).
 
 What the runs show:
 
