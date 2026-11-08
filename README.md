@@ -5,189 +5,339 @@ A multi-agent drill engine for cross-border medical-AI incidents, built for the
 
 When a medical AI product made in one country fails in another, both countries'
 regulators, data-protection authorities and cyber agencies must share information
-quickly, under different laws. Borderline rehearses that response before a real
-incident. It records which institution decided what, which letters may legally
-cross the border, and where the rules run out. The drill is wired to the United
-Arab Emirates (UAE) and Switzerland (CH); country packs, a bridge pack and drill
-intents are plain YAML (a readable configuration format).
-
-**Read first:** [technical report](report/technical-report.md) ·
-[final run review](report/run-review-2026-11-08-final-runs.md) ·
-decision trails for drills [A](report/decision-trail-governed-20261108-4.md),
-[B](report/decision-trail-ungoverned-20261108-3.md),
-[C](report/decision-trail-insufficient-20261108-3.md),
-[D](report/decision-trail-governed-scripted-20261108-3.md)
-
-## How it works
-
-Three kinds of decision-maker take part, and every log entry records which one decided:
-
-- **Institution AI agents** (12 UAE, Swiss and neutral institutions) each see only
-  their own view and choose one of their allowed actions, with citations.
-- **An AI liaison reviewer** (a separate model call) answers three questions for
-  every cross-border letter: is there a legal basis to share, is the transfer
-  allowed under both sides' rules, and is the receiver the right counterpart.
-  Every answer carries exact quotes.
-- **Code makes the final check.** It verifies every quote against the source
-  passage (a fabricated quote becomes UNCLEAR), stops patient data without
-  verified legal-basis and transfer-rules quotes and a recorded human approval,
-  delivers a letter only on three YES answers, and flags every YES for human
-  review. Every UNCLEAR or NO is typed `policy_gap`, `implementation_gap`,
-  `conflict` or `missing_evidence`; the last goes to a homework list.
-
-Everything is written to a hash-chained audit log. All AI decisions run on a local
-open-weight model (`qwen3:8b` through Ollama), so no prompt or passage leaves the machine.
-
-The use case is RetinaVision-DX, a fictional diabetic-retinopathy screening service
-from a fictional Swiss vendor, used at fictional Dubai clinics: a model update misses
-referable disease in 47 synthetic patients, the update came from a compromised vendor
-account, and UAE retinal images held in Zurich were reused for retraining.
-
-The knowledge base holds 49 registered UAE, Swiss and global source and extraction
-files (hashed in [`data/sources.csv`](data/sources.csv)), split into 2,286 passages
-that keep their document, page, language and legal status.
+quickly, under different laws, each seeing only part of the picture. Borderline
+rehearses that response before a real incident. It records which institution
+decided what, which letters may legally cross the border, and where the rules run
+out. The drill is wired to the United Arab Emirates (UAE) and Switzerland (CH);
+country packs, a bridge pack and drill intents are plain YAML (a readable
+configuration format).
 
 > All scenario data is synthetic. Agent roles are simulated and do not represent any
 > authority's official position. Nothing produced is a legal conclusion; policy gaps
 > are called candidates.
 
+## Contents
+
+1. [Start here](#start-here)
+2. [The use case](#the-use-case)
+3. [How it works](#how-it-works)
+4. [The knowledge base](#the-knowledge-base)
+5. [The drills](#the-drills)
+6. [Results](#results-8-november-2026)
+7. [Gap candidates](#gap-candidates)
+8. [Reproducibility guide](#reproducibility-guide)
+9. [Repository map](#repository-map)
+10. [Commands](#commands)
+11. [Configuration](#configuration)
+12. [Scope](#scope)
+
+## Start here
+
+| If you want to… | Open |
+|---|---|
+| Read the submission | [Technical report](report/technical-report.md) |
+| See every drill result against what was expected | [Final run review](report/run-review-2026-11-08-final-runs.md) |
+| See who decided what, step by step | Decision trails for drills [A](report/decision-trail-governed-20261108-4.md), [B](report/decision-trail-ungoverned-20261108-3.md), [C](report/decision-trail-insufficient-20261108-3.md), [D](report/decision-trail-governed-scripted-20261108-3.md) |
+| Check the results yourself in a few minutes | [Reproducibility guide](#reproducibility-guide) |
+| See the code that makes the final decision | [`engine/liaison.py`](engine/liaison.py), [`engine/quotes.py`](engine/quotes.py) |
+
+## The use case
+
+RetinaVision-DX is a fictional diabetic-retinopathy screening service from a
+fictional Swiss vendor, RetinaSwiss AG, used at fictional Dubai clinics. A model
+update misses referable disease in 47 synthetic patients; the update was pushed
+from a compromised vendor account; and UAE patients' retinal images held in Zurich
+were reused for retraining. Each side learns different facts at different times and
+must respond under its own rules; information crosses the border only through the
+liaison channel. Product background:
+[synthetic product dossier](report/synthetic-product-dossier-retinavision-dx.md).
+
+## How it works
+
+Three kinds of decision-maker take part, and every log entry records which one decided.
+
+**1. Institution AI agents.** Twelve institutions, each a separate agent with its
+own profile, mandate and allowed actions:
+
+| Side | Institutions (profiles) |
+|---|---|
+| UAE | Dubai Health Authority (DHA), Ministry of Health and Prevention (MoHAP), Emirates Drug Establishment (EDE), UAE Data Office, UAE cyber incident coordination, the screening service, the clinic operator ([`packs/ae/institutions/`](packs/ae/institutions)) |
+| Switzerland | Swiss Agency for Therapeutic Products (Swissmedic), Federal Data Protection and Information Commissioner (FDPIC), National Cyber Security Centre (NCSC), the vendor ([`packs/ch/institutions/`](packs/ch/institutions)) |
+| Neutral | Policy and legal adviser ([`packs/global/institutions/`](packs/global/institutions)) |
+
+Each agent sees only its institution's view of the event and passages retrieved
+from its own country's texts plus global guidance. In one stateless model call it
+chooses one allowed action and explains it with citations
+([`engine/agent.py`](engine/agent.py)).
+
+**2. An AI liaison reviewer.** Every cross-border letter goes to a separate model
+call that answers three questions, each YES, NO or UNCLEAR with exact quotes
+([`engine/liaison.py`](engine/liaison.py), `LiaisonReviewer`):
+
+- **Legal basis:** may the sender share this?
+- **Transfer rules:** is the transfer allowed under both sides' rules?
+- **Counterpart:** is the receiver the right institution? (Counterpart pairs and
+  reference answers: [`packs/bridge/ae-ch.yaml`](packs/bridge/ae-ch.yaml).)
+
+**3. Code makes the final check.** The model proposes; code decides:
+
+| Rule | Where |
+|---|---|
+| Every quote must appear word for word in a passage the reviewer was shown; up to two character slips are accepted and the exact source text is logged; a fabricated, joined or uncited quote turns the answer into UNCLEAR | [`engine/quotes.py`](engine/quotes.py) (`verify_quote`), [`engine/liaison.py`](engine/liaison.py) (`finalize_answer`) |
+| A legal-basis YES must rest on national law, not global guidance or a drill exhibit | [`engine/liaison.py`](engine/liaison.py) (`NOT_LAW`) |
+| Patient data crosses only with two keys: verified national-law quotes behind YES on legal basis and transfer rules, and a recorded human approval that matches the letter | [`engine/liaison.py`](engine/liaison.py) (`decide_liaison`, `evaluate_approval`) |
+| A letter is delivered only on three YES answers, and every YES is flagged for human review | [`engine/liaison.py`](engine/liaison.py) (`decide_liaison`) |
+| A letter that names no receiver is blocked | [`engine/actions.py`](engine/actions.py) (`_block_unaddressed_letter`) |
+| An agent may only take actions its institution is allowed | [`engine/actions.py`](engine/actions.py), institution profiles |
+| An uncited legal claim in an agent's explanation is sent back once, then replaced by fixed wording, and the log says so | [`engine/agent.py`](engine/agent.py) (`evaluate_step`) |
+| Every UNCLEAR or NO is typed `policy_gap`, `implementation_gap`, `conflict` or `missing_evidence`; the last goes to a homework list, not to gap candidates | [`engine/liaison.py`](engine/liaison.py) (`finalize_answer`), [`engine/orchestrator.py`](engine/orchestrator.py) |
+
+Every decision is written to a hash-chained audit log
+([`audit/hasher.py`](audit/hasher.py)): each entry includes the hash of the one
+before, so any edit breaks the chain at that entry.
+
+All AI decisions run on a local open-weight model (`qwen3:8b` through Ollama) at
+temperature 0, so no prompt, passage or patient fact leaves the machine and the same
+inputs give the same log ([`engine/llm.py`](engine/llm.py)).
+
+## The knowledge base
+
+- **49 registered source and extraction files** (26 UAE, 9 Swiss, 14 global) in
+  [`data/raw/`](data/raw), each with its URL, issuer, language, legal status and
+  SHA-256 hash in the register [`data/sources.csv`](data/sources.csv).
+- **2,286 passages** in [`packs/ae/chunks.jsonl`](packs/ae/chunks.jsonl),
+  [`packs/ch/chunks.jsonl`](packs/ch/chunks.jsonl) and
+  [`packs/global/chunks.jsonl`](packs/global/chunks.jsonl). Each keeps its document,
+  page, language and binding status, and an ID such as `CH-HEALTH-TPA:p40:c1` that
+  every citation in the report points to.
+- **Search** combines keyword matching with a local multilingual embedding model
+  (`paraphrase-multilingual-MiniLM-L12-v2`, through fastembed) over a Chroma index
+  ([`engine/knowledge.py`](engine/knowledge.py)). On a ten-question test set it puts
+  the exact passage in the top six for 8 of 10 questions
+  ([evaluation](report/retrieval-evaluation-seed-20261101.md),
+  [questions](data/retrieval_benchmark_seed.csv)).
+- **Gaps are recorded, not guessed.** Arabic text whose extraction is garbled is
+  kept out of quoting; documents that could not be obtained are registered as such;
+  absence searches (what was searched for, where, and what was found) are kept in
+  [`gaps/searches/`](gaps/searches).
+
+## The drills
+
+Drill specifications are in [`intents/`](intents) (the ITU-T Y.3172 "ML intent").
+
+| Drill | Intent | What it tests |
+|---|---|---|
+| A, governed | [`retinopathy-governed.yaml`](intents/retinopathy-governed.yaml) | Three letters written to real provisions, with the senders' assurances as labelled synthetic exhibits: a vigilance request (Therapeutic Products Act (TPA) Art. 64(1)), a recall list of 47 patients with a recorded human approval (TPA Art. 64(2)(c)), and a data-protection request on staff data (Federal Act on Data Protection (FADP) Art. 55) |
+| B, ungoverned | [`retinopathy-ae-ch.yaml`](intents/retinopathy-ae-ch.yaml) | A staged incident across all 12 institutions, ending with DHA trying to send patient images to Switzerland; optional step 13 is a judge-injected event |
+| C, insufficient evidence | [`retinopathy-insufficient-evidence.yaml`](intents/retinopathy-insufficient-evidence.yaml) | A request whose deciding document is missing |
+| D, scripted control for A | [`retinopathy-governed.yaml`](intents/retinopathy-governed.yaml) with `--reviewer scripted` | Drill A's letters with the project's reference answers in place of the AI reviewer, to show whether Drill A's outcome comes from the AI review or from the law and the code. Institution agents are still AI and every code check still runs; the liaison answers are **not AI decisions** |
+
 ## Results (8 November 2026)
 
-Four runs on the same code with local `qwen3:8b`. Drill D is a scripted control
-for Drill A: the same letters, with the project's reference answers in place of the
-AI liaison reviewer, to show whether Drill A's outcome comes from the AI review or
-from the law and the code. Drill D's liaison answers are not AI decisions.
+Four runs, all on the same code (commit `b229477`) and model (`qwen3:8b`). Their
+full logs are in [`runs/`](runs).
 
-| Drill | Run | Decisions | Letters delivered | Highlights |
-|---|---|---|---|---|
-| A, governed | `governed-20261108-4` | 9 | 0 of 3 | The AI reviewer found the right provisions (YES on legal basis each time); code rejected quotes it had joined from two places |
-| B, ungoverned (with optional step 13) | `ungoverned-20261108-3` | 40 | 0 of 5 | Patient images stopped at the border; a letter naming no receiver blocked; 1 typed gap; 8 homework items |
-| C, insufficient evidence | `insufficient-20261108-3` | 7 | 0 of 1 | Letter without a reciprocity assurance blocked; answers typed as gaps for human review |
-| D, scripted control for A | `governed-scripted-20261108-3` | 11 | 3 of 3 | All 21 quotes verified; the recall list crossed only with a matching recorded human approval |
+| Drill | Run | Decisions | Letters delivered | Quotes verified | Highlights |
+|---|---|---|---|---|---|
+| A | [`governed-20261108-4`](runs/governed-20261108-4) | 9 | 0 of 3 | 10 of 13 | The AI reviewer found the right provisions (YES on legal basis each time); code rejected quotes it had joined from two places |
+| B | [`ungoverned-20261108-3`](runs/ungoverned-20261108-3) | 40 | 0 of 5 | 24 of 30 | Patient images stopped at the border; a letter naming no receiver blocked; 1 typed gap; 8 homework items |
+| C | [`insufficient-20261108-3`](runs/insufficient-20261108-3) | 7 | 0 of 1 | 6 of 6 | Letter without a reciprocity assurance blocked; answers typed as gaps for human review |
+| D (scripted) | [`governed-scripted-20261108-3`](runs/governed-scripted-20261108-3) | 11 | 3 of 3 | 21 of 21 | The recall list crossed only with a matching recorded human approval |
 
-All four hash chains verify and all four replay with 0 differences. The four gap
-candidates (CAND-001 to CAND-004) meet the project's four-part evidence rule
-(`make assess-candidates`) and await expert review.
+All four hash chains verify and all four replay with 0 differences. Drill-by-drill
+discussion, including where the 8-billion-parameter model fell short, is in the
+[final run review](report/run-review-2026-11-08-final-runs.md).
 
-Check any run yourself, without calling a model:
+## Gap candidates
 
-```sh
-make verify-log RUN=governed-20261108-4
-make replay RUN=governed-20261108-4
-```
+Four policy and standards gap candidates are kept in
+[`gaps/candidate_register.yaml`](gaps/candidate_register.yaml). Code applies a
+four-part evidence rule ([`gaps/sufficiency.py`](gaps/sufficiency.py)): every quote
+verifies, an absence search is recorded, a verified global comparison is quoted, and
+no obtainable missing document could refute the candidate. All four currently meet
+it ([`report/candidate-status.json`](report/candidate-status.json)) and await expert
+review.
 
-`make replay` re-runs every code decision (quote checks, the patient-data rule,
-three-YES routing, action authorization and which conditional steps run) over the
-AI answers recorded in the log and reports any difference.
+| ID | Candidate |
+|---|---|
+| CAND-001 | No single UAE authority is clearly competent to protect UAE health data held abroad |
+| CAND-002 | DHA's AI policy requires certification of "major upgraded versions" without defining them |
+| CAND-003 | Neither country takes part in the international device-incident report exchange |
+| CAND-004 | The exceptions to the UAE health-data localisation rule are in a resolution that is not publicly available |
 
-## Layout
+## Reproducibility guide
 
-```
-packs/ae/, packs/ch/      country packs: institutions/*.yaml, chunks.jsonl
-packs/bridge/ae-ch.yaml   what links the two countries (counterparts, reference answers)
-packs/global/             global benchmarks, neutral adviser
-intents/                  staged drill specs (the Y.3172 "ML intent")
-engine/                   AI agents, liaison reviewer, action sandbox, orchestrator, replay
-audit/                    hash-chained log and verifier
-gaps/                     gap-candidate register, absence searches, evidence rule
-data/raw/, data/sources.csv   source files and provenance register
-runs/<run_id>/            the four final runs: log.jsonl, gaps.jsonl, homework, replay
-report/                   technical report, run review, decision trails
-```
+There are three levels of check. The first two need no language model and take a
+few minutes.
 
-## Setup
+### Environment used for the final runs
+
+| Item | Value |
+|---|---|
+| Code | commit `b229477` (drill code is unchanged since; later commits touch documentation only) |
+| Python | 3.11.17; exact packages in [`requirements-lock.txt`](requirements-lock.txt) |
+| Ollama | 0.40.6 |
+| Model | `qwen3:8b`, digest `500a1f067a9f` (8.2B parameters, Q4_K_M quantisation) |
+| Model settings | temperature 0, thinking off, context window 16,384 tokens ([`engine/llm.py`](engine/llm.py)) |
+| Embedding model | `sentence-transformers/paraphrase-multilingual-MiniLM-L12-v2` through fastembed 0.9.1 |
+| Machine | Apple M5 Pro, 24 GB memory, macOS 26.6.2 |
+
+### 1. Install
 
 ```sh
 git clone --recurse-submodules https://github.com/Evangel90/Borderline.git
 cd Borderline
+git checkout incident-drill
 python3.11 -m venv .venv
+.venv/bin/pip install -r requirements-lock.txt   # exact versions used
 .venv/bin/pip install -e .
-make verify-sources
-make index        # downloads the local embedding model once (~220 MB)
+make index        # builds the local search index; downloads the embedding model once (~220 MB)
 ```
 
-To run the drills as in the final runs (local Ollama, no application programming
-interface (API) key; `ollama pull qwen3:8b` first). Each run ID must be new:
+### 2. Check the published results (no model needed)
 
 ```sh
-export BORDERLINE_LLM_PROVIDER=ollama BORDERLINE_LLM_MODEL=qwen3:8b
-make drill INTENT=retinopathy-governed RUN=<new-id-A>
-make drill INTENT=retinopathy-ae-ch RUN=<new-id-B> DRILL_ARGS=--include-optional-events
-make drill INTENT=retinopathy-insufficient-evidence RUN=<new-id-C>
-make drill INTENT=retinopathy-governed RUN=<new-id-D> DRILL_ARGS="--reviewer scripted"
-make verify-log RUN=<id>; make audit-evidence RUN=<id>; make decision-trail RUN=<id>
-make step-coverage RUNS="retinopathy-governed=<A> retinopathy-ae-ch=<B> retinopathy-insufficient-evidence=<C>"
-make assess-candidates
+make verify-sources                       # every source file still matches its registered hash
+.venv/bin/python -m pytest -q             # 174 tests
+for RUN in governed-20261108-4 ungoverned-20261108-3 insufficient-20261108-3 governed-scripted-20261108-3; do
+  make verify-log RUN=$RUN                # hash chain intact
+  make replay RUN=$RUN                    # every code decision re-run over the logged AI answers
+done
+make assess-candidates                    # four-part rule on the gap candidates
+make evaluate-retrieval                   # 8 of 10 in the top six
 ```
 
-### Technical notes
+**What to expect:** every hash chain verifies; each replay ends in `0 differences`
+(13, 30, 6 and 21 quotes re-checked); `4 of 4 candidates supported`.
 
-Search combines keyword matching with the local multilingual embedding model
-`paraphrase-multilingual-MiniLM-L12-v2` (through fastembed). A hosted model can be
-used instead by setting `BORDERLINE_LLM_PROVIDER=openrouter`:
+`make replay` takes what each model said, as recorded in the log, and runs every
+code rule again: quote checks, chunk-ID corrections, the patient-data rule,
+three-YES routing, action authorisation, and which conditional steps should have
+run ([`engine/replay.py`](engine/replay.py)). It shows that every outcome follows
+from the logged AI answers and the code. To see the code react to a changed answer,
+edit a copy of a log and run `make replay RUN=<id> REPLAY_ARGS="--log edited.jsonl"`;
+the hash-chain check will also report the edit.
 
-Create an API key from [OpenRouter](https://openrouter.ai/settings/keys) and
-export it as `OPENROUTER_API_KEY`. The default model `openrouter/free` routes
-requests among available free models that support structured outputs. Free
-models have rate limits and availability can change; the selected model can
-vary between agent decisions. The drill sends its
-prompts, synthetic events, and retrieved policy excerpts to OpenRouter; do not
-include real patient or confidential data. Set `BORDERLINE_LLM_MODEL` to a
-specific model ID if needed, or `BORDERLINE_LLM_PROVIDER=ollama` to use local
-Ollama instead (`BORDERLINE_OLLAMA_URL` and `BORDERLINE_LLM_TIMEOUT` configure
-the local service and timeout).
+### 3. Re-run the drills with the model
 
-The `RUN` value must be new each time; existing run IDs are immutable and the
-engine refuses to append to them. The supplied policy chunks are checked in;
-agent prompts and retrieved excerpts are sent to OpenRouter when a drill runs.
-The local Chroma index is built from the checked-in chunks; it is ignored by
-Git and can be recreated with `make index`. The first index build downloads the
-multilingual [FastEmbed model](https://qdrant.github.io/fastembed/examples/Supported_Models/)
-(about 220 MB); embedding and search then run locally. Set
-`BORDERLINE_VECTOR_PATH` to change the index directory or
-`BORDERLINE_EMBEDDING_MODEL` to select another supported FastEmbed text model. Each
-decision log records the IDs of all chunks retrieved for its agent view.
-Each `packs/*/chunks.jsonl` record retains its source URL, issuer, registered
-file path and SHA-256, retrieval date, language, legal status, and provenance
-notes. A decision's cited chunk ID therefore resolves to both an exact page
-and its source record; `data/sources.csv` remains the register of record.
-Arabic PDFs with usable embedded text are ingested directly and searched with
-the multilingual embedding model. Registered Arabic scans or PDFs with broken
-font extraction are skipped with an `OCR required` warning instead of adding
-corrupted text. An English translation may be registered as a separate source
-for retrieval assistance; the Arabic original remains controlling where the
-official source says so.
-For a reviewed OCR derivative, set `extraction_file` in `data/sources.csv`; the
-chunk provenance continues to point to the immutable original and its hash.
-Create a searchable derivative with `scripts/ocr_pdf.py` and manually inspect
-important passages because OCR can alter Arabic letters, spacing, and numbers.
-Set `retrieval_excluded` for a registered source that is intentionally outside
-the current drill; its original and hash remain verifiable without entering the
-policy pack or search index.
-Use `DRILL_ARGS=--include-optional-events` with `make drill` to include the
-judge-injected reserve event.
-`vendor/ITUAIReadiness` contains the [ITU reference
-code](https://github.com/CrashingGuru/ITUAIReadiness) (MIT), pinned as a git
-submodule; `make itu-smoke` is optional and requires that project's dependencies
-and a locally running Ollama embedding model.
+Install [Ollama](https://ollama.com), then:
+
+```sh
+ollama pull qwen3:8b
+export BORDERLINE_LLM_PROVIDER=ollama BORDERLINE_LLM_MODEL=qwen3:8b
+make drill INTENT=retinopathy-governed RUN=repro-A
+make drill INTENT=retinopathy-ae-ch RUN=repro-B DRILL_ARGS=--include-optional-events
+make drill INTENT=retinopathy-insufficient-evidence RUN=repro-C
+make drill INTENT=retinopathy-governed RUN=repro-D DRILL_ARGS="--reviewer scripted"
+shasum -a 256 runs/repro-*/log.jsonl
+```
+
+Logs contain no run IDs or timestamps, so a faithful re-run produces a
+byte-identical `log.jsonl`. Compare with the published logs:
+
+| Drill | SHA-256 of `log.jsonl` |
+|---|---|
+| A | `c59a3118f235f0a925e07c51e10982d9132abb2565cbdd3d7dc686348aa0a454` |
+| B | `5366b97322663adb3a76bd5b2225d341d62ef284c0cb21f660ca2b58f35d6b66` |
+| C | `d5f2d063953be39109588ea637c784c2868a139659671fa426a461495a1be4bd` |
+| D | `7920a75722af7c65bce10313be6918f5952e401eb0b8540c099abdb5c6372395` |
+
+On our machine, re-running all four drills on the same code gave identical logs.
+On different hardware or another Ollama version, the model's wording can differ
+even at temperature 0. If a hash differs, compare outcomes instead:
+
+```sh
+make decision-trail RUN=repro-A           # writes report/decision-trail-repro-A.md
+make replay RUN=repro-A                   # code decisions still replay with 0 differences
+make step-coverage RUNS="retinopathy-governed=repro-A retinopathy-ae-ch=repro-B retinopathy-insufficient-evidence=<C>"
+```
+
+Each run ID must be new; the engine refuses to write into an existing run.
+
+## Repository map
+
+```
+README.md                    this guide
+report/                      submission material
+  technical-report.md          the technical report
+  run-review-2026-11-08-final-runs.md   results against expectations, per drill
+  decision-trail-*.md          who decided what, per step and per letter
+  candidate-status.json        gap candidates as assessed by code
+  step-coverage.json           which steps and branches ran
+runs/<run_id>/               the four final runs
+  log.jsonl                    hash-chained decision log
+  gaps.jsonl                   typed gap records
+  liaison_homework.jsonl       missing-evidence homework
+  replay.json                  code-replay result
+engine/                      the drill engine
+  orchestrator.py              runs a drill step by step
+  agent.py                     institution AI agents
+  liaison.py                   liaison reviewer and the final code decision
+  quotes.py                    quote verification
+  actions.py                   action sandbox (drill state only)
+  knowledge.py                 hybrid search
+  llm.py                       Ollama / OpenRouter clients
+  replay.py                    code replay
+  models.py                    data models for intents, packs and logs
+audit/hasher.py              hash-chained log and verifier
+gaps/                        gap-candidate register, absence searches, evidence rule
+intents/                     drill specifications
+packs/ae/, packs/ch/         country packs: institution profiles and passages
+packs/bridge/ae-ch.yaml      counterparts and reference answers between the two countries
+packs/global/                global guidance and the neutral adviser
+data/sources.csv, data/raw/  source register and source files
+scripts/                     command-line tools behind the make targets
+tests/                       unit and scenario tests
+vendor/ITUAIReadiness/       ITU reference code (git submodule, MIT)
+```
 
 ## Commands
 
-Run from the repo root.
+Run from the repository root.
 
 | Command | What it does |
 | --- | --- |
-| `make verify-sources` | Re-hash sources and flag any change |
-| `make ingest` | Rebuild provenance-bearing chunks and update the local vector index |
-| `make index` | Build or update the local Chroma index from existing chunks |
-| `make drill INTENT=<intent> RUN=<id>` | Run a drill with the configured model provider |
-| `make verify-log RUN=<run_id>` | Check the hash chain; name the first broken entry |
-| `make replay RUN=<run_id>` | Code replay: re-run every code decision over the logged AI answers, no model call; exit 1 on any difference |
-| `make audit-evidence RUN=<run_id>` | Screen a run's citations |
-| `make decision-trail RUN=<run_id>` | Write who decided what, per step and per letter, to `report/` |
+| `make verify-sources` | Re-hash every registered source and flag any change |
+| `make ingest` | Rebuild the provenance-bearing passages and the search index |
+| `make index` | Build or update the local search index from the existing passages |
+| `make drill INTENT=<intent> RUN=<id>` | Run a drill (add `DRILL_ARGS="--reviewer scripted"` for Drill D, `--include-optional-events` for the judge-injected event) |
+| `make verify-log RUN=<id>` | Check the hash chain; name the first broken entry |
+| `make replay RUN=<id>` | Re-run every code decision over the logged AI answers, with no model call; exits 1 on any difference |
+| `make decision-trail RUN=<id>` | Write who decided what, per step and per letter, to `report/` |
+| `make audit-evidence RUN=<id>` | Screen a run's citations |
 | `make step-coverage RUNS="..."` | Show which steps and liaison branches ran across runs |
-| `make assess-candidates` | Apply the four-part evidence rule to the gap-candidate register |
-| `make evaluate-retrieval` | Measure retrieval on the ten-question seed |
+| `make assess-candidates` | Apply the four-part evidence rule to the gap candidates |
+| `make evaluate-retrieval` | Measure retrieval on the ten-question test set |
+| `make itu-smoke` | Optional: run the ITU reference ingestion on one PDF (needs the `itu` extra and an Ollama embedding model) |
+
+## Configuration
+
+| Variable | Default | Purpose |
+|---|---|---|
+| `BORDERLINE_LLM_PROVIDER` | `openrouter` | `ollama` for the local model used in the final runs |
+| `BORDERLINE_LLM_MODEL` | `qwen3:8b` (Ollama), `openrouter/free` (OpenRouter) | Model ID |
+| `BORDERLINE_OLLAMA_URL` | `http://127.0.0.1:11434` | Local Ollama service |
+| `BORDERLINE_OLLAMA_NUM_CTX` | `16384` | Context window; code refuses a prompt that would not fit |
+| `BORDERLINE_LLM_TIMEOUT` | `180` | Seconds per model call |
+| `OPENROUTER_API_KEY` | none | Needed only for the hosted option |
+| `BORDERLINE_VECTOR_PATH` | `index/chroma` | Where the search index is built |
+| `BORDERLINE_EMBEDDING_MODEL` | MiniLM (above) | Another supported fastembed text model |
+
+Variables can also be set in a `.env` file in the repository root (the shell takes
+precedence). With the hosted option, prompts, synthetic events and retrieved
+passages are sent to OpenRouter, so never include real patient or confidential data.
+
+**Sources and Arabic text.** Each passage keeps its source URL, issuer, file path
+and hash, retrieval date, language, legal status and provenance notes, so a cited
+chunk ID resolves to an exact page and its source record. Arabic PDFs with usable
+text are searched directly with the multilingual model; scans or PDFs with broken
+text are skipped with an `OCR required` warning rather than adding corrupted text.
+An English translation may be registered separately for searching; the Arabic
+original stays controlling where the official source says so. A reviewed OCR
+version can be attached through `extraction_file` in `data/sources.csv`
+([`scripts/ocr_pdf.py`](scripts/ocr_pdf.py)); provenance still points to the
+original file and its hash. `retrieval_excluded` keeps a registered source
+verifiable without adding it to search.
 
 ## Scope
 
