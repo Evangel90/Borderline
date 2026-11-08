@@ -1,6 +1,6 @@
 # AI for Good Sandbox Hackathon: United Arab Emirates — Borderline
 
-**(Cross-border incident response when an imported retinal-screening AI fails)**
+**(Cross-border incident response to a retinal-screening AI failure)**
 
 **Team:** Borderline · **Team leader:** Oladipo Evangel · **Members:** Oladipo Evangel, Professor James Agajo
 **Contact:** [oladipoevangel90@gmail.com](mailto:oladipoevangel90@gmail.com), +2348135001380 · **GitHub:** [github.com/Evangel90/Borderline](https://github.com/Evangel90/Borderline/tree/incident-drill) (branch `incident-drill`)
