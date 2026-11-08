@@ -1,6 +1,6 @@
 # AI for Good Sandbox Hackathon: United Arab Emirates — Borderline
 
-**Team:** [team name] · **Team leader:** [name] · **Members:** [names]
+**Team:** Borderline · **Team leader:** Oladipo Evangel · **Members:** Oladipo Evangel, Professor James Agajo
 **Contact:** [email and phone] · **GitHub:** https://github.com/Evangel90/Borderline (branch `incident-drill`)
 **Status:** submission draft, 8 November 2026. All results are from three local drill runs on 8 November 2026 (`governed-20261108-1`, `ungoverned-20261108-1`, `insufficient-20261108-1`). Nothing in this report is a legal conclusion; no person with legal standing has reviewed it. Policy gaps are called **candidates**.
 
