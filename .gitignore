@@ -42,3 +42,6 @@ chromadb/
 
 # Submission template and the Word submission are kept local.
 /AI for Good Hackathon Submission Template.docx
+
+# Local copy of the ITU AI Readiness reference code (only used by the optional `make itu-smoke`).
+/vendor/

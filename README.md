@@ -327,7 +327,6 @@ data/sources.csv, data/raw/  source register and source files
 scripts/                     command-line tools behind the make targets
 ui/                          review dashboard (`make ui`): reads saved files, calls no model
 tests/                       unit and scenario tests
-vendor/ITUAIReadiness/       ITU reference code (git submodule, MIT)
 ```
 
 ## Commands

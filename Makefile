@@ -55,7 +55,8 @@ replay:
 ui:
 	STREAMLIT_BROWSER_GATHER_USAGE_STATS=false $(PYTHON) -m streamlit run ui/app.py --server.headless true --server.address localhost
 
-# Optional check: ITU reference ingestion on one PDF, into a throwaway index.
+# Optional local check: ITU reference ingestion on one PDF, into a throwaway index.
+# Needs a local clone of https://github.com/CrashingGuru/ITUAIReadiness in vendor/ (not in this repository).
 # Needs `ollama serve` running and `ollama pull nomic-embed-text`.
 itu-smoke:
 	cd $(ITU_SIM) && AIREADY_CHROMADB_DIR=$(CURDIR)/index/itu-smoke \
