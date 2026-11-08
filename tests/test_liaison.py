@@ -854,3 +854,35 @@ def test_replay_reports_an_old_log_where_an_unaddressed_letter_was_routed(tmp_pa
     logger.append(entry)
     report = replay_run("old", log_path=logger.log_path, intent_path=None, root=".")
     assert any("without the liaison check" in d for d in report.all_differences)
+
+
+# --- Copy slips: a missing or extra space counts as one character slip; skipping or joining text does not. ---
+
+PDPL_HEADING = Chunk(
+    chunk_id="AE-TEST:p25:c2", doc_id="AE-TEST", title="test", jurisdiction="AE", page=25, total_pages=30,
+    chunk_index=0, source_file="test", source_language="en",
+    text="Article (23)\nCross-Border Transfer and Sharing of Personal Data for Processing Purposes if a\n"
+         "Proper Protection Level is not Available\n1. Notwithstanding Article (22) of this Decree by Law",
+)
+
+
+@pytest.mark.parametrize("quote, expected", [
+    ("Cross-Border Transfer and Sharing of Personal Data for Processing Purposes if a ProperProtection",
+     "Cross-Border Transfer and Sharing of Personal Data for Processing Purposes if a Proper Protection"),
+    ("Cross-Border Transfer and Sharing of Personal Data for Pro cessing Purposes",
+     "Cross-Border Transfer and Sharing of Personal Data for Processing Purposes"),
+])
+def test_a_missing_or_extra_space_is_a_logged_copy_slip(quote, expected):
+    record = verify_quote(PDPL_HEADING.chunk_id, quote, "", {PDPL_HEADING.chunk_id: PDPL_HEADING})
+    assert record["verified"] is True
+    assert record["quote"] == expected and record["quote_corrected_from"] == quote
+
+
+@pytest.mark.parametrize("quote", [
+    "Cross-Border Transfer and Sharing of Personal Data if a Proper Protection Level is not Available",  # words skipped
+    "Article (23) Proper Protection Level is not Available 1. Notwithstanding Article (22)",  # joined across a gap
+    "Sharing and Cross-Border Transfer of Personal Data for Processing Purposes",  # reordered
+])
+def test_skipped_joined_or_reordered_text_still_fails(quote):
+    record = verify_quote(PDPL_HEADING.chunk_id, quote, "", {PDPL_HEADING.chunk_id: PDPL_HEADING})
+    assert record["verified"] is False

@@ -44,38 +44,51 @@ def normalize_whitespace(text: str) -> str:
 
 
 def _edit_distance(a: str, b: str, limit: int) -> int:
-    """Levenshtein distance, stopping early once it exceeds `limit`."""
+    """Levenshtein distance (characters, spaces included), or limit + 1 once it exceeds `limit`.
+
+    Banded: only cells within `limit` of the diagonal are computed, so long quotes stay fast."""
     if abs(len(a) - len(b)) > limit:
         return limit + 1
-    previous = list(range(len(b) + 1))
-    for i, char_a in enumerate(a, 1):
-        current = [i]
-        for j, char_b in enumerate(b, 1):
-            current.append(min(previous[j] + 1, current[j - 1] + 1, previous[j - 1] + (char_a != char_b)))
-        if min(current) > limit:
-            return limit + 1
+    big = limit + 1
+    previous = {j: j for j in range(0, min(len(b), limit) + 1)}
+    for i in range(1, len(a) + 1):
+        current = {}
+        if i <= limit:
+            current[0] = i
+        for j in range(max(1, i - limit), min(len(b), i + limit) + 1):
+            current[j] = min(
+                previous.get(j, big) + 1,
+                current.get(j - 1, big) + 1,
+                previous.get(j - 1, big) + (a[i - 1] != b[j - 1]),
+            )
+        if min(current.values(), default=big) > limit:
+            return big
         previous = current
-    return previous[-1]
+    return min(previous.get(len(b), big), big)
 
 
 def near_exact_passage(needle: str, text: str) -> str | None:
     """The one continuous passage of `text` that `needle` copies with at most MAX_COPY_SLIPS
-    character slips, keeping the same words in the same order; None if there is none or more
-    than one. The caller uses the passage's exact text, so the logged quote is always real."""
-    quote_words, words = needle.split(), normalize_whitespace(text).split()
-    size = len(quote_words)
-    found = []
-    for start in range(len(words) - size + 1):
-        window = words[start:start + size]
-        slips = 0
-        for quoted, source in zip(quote_words, window):
-            if quoted != source:
-                slips += _edit_distance(quoted, source, MAX_COPY_SLIPS - slips)
-                if slips > MAX_COPY_SLIPS:
-                    break
-        if slips <= MAX_COPY_SLIPS:
-            found.append(" ".join(window))
-    return found[0] if len(found) == 1 else None
+    character slips; None if there is none, or if more than one passage fits equally well.
+
+    A slip is one wrong, missing or extra character, including a space: "ProperProtection" for
+    "Proper Protection" is one slip. Words cannot be skipped, joined across gaps or reordered,
+    because each of those costs far more than two characters. The caller logs the passage's
+    exact text, so the logged quote is always real."""
+    quote = " ".join(needle.split())
+    words = normalize_whitespace(text).split()
+    size = len(quote.split())
+    best, found = MAX_COPY_SLIPS + 1, []
+    # A dropped or added space changes the word count by one per slip.
+    for length in range(max(1, size - MAX_COPY_SLIPS), size + MAX_COPY_SLIPS + 1):
+        for start in range(len(words) - length + 1):
+            window = " ".join(words[start:start + length])
+            distance = _edit_distance(quote, window, MAX_COPY_SLIPS)
+            if distance < best:
+                best, found = distance, [window]
+            elif distance == best and distance <= MAX_COPY_SLIPS:
+                found.append(window)
+    return found[0] if best <= MAX_COPY_SLIPS and len(set(found)) == 1 else None
 
 
 def verify_quote(chunk_id: str, quote: str, translation: str,
