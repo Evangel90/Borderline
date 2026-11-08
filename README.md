@@ -1,6 +1,6 @@
 # Borderline
 
-**(Cross-border response to safety, security and data incidents in a retinal-screening AI)**
+**(Cross-border response to safety, security and data incidents in diabetic-retinopathy screening)**
 
 A multi-agent drill engine for cross-border medical-AI incidents, built for the
 [International Telecommunication Union (ITU) AI for Good Sandbox Hackathon: United Arab Emirates](https://aiforgood.itu.int/event/ai-for-good-sandbox-hackathon-united-arab-emirates/).
