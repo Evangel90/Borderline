@@ -1,7 +1,7 @@
 # AI for Good Sandbox Hackathon: United Arab Emirates — Borderline
 
 **Team:** Borderline · **Team leader:** Oladipo Evangel · **Members:** Oladipo Evangel, Professor James Agajo
-**Contact:** oladipoevangel90@gmail.com, +2348135001380 · **GitHub:** https://github.com/Evangel90/Borderline (branch `incident-drill`)
+**Contact:** [oladipoevangel90@gmail.com](mailto:oladipoevangel90@gmail.com), +2348135001380 · **GitHub:** [github.com/Evangel90/Borderline](https://github.com/Evangel90/Borderline/tree/incident-drill) (branch `incident-drill`)
 **Status:** submission draft, 8 November 2026. All results are from three local drill runs on 8 November 2026 (`governed-20261108-1`, `ungoverned-20261108-1`, `insufficient-20261108-1`). Nothing in this report is a legal conclusion; no person with legal standing has reviewed it. Policy gaps are called **candidates**.
 
 ## Introduction
@@ -48,13 +48,13 @@ Y.3172 is the International Telecommunication Union (ITU) architecture for machi
 
 | Y.3172 node | Borderline element | Readiness 2.0 dimension | Policy documents (examples, with chunk IDs) |
 |---|---|---|---|
-| SRC (source) | Synthetic incident events released step by step; 49 registered source and extraction files, hashed in `data/sources.csv` (26 UAE, 9 Swiss, 14 global), all re-verified on 8 November 2026 | 4 | UAE Federal Law No. 2 of 2019 (Health Data Law), Art. 13 (`AE-HEALTH-ICT-LAW-2019:p8:c1`); Swiss TPA Art. 64 (`CH-HEALTH-TPA:p40:c1`) |
-| C (collector) | `make verify-sources`, `make ingest`; absence searches recorded in `gaps/searches/` (what was searched for, where, what was found) | 10 | International Medical Device Regulators Forum (IMDRF) N14 incident-exchange participant list (`IMDRF-NCAR-N14-2025:p16:c1`) |
+| SRC (source) | Synthetic incident events released step by step; 49 registered source and extraction files, hashed in [`data/sources.csv`](../data/sources.csv) (26 UAE, 9 Swiss, 14 global), all re-verified on 8 November 2026 | 4 | UAE Federal Law No. 2 of 2019 (Health Data Law), Art. 13 (`AE-HEALTH-ICT-LAW-2019:p8:c1`); Swiss TPA Art. 64 (`CH-HEALTH-TPA:p40:c1`) |
+| C (collector) | `make verify-sources`, `make ingest`; absence searches recorded in [`gaps/searches/`](../gaps/searches) (what was searched for, where, what was found) | 10 | International Medical Device Regulators Forum (IMDRF) N14 incident-exchange participant list (`IMDRF-NCAR-N14-2025:p16:c1`) |
 | PP (pre-processor) | 2,286 chunks with provenance; garbled Arabic text is detected and kept out of quoting | 4 | Federal Decree-Law 38/2024 official Arabic, registered but excluded because its text layer is defective |
-| M (model) | 12 institution agents and the AI liaison reviewer, `qwen3:8b`, temperature 0, one stateless call each | 8 | Institution profiles in `packs/*/institutions/*.yaml` |
+| M (model) | 12 institution agents and the AI liaison reviewer, `qwen3:8b`, temperature 0, one stateless call each | 8 | Institution profiles in [`packs/ae/institutions/`](../packs/ae/institutions), [`packs/ch/institutions/`](../packs/ch/institutions), [`packs/global/institutions/`](../packs/global/institutions) |
 | P (policy) | Code: action allow-lists, quote verification, patient-data rule, three-YES routing, human-review flag on every YES | 10, 7 | FADP Art. 55 (`CH-DATA-FADP:p24:c1`); Personal Data Protection Law (PDPL) health-data exclusion (`AE-DATA-PDPL-2021-EN:p6:c2`) |
-| D (distributor) | Synthetic action handlers; a letter is delivered, blocked or routed in drill state only | 5 | `packs/bridge/ae-ch.yaml` (counterparts and reference answers) |
-| SINK | Hash-chained log (`log.jsonl`), decision trail, homework list, gap register, Streamlit viewer | 8 | `report/decision-trail-*-20261108-1.md` |
+| D (distributor) | Synthetic action handlers; a letter is delivered, blocked or routed in drill state only | 5 | [`packs/bridge/ae-ch.yaml`](../packs/bridge/ae-ch.yaml) (counterparts and reference answers) |
+| SINK | Hash-chained log (`log.jsonl`), decision trail, homework list, gap register, Streamlit viewer | 8 | [`decision-trail-governed-20261108-1.md`](decision-trail-governed-20261108-1.md), [`decision-trail-ungoverned-20261108-1.md`](decision-trail-ungoverned-20261108-1.md), [`decision-trail-insufficient-20261108-1.md`](decision-trail-insufficient-20261108-1.md) |
 
 ## Requirements mapped to domain-specific policies
 
@@ -103,11 +103,11 @@ What the runs show:
 - **Known defect.** In Drill B step 13, a request with no named receiver was routed by an older fixed rule, without the three-question check. Only an unverified claim was involved, and nothing real was sent. It is recorded as a defect, not fixed.
 - **No "delivered" branch is covered in any run.** All 5 blocked branches are covered; no step failed.
 
-Full details are in `report/run-review-2026-11-08-three-drills.md`.
+Full details are in [`report/run-review-2026-11-08-three-drills.md`](run-review-2026-11-08-three-drills.md).
 
 ## Policy and standards gap candidates derived from the mapping
 
-All four candidates in `gaps/candidate_register.yaml` meet the project's four-part rule (`make assess-candidates`, 8 November 2026):
+All four candidates in [`gaps/candidate_register.yaml`](../gaps/candidate_register.yaml) meet the project's four-part rule (`make assess-candidates`, 8 November 2026):
 
 1. every quote verifies;
 2. a recorded absence search exists;
@@ -118,7 +118,7 @@ They are **candidates, not findings**. They are unreviewed, and "absent" means a
 
 | ID | Type | Local evidence (verified quote) | Global comparison (verified quote) |
 |---|---|---|---|
-| CAND-003 | standards | Switzerland: "However, without resolving the institutional issues, Switzerland remains excluded from market surveillance with EU member states for medical devices." (`CH-EU-MRA-FACTSHEET-2025:p2:c2`). Neither country appears in the participant list of the IMDRF National Competent Authority Report (NCAR) exchange (search `SEARCH-NCAR-PARTICIPANTS-001`). | "Participation in the NCAR Exchange Program will be limited to the IMDRF Management Committee (MC) Regulators. A list of NCAR Participant Countries is provided in Annex1." (`IMDRF-NCAR-N14-2025:p9:c1`) |
+| CAND-003 | standards | Switzerland: "However, without resolving the institutional issues, Switzerland remains excluded from market surveillance with EU member states for medical devices." (`CH-EU-MRA-FACTSHEET-2025:p2:c2`). Neither country appears in the participant list of the IMDRF National Competent Authority Report (NCAR) exchange (search [`SEARCH-NCAR-PARTICIPANTS-001`](../gaps/searches/SEARCH-NCAR-PARTICIPANTS-001.json)). | "Participation in the NCAR Exchange Program will be limited to the IMDRF Management Committee (MC) Regulators. A list of NCAR Participant Countries is provided in Annex1." (`IMDRF-NCAR-N14-2025:p9:c1`) |
 | CAND-002 | policy | DHA's AI policy requires certification of "major upgraded versions" without defining them: "Comply with all required certification of the AI software and its major upgraded versions from recognized international/local agencies." (`AE-DHA-AI-HEALTH-2021:p10:c1`) | "Changes to the approved device shall require approval from the notified body which issued the EU technical documentation assessment certificate where such changes could affect the safety and performance of the device or the conditions prescribed for use of the device." (`EU-MDR-2017-745:p202:c1`) |
 | CAND-001 | implementation | The PDPL excludes "e. Personal Health Data that has legislation regulating its protection and processing." (`AE-DATA-PDPL-2021-EN:p6:c2`), so no single UAE authority is clearly competent to protect UAE health data held abroad. | The Organisation for Economic Co-operation and Development (OECD) 2007 privacy-enforcement Recommendation lists 38 adherents, including Switzerland and no non-members: "Spain Sweden Switzerland Türkiye United Kingdom United States Non-Members None" (`OECD-LEGAL-0352-ADHERENTS-2026:p8:c1`) |
 | CAND-004 | policy | The exceptions to Art. 13 are in a resolution the project could not obtain: "a. Cabinet Decision No. (51) of year 2021 on exemption for storage and transfer of health records and information must be abide to:" (`AE-DHA-HEALTH-DATA-PROTECTION-PP11-2022:p27:c1`) | By analogy only, EU national derogations are published: "The Commission shall keep the information publicly available." (`EU-MDR-2017-745:p30:c1`) |
@@ -136,8 +136,8 @@ The drills support these candidates in practice. In Drill A, the reviewer could 
 
 ## References
 
-- ITU AI for Good Sandbox Hackathon, UAE: https://aiforgood.itu.int/event/ai-for-good-sandbox-hackathon-united-arab-emirates/
-- ITU-T Y.3172: https://www.itu.int/rec/T-REC-Y.3172-201906-I/en
-- ITU AI Ready, Report 2.0: https://www.itu.int/epublications/publication/ai-ready-analysis-towards-a-standardized-readiness-framework
-- A criterion-by-criterion evidence map is in `docs/HACKATHON_CRITERIA_AUDIT.md`.
-- Source register `data/sources.csv`; run review `report/run-review-2026-11-08-three-drills.md`; decision trails `report/decision-trail-*-20261108-1.md`; candidate status `report/candidate-status.json`.
+- ITU AI for Good Sandbox Hackathon, UAE: [https://aiforgood.itu.int/event/ai-for-good-sandbox-hackathon-united-arab-emirates/](https://aiforgood.itu.int/event/ai-for-good-sandbox-hackathon-united-arab-emirates/)
+- ITU-T Y.3172: [https://www.itu.int/rec/T-REC-Y.3172-201906-I/en](https://www.itu.int/rec/T-REC-Y.3172-201906-I/en)
+- ITU AI Ready, Report 2.0: [https://www.itu.int/epublications/publication/ai-ready-analysis-towards-a-standardized-readiness-framework](https://www.itu.int/epublications/publication/ai-ready-analysis-towards-a-standardized-readiness-framework)
+- A criterion-by-criterion evidence map is in [`docs/HACKATHON_CRITERIA_AUDIT.md`](../docs/HACKATHON_CRITERIA_AUDIT.md).
+- Source register [`data/sources.csv`](../data/sources.csv); run review [`report/run-review-2026-11-08-three-drills.md`](run-review-2026-11-08-three-drills.md); decision trails [`decision-trail-governed-20261108-1.md`](decision-trail-governed-20261108-1.md), [`decision-trail-ungoverned-20261108-1.md`](decision-trail-ungoverned-20261108-1.md), [`decision-trail-insufficient-20261108-1.md`](decision-trail-insufficient-20261108-1.md); candidate status [`report/candidate-status.json`](candidate-status.json).
