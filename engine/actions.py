@@ -116,6 +116,23 @@ class ActionExecutor:
             changes, decision.checks, decision.review,
         )
 
+    def _block_unaddressed_letter(self, institution: Institution, action: str) -> ActionResult:
+        """A cross-border letter that names no receiver cannot be checked, so it is blocked.
+
+        Until the fix of 8 November 2026 such a letter fell back to the older fixed gate, which routed it
+        without the three liaison questions (Drill B step 13). It never falls back now."""
+        record_key = self.LIAISON_RECORD_KEYS[action]
+        changes = self._record(record_key, "blocked_by_liaison_check")
+        changes.update(self._record(f"{record_key}.{institution.id}", "blocked_by_liaison_check"))
+        reason = "code: the letter names no receiver, so the liaison check cannot run; blocked"
+        return ActionResult(
+            action, "BLOCK",
+            "Liaison check blocked the request; nothing crossed the border. The letter names no "
+            "receiver, so the three liaison questions cannot be asked.",
+            changes, [], {"status_decided_by": reason, "reviewer_status": "NOT_RUN",
+                          "no_receiver": True},
+        )
+
     def _record(self, key: str, value: Any) -> dict[str, Any]:
         self.state[key] = value
         return {key: value}
@@ -138,7 +155,9 @@ class ActionExecutor:
                 f"Action '{action}' is not available to {institution.id} in this event."
             )
 
-        if action in self.LIAISON_REQUEST_TYPES and self.liaison is not None and "target" in payload:
+        if action in self.LIAISON_REQUEST_TYPES and self.liaison is not None:
+            if not payload.get("target"):
+                return self._block_unaddressed_letter(institution, action)
             return self._send_liaison_request(institution, action, payload)
 
         if action in self.GATED_ACTIONS:

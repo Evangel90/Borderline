@@ -827,3 +827,30 @@ def test_drill_a_scripted_quotes_all_verify_against_the_packs():
     for q in quotes:
         record = verify_quote(q.chunk_id, q.quote, "", library)
         assert record["verified"] and "quote_corrected_from" not in record, (q.chunk_id, record["failure"])
+
+
+# --- A letter that names no receiver is blocked, never routed by the older fixed gate. ---
+
+@pytest.mark.parametrize("action", ["request_regulatory_evidence"])  # the action the test institution may take
+def test_letter_without_a_receiver_is_blocked_not_routed(action):
+    from engine.actions import ActionExecutor
+    config = bridge()
+    executor = ActionExecutor({}, channel(all_yes(), config=config))
+    result = executor.execute(INSTITUTIONS["ae_health"], action,
+                              {"claim": "insurer_pricing_use", "verification_status": "unverified"},
+                              BorderGate(config))
+    assert result.liaison_status == "BLOCK"
+    assert "names no receiver" in result.liaison_review["status_decided_by"]
+    assert all(v == "blocked_by_liaison_check" for v in result.state_changes.values())
+    assert "regulatory_notifications" not in executor.state
+
+
+def test_replay_reports_an_old_log_where_an_unaddressed_letter_was_routed(tmp_path):
+    from engine.replay import replay_run
+    entry = {"entry_id": "log-13-dha", "step": 13, "actor_id": "dha", "action_taken": "request_regulatory_evidence",
+             "visible_payload": {"claim": "x"}, "liaison_status": None, "gate_status": "ROUTE",
+             "state_changes": {"regulatory_notifications": {"status": "simulated_route"}}}
+    logger = HashChainedLogger(str(tmp_path))
+    logger.append(entry)
+    report = replay_run("old", log_path=logger.log_path, intent_path=None, root=".")
+    assert any("without the liaison check" in d for d in report.all_differences)

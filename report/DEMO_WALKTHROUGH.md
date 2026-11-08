@@ -43,7 +43,7 @@ The demo uses saved runs, not live model calls. The three runs below exist only 
    make assess-candidates
    ```
 
-   The hash chain verifies. Step coverage shows every blocked branch covered and no delivered branch reached. The candidate assessment shows four `SUPPORTED_CANDIDATE`s (candidates, unreviewed, not legal conclusions). Close on CAND-003: neither country is in the International Medical Device Regulators Forum (IMDRF) incident-report exchange.
+   The hash chain verifies. Step coverage shows every blocked branch covered; delivered branches were reached only in Drill D (scripted). The candidate assessment shows four `SUPPORTED_CANDIDATE`s (candidates, unreviewed, not legal conclusions). Close on CAND-003: neither country is in the International Medical Device Regulators Forum (IMDRF) incident-report exchange.
 
 ## Optional user interface (UI) route
 
@@ -53,5 +53,5 @@ The demo uses saved runs, not live model calls. The three runs below exist only 
 
 - Say "candidate", never "finding" or "violation". Nothing here is a legal conclusion.
 - Name the decider every time: institution AI agent, AI liaison reviewer, or code.
-- Say plainly that no governed letter was delivered in these runs, and that one request at Drill B step 13 bypassed the liaison check (a known defect).
+- Say plainly that no governed letter was delivered by the AI liaison reviewer in either Drill A run, that Drill D's deliveries used scripted answers, and that one request at Drill B step 13 bypassed the liaison check (fixed after the run; `make replay RUN=ungoverned-20261108-1` shows the one difference).
 - Expand each abbreviation the first time you say it.

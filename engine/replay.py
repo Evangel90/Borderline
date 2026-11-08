@@ -35,6 +35,9 @@ from engine.models import (
     Chunk, DrillIntent, LiaisonAnswer, LiaisonQuote, LiaisonReview, LiaisonRule, StandingApproval,
 )
 
+# Actions that send a cross-border letter (engine/actions.py LIAISON_REQUEST_TYPES).
+LIAISON_ACTIONS = {"request_regulatory_evidence", "route_regulatory_notification", "share_patient_data_via_liaison"}
+
 # Logged state keys for each liaison action, as written by engine/actions.py.
 BLOCKED, DELIVERED = "blocked_by_liaison_check", "delivered"
 
@@ -251,6 +254,13 @@ def replay_run(run: str, log_path: str | None = None, intent_path: str | None = 
     approvals = intent.standing_approvals if intent else []
 
     for entry in entries:
+        if (entry.get("action_taken") in LIAISON_ACTIONS and not entry.get("liaison_checks")
+                and entry.get("liaison_status") != "BLOCK"):
+            report.differences.append(
+                f"step {entry['step']} {entry['actor_id']}: cross-border letter {entry['action_taken']} was "
+                f"logged {entry.get('liaison_status') or entry.get('gate_status')} without the liaison check "
+                "(it named no receiver); the current code blocks it"
+            )
         offered = entry.get("authorized_actions") or []
         if offered and entry.get("action_taken") not in offered:
             report.differences.append(

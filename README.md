@@ -62,9 +62,10 @@ Swiss Federal Data Protection and Information Commissioner) (3 attempts each, pl
 that must block) still delivered 0 of 9; both controls stayed blocked
 ([`report/liaison-rehearsal-20261108.json`](report/liaison-rehearsal-20261108.json)).
 
-In the AI runs, patient data never crossed the border. Code rejected two invented quotes. Known
-defect: in Drill B step 13 a request without a named receiver was routed by an
-older fixed rule, without the liaison check (`engine/actions.py`). The four gap
+In the AI runs, patient data never crossed the border. Code rejected two invented quotes. In Drill B
+step 13 a request without a named receiver was routed by an older fixed rule,
+without the liaison check. Fixed after the run (`engine/actions.py`): such a
+letter is now blocked; `make replay` on that log flags step 13. Drill B was not re-run. The four gap
 candidates (CAND-001 to CAND-004) are all `SUPPORTED_CANDIDATE` under the
 project's four-part rule (`make assess-candidates`); they are unreviewed.
 Submission material: [technical report](report/technical-report-draft.md),
