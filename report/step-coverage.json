@@ -1,8 +1,92 @@
 {
   "runs": [
     {
+      "intent": "retinopathy-governed",
+      "run_id": "governed-20261108-1",
+      "steps": [
+        {
+          "step": 1,
+          "phase": "The vendor files a vigilance report with Swissmedic",
+          "status": "RAN",
+          "requires_state": {}
+        },
+        {
+          "step": 2,
+          "phase": "EDE asks Swissmedic for device-vigilance information",
+          "status": "RAN",
+          "requires_state": {}
+        },
+        {
+          "step": 3,
+          "phase": "Swissmedic receives EDE's request",
+          "status": "SKIPPED_CONDITION_NOT_MET",
+          "requires_state": {
+            "regulatory_evidence_request.ede": "delivered"
+          }
+        },
+        {
+          "step": 4,
+          "phase": "The liaison channel blocks EDE's request",
+          "status": "RAN",
+          "requires_state": {
+            "regulatory_evidence_request.ede": "blocked_by_liaison_check"
+          }
+        },
+        {
+          "step": 5,
+          "phase": "Swissmedic sends EDE the patient recall list",
+          "status": "RAN",
+          "requires_state": {}
+        },
+        {
+          "step": 6,
+          "phase": "EDE receives the recall list and coordinates the recall",
+          "status": "SKIPPED_CONDITION_NOT_MET",
+          "requires_state": {
+            "patient_data_disclosure.swissmedic": "delivered"
+          }
+        },
+        {
+          "step": 7,
+          "phase": "The liaison channel blocks the recall list",
+          "status": "RAN",
+          "requires_state": {
+            "patient_data_disclosure.swissmedic": "blocked_by_liaison_check"
+          }
+        },
+        {
+          "step": 8,
+          "phase": "The UAE Data Office asks the FDPIC for help on staff data",
+          "status": "RAN",
+          "requires_state": {}
+        },
+        {
+          "step": 9,
+          "phase": "The FDPIC receives the UAE Data Office request",
+          "status": "SKIPPED_CONDITION_NOT_MET",
+          "requires_state": {
+            "regulatory_evidence_request.uae_data_office": "delivered"
+          }
+        },
+        {
+          "step": 10,
+          "phase": "The liaison channel blocks the UAE Data Office request",
+          "status": "RAN",
+          "requires_state": {
+            "regulatory_evidence_request.uae_data_office": "blocked_by_liaison_check"
+          }
+        },
+        {
+          "step": 11,
+          "phase": "What made these routes work",
+          "status": "RAN",
+          "requires_state": {}
+        }
+      ]
+    },
+    {
       "intent": "retinopathy-ae-ch",
-      "run_id": "retinopathy-main-20261107-2",
+      "run_id": "ungoverned-20261108-1",
       "steps": [
         {
           "step": 1,
@@ -89,22 +173,44 @@
           "phase": "Optional escalation: patient images appear in an insurer pricing model",
           "status": "RAN",
           "requires_state": {}
+        },
+        {
+          "step": 14,
+          "phase": "DHA tries to send the patients' images to Switzerland for investigation",
+          "status": "RAN",
+          "requires_state": {}
+        },
+        {
+          "step": 15,
+          "phase": "Swissmedic receives the patients' images",
+          "status": "SKIPPED_CONDITION_NOT_MET",
+          "requires_state": {
+            "patient_data_disclosure.dha": "delivered"
+          }
+        },
+        {
+          "step": 16,
+          "phase": "The liaison channel stops the patients' images at the border",
+          "status": "RAN",
+          "requires_state": {
+            "patient_data_disclosure.dha": "blocked_by_liaison_check"
+          }
         }
       ]
     },
     {
-      "intent": "retinopathy-ae-ch-cooperation",
-      "run_id": "retinopathy-coop-20261107-1",
+      "intent": "retinopathy-insufficient-evidence",
+      "run_id": "insufficient-20261108-1",
       "steps": [
         {
           "step": 1,
-          "phase": "UAE authorities learn of the faulty update and the compromised vendor account",
+          "phase": "MoHAP asks whether the Zurich storage was ever approved",
           "status": "RAN",
           "requires_state": {}
         },
         {
           "step": 2,
-          "phase": "The UAE Data Office asks the FDPIC for help on the staff data",
+          "phase": "The UAE Data Office asks the FDPIC for help without a reciprocity undertaking",
           "status": "RAN",
           "requires_state": {}
         },
@@ -126,29 +232,25 @@
         },
         {
           "step": 5,
-          "phase": "EDE asks Swissmedic for device-vigilance information",
+          "phase": "EDE weighs its investigation powers without the manufacturer's report",
           "status": "RAN",
           "requires_state": {}
         },
         {
           "step": 6,
-          "phase": "Swissmedic receives EDE's request",
-          "status": "SKIPPED_CONDITION_NOT_MET",
-          "requires_state": {
-            "regulatory_evidence_request.ede": "delivered"
-          }
+          "phase": "Swissmedic asks whether the EU route still applies",
+          "status": "RAN",
+          "requires_state": {}
         },
         {
           "step": 7,
-          "phase": "The liaison channel blocks EDE's request",
+          "phase": "NCSC asks whether the reporting duty reaches the vendor",
           "status": "RAN",
-          "requires_state": {
-            "regulatory_evidence_request.ede": "blocked_by_liaison_check"
-          }
+          "requires_state": {}
         },
         {
           "step": 8,
-          "phase": "Compare with the main drill",
+          "phase": "The homework list",
           "status": "RAN",
           "requires_state": {}
         }
@@ -156,19 +258,49 @@
     }
   ],
   "branches": {
-    "regulatory_evidence_request.uae_data_office": {
+    "regulatory_evidence_request.ede": {
       "delivered": {
         "covered": false,
         "where": [
-          "retinopathy-ae-ch step 7: SKIPPED_CONDITION_NOT_MET",
-          "retinopathy-ae-ch-cooperation step 3: SKIPPED_CONDITION_NOT_MET"
+          "retinopathy-governed step 3: SKIPPED_CONDITION_NOT_MET"
         ]
       },
       "blocked_by_liaison_check": {
         "covered": true,
         "where": [
+          "retinopathy-governed step 4: RAN"
+        ]
+      }
+    },
+    "patient_data_disclosure.swissmedic": {
+      "delivered": {
+        "covered": false,
+        "where": [
+          "retinopathy-governed step 6: SKIPPED_CONDITION_NOT_MET"
+        ]
+      },
+      "blocked_by_liaison_check": {
+        "covered": true,
+        "where": [
+          "retinopathy-governed step 7: RAN"
+        ]
+      }
+    },
+    "regulatory_evidence_request.uae_data_office": {
+      "delivered": {
+        "covered": false,
+        "where": [
+          "retinopathy-governed step 9: SKIPPED_CONDITION_NOT_MET",
+          "retinopathy-ae-ch step 7: SKIPPED_CONDITION_NOT_MET",
+          "retinopathy-insufficient-evidence step 3: SKIPPED_CONDITION_NOT_MET"
+        ]
+      },
+      "blocked_by_liaison_check": {
+        "covered": true,
+        "where": [
+          "retinopathy-governed step 10: RAN",
           "retinopathy-ae-ch step 8: RAN",
-          "retinopathy-ae-ch-cooperation step 4: RAN"
+          "retinopathy-insufficient-evidence step 4: RAN"
         ]
       }
     },
@@ -186,25 +318,27 @@
         ]
       }
     },
-    "regulatory_evidence_request.ede": {
+    "patient_data_disclosure.dha": {
       "delivered": {
         "covered": false,
         "where": [
-          "retinopathy-ae-ch-cooperation step 6: SKIPPED_CONDITION_NOT_MET"
+          "retinopathy-ae-ch step 15: SKIPPED_CONDITION_NOT_MET"
         ]
       },
       "blocked_by_liaison_check": {
         "covered": true,
         "where": [
-          "retinopathy-ae-ch-cooperation step 7: RAN"
+          "retinopathy-ae-ch step 16: RAN"
         ]
       }
     }
   },
   "unconditional_steps_missing": [],
   "branches_not_covered": [
+    "regulatory_evidence_request.ede = delivered",
+    "patient_data_disclosure.swissmedic = delivered",
     "regulatory_evidence_request.uae_data_office = delivered",
     "regulatory_evidence_request.dha = delivered",
-    "regulatory_evidence_request.ede = delivered"
+    "patient_data_disclosure.dha = delivered"
   ]
 }
