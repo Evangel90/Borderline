@@ -1,6 +1,6 @@
 # AI for Good Sandbox Hackathon: United Arab Emirates — Borderline
 
-**When a retinal-screening AI fails across borders**
+**(Cross-border incident response when a Swiss-made retinal-screening AI fails in Dubai clinics)**
 
 **Team:** Borderline · **Team leader:** Oladipo Evangel · **Members:** Oladipo Evangel, Professor James Agajo
 **Contact:** [oladipoevangel90@gmail.com](mailto:oladipoevangel90@gmail.com), +2348135001380 · **GitHub:** [github.com/Evangel90/Borderline](https://github.com/Evangel90/Borderline/tree/incident-drill) (branch `incident-drill`)
