@@ -1,7 +1,7 @@
 # AI for Good Sandbox Hackathon: United Arab Emirates — Borderline
 
 **Team:** Borderline · **Team leader:** Oladipo Evangel · **Members:** Oladipo Evangel, Professor James Agajo
-**Contact:** [email and phone] · **GitHub:** https://github.com/Evangel90/Borderline (branch `incident-drill`)
+**Contact:** oladipoevangel90@gmail.com, +2348135001380 · **GitHub:** https://github.com/Evangel90/Borderline (branch `incident-drill`)
 **Status:** submission draft, 8 November 2026. All results are from three local drill runs on 8 November 2026 (`governed-20261108-1`, `ungoverned-20261108-1`, `insufficient-20261108-1`). Nothing in this report is a legal conclusion; no person with legal standing has reviewed it. Policy gaps are called **candidates**.
 
 ## Introduction
@@ -55,6 +55,21 @@ Y.3172 is the International Telecommunication Union (ITU) architecture for machi
 | P (policy) | Code: action allow-lists, quote verification, patient-data rule, three-YES routing, human-review flag on every YES | 10, 7 | FADP Art. 55 (`CH-DATA-FADP:p24:c1`); Personal Data Protection Law (PDPL) health-data exclusion (`AE-DATA-PDPL-2021-EN:p6:c2`) |
 | D (distributor) | Synthetic action handlers; a letter is delivered, blocked or routed in drill state only | 5 | `packs/bridge/ae-ch.yaml` (counterparts and reference answers) |
 | SINK | Hash-chained log (`log.jsonl`), decision trail, homework list, gap register, Streamlit viewer | 8 | `report/decision-trail-*-20261108-1.md` |
+
+## Requirements mapped to domain-specific policies
+
+For each node, the use-case requirement is mapped to health-sector AI policy in the knowledge base. Every quote is exact and verified by script against its chunk. "Type" separates law, health-authority policy and charters from advisory global guidance. A mapping shows that a text speaks to the requirement, not that it legally applies to these synthetic facts.
+
+| Node | Requirement in this use case | Domain-specific policy (type) and exact quote |
+|---|---|---|
+| SRC | An AI failure seen at the clinic must reach the responsible bodies in both countries | DHA AI in Healthcare policy (DHA policy): "Report to DHA-HRS all known or suspected incidents or deficiencies related to AI solutions used in their respective healthcare facility." (`AE-DHA-AI-HEALTH-2021:p12:c1`; DHA-HRS is DHA's Health Regulation Sector). Swiss Medical Devices Ordinance (MedDO) Art. 66 (Swiss ordinance): manufacturers report "any serious incidents involving the device in question that have occurred in Switzerland, as soon as they become aware of them" (`CH-HEALTH-MedDO:p28:c1`). The Dubai incident did not occur in Switzerland; how it reaches Swissmedic is the question Drills A and B test. |
+| C | Every source and decision is traceable to its origin | International Medical Device Regulators Forum (IMDRF) good machine-learning practice, N88 (global guidance, advisory): "design processes that can appropriately record and communicate decisions and rationale, as well as ensure traceability, reproducibility, data authenticity" (`IMDRF-AIML-N88-2025:p6:c2`) |
+| PP | Retinal images are processed in Zurich, outside the UAE | Federal Law No. 2 of 2019, Art. 13 (UAE law): "It is not permissible to store, process, generate or transform the health data and information outside State" (`AE-HEALTH-ICT-LAW-2019:p8:c1`). The exceptions are in Resolution 51/2021, which the project could not obtain (CAND-004). |
+| M | A model update must be controlled, and real-world results compared with validation | DHA AI policy (DHA policy): "Comply with all required certification of the AI software and its major upgraded versions from recognized international/local agencies." (`AE-DHA-AI-HEALTH-2021:p10:c1`) and "actual outcomes must be compared to those obtained in training and validation. Any significant discrepancies must call for further inspection." (`AE-DHA-AI-HEALTH-2021:p10:c1`). IMDRF N88 (advisory): "Clinical evaluation includes the use of datasets that are representative of the intended patient population" (`IMDRF-AIML-N88-2025:p7:c2`) |
+| P | Humans keep oversight; failures can be traced and controlled | UAE Charter for the Development and Use of AI, 2024 (UAE charter): "the irreplaceable value of human judgment and human oversight over AI" (`AE-AI-CHARTER-2024:p4:c1`). DHA AI policy: "AI solution developers must build systems whose failures can be traced, diagnosed, and controlled." (`AE-DHA-AI-HEALTH-2021:p7:c1`) |
+| D | A failing tool can be stopped safely, and adverse events are passed on | DHA AI policy: "AI tool must be equipped with “Graceful Degradation” mechanisms by means of automatic alerts and gradual operation cessation abilities" (`AE-DHA-AI-HEALTH-2021:p10:c1`) and "Adverse events should be timely reported to relevant oversight bodies for appropriate investigation and action." (`AE-DHA-AI-HEALTH-2021:p11:c1`) |
+| SINK | Results are audited, and performance is judged for clinician and AI together | DHA AI policy: "Conduct regular audits of AI functionality by independent third party, and reporting to DHA-HRS as needed." (`AE-DHA-AI-HEALTH-2021:p13:c1`). IMDRF N88 (advisory): "including the performance of the human-AI team, rather than just the device in isolation." (`IMDRF-AIML-N88-2025:p7:c2`) |
+| Strategy alignment | Both countries' institutions work to compatible aims | UAE AI Charter: "serves as a guiding framework to protect the rights of the UAE community in the development or use of AI solutions and technologies." (`AE-AI-CHARTER-2024:p2:c1`). **No Swiss AI strategy is registered in the knowledge base**, so cross-border strategy alignment could not be mapped. |
 
 ## Local policy mapping
 
@@ -124,4 +139,5 @@ The drills support these candidates in practice. In Drill A, the reviewer could 
 - ITU AI for Good Sandbox Hackathon, UAE: https://aiforgood.itu.int/event/ai-for-good-sandbox-hackathon-united-arab-emirates/
 - ITU-T Y.3172: https://www.itu.int/rec/T-REC-Y.3172-201906-I/en
 - ITU AI Ready, Report 2.0: https://www.itu.int/epublications/publication/ai-ready-analysis-towards-a-standardized-readiness-framework
+- A criterion-by-criterion evidence map is in `docs/HACKATHON_CRITERIA_AUDIT.md`.
 - Source register `data/sources.csv`; run review `report/run-review-2026-11-08-three-drills.md`; decision trails `report/decision-trail-*-20261108-1.md`; candidate status `report/candidate-status.json`.
