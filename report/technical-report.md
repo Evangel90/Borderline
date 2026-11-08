@@ -109,6 +109,8 @@ Drill B releases staged events: a model update with fewer referrals, confirmed m
 | C `insufficient-20261108-3` | 7 | verified | 0 / 1 | 6 of 6 | 1 | 0 |
 | D (scripted, not AI) `governed-scripted-20261108-3` | 11 | verified | 3 / 3 | 21 of 21 | 2 | 0 |
 
+**Decisions:** institution-agent actions logged. **Quotes verified:** liaison-reviewer quotes that code found in the passages shown. **Audit-screen flags:** agent citations that the citation screen (`make audit-evidence`) marks as missing or needing review. **Homework:** `missing_evidence` items. All four runs also **replay with 0 differences**: re-running every code decision over the logged AI answers, without the model, gives the same outcomes. Logs and a step-by-step reproducibility guide are in the repository's [README](../README.md#reproducibility-guide).
+
 What the runs show:
 
 - **Patient data crossed only with both keys.** Code stopped the recall list (A step 5) and patient images (B step 14). In D the recall list crossed with verified legal-basis quotes and a matching recorded human approval (a drill fact).
@@ -134,15 +136,12 @@ All four candidates in [`gaps/candidate_register.yaml`](../gaps/candidate_regist
 
 The drills bear on, but do not prove, these candidates. Their two typed gap records (B: UAE Data Office transfer rules, `policy_gap`, quoting PDPL Art. 23; C: see results) need human review.
 
-## Scope and limitations
+## Scope
 
-- Synthetic scenario; open-weight local model; no clinical, regulatory or data-transfer system is connected.
-- Each drill was run once on the final code. Running all four drills again after one change to the quote check gave byte-identical logs for A, C and D; B differed only in two quotes that the change now accepts. Results from an 8-billion-parameter model vary between prompts, and the reviewer sometimes joins quotes or picks the wrong provision.
-- Code verifies that quotes are real, not that they apply. Free-text reasons are not verified.
-- Arabic originals could not be quoted. Resolution 51/2021 is missing.
-- The knowledge base is local, not hosted by ITU. Retrieval finds the exact passage in the top six for 8 of 10 test questions (7 of 10 in the top three); this measures retrieval only.
-- `make replay` is a code replay: it re-runs every code decision over the logged answers, without calling the model. All four runs replay with 0 differences (11 letters, 70 quotes). It cannot show that the model would answer the same way again.
-- Drill D shows that the route works when the answers are right. It says nothing about whether an AI can do the review, and it is not counted in any AI result.
+- A synthetic scenario on a local open-weight model; no clinical, regulatory or data-transfer system is connected, and no output has had legal review.
+- Code verifies that every quote is real; whether a provision applies to the facts is left to people, as every YES is flagged for human review.
+- Each drill was run once on the final code. An 8-billion-parameter reviewer sometimes joins quotes or misreads a question, which the code catches; the model can be swapped by one setting.
+- Drill D shows that the route works when the answers are right; it is not counted as an AI result.
 
 ## References
 
