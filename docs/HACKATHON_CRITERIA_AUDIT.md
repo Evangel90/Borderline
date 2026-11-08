@@ -1,7 +1,24 @@
-# ITU Hackathon Criteria Audit
+# International Telecommunication Union (ITU) Hackathon Criteria Audit
 
 **Reviewed:** 3 November 2026. **Submission deadline:** 10 November 2026.  
 **Purpose:** decide whether to run another drill now and define the evidence the technical report must contain.
+
+## Criteria mapped to the 8 November 2026 runs (supersedes the recommendation below)
+
+Runs: `governed-20261108-1` (Drill A), `ungoverned-20261108-1` (Drill B), `insufficient-20261108-1` (Drill C), local `qwen3:8b`. "Section" means a section of `report/technical-report-draft.md`. Nothing here is a legal conclusion.
+
+| Judging criterion (official requirements and evaluation emphasis) | Report section | Evidence from the new runs | Honest status |
+| --- | --- | --- | --- |
+| Healthcare AI use case with real need | Introduction; Use-case requirements | Fictional Swiss screening AI failing in Dubai; 47 synthetic missed patients; 12 institutions across the United Arab Emirates (UAE) and Switzerland | Synthetic scenario; no clinic integration |
+| Relevant, structured knowledge base (KB) | Mapping table (SRC, C, PP rows); Local policy mapping | 49 artifacts verified, 2,286 chunks; 52 of 54 liaison quotes verified word for word; retrieval 8/10 hit@6 | Local KB, not ITU-hosted; Arabic text cannot be quoted |
+| Agent capability and roles | What role does AI play?; Demo scenarios | 56 agent decisions (9 + 40 + 7), each by the institution's own AI agent from its allowed actions; separate AI liaison reviewer on 8 letters | 8B model: 9 audit flags; 8 explanations replaced by code; reviewer sometimes picks the wrong provision |
+| Progressive error scenarios | Error scenarios and results | Drill B's 16 staged events, including optional judge-injected step 13; step coverage shows no unconditional step skipped | No delivered branch reached in any run |
+| Auditability and source attribution | What role does AI play? (code checks); Error scenarios | Three verified hash chains; decision trails name the decider of every answer; 2 invented quotes rejected; 5 chunk-ID corrections logged with unchanged text | Code checks that quotes are real, not that they apply; step 13 bypass defect |
+| Domain-specific policy and standards gaps with accurate global examples (critical) | Gap candidates table | CAND-001 to CAND-004 `SUPPORTED_CANDIDATE`, each with verified local and global quotes and an absence-search record | Candidates, unreviewed; only 1 typed gap came from the runs' liaison answers |
+| Data protection in practice | Error scenarios (patient data) | Recall list (A step 5) and patient images (B step 14) stopped by code's patient-data rule | Drill A shows the rule also stops data the scenario intended to pass |
+| ITU-T Y.3172 and AI Readiness 2.0 alignment | Mapping table | Each pipeline node mapped to a component, 5 of 13 Readiness dimensions, and cited documents | Adaptation only; no conformance or readiness score |
+| Reproducibility and open source | Scope and limitations; README | Exact Ollama commands in README; 147 tests pass; open-weight model, no API key needed | Single run per drill; `make replay` not implemented |
+| Five-page report in official template | Whole report | `report/technical-report-draft.md`; Word version drafted for review | Page count not yet confirmed; team fields empty |
 
 ## Recommendation
 

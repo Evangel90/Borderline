@@ -1,68 +1,66 @@
 # Borderline
 
 A prototype for policy-grounded deployment and incident drills, built for the
-[ITU AI for Good Lab Hackathon: United Arab Emirates](https://aiforgood.itu.int/event/ai-for-good-sandbox-hackathon-united-arab-emirates/).
-The current drill is wired to UAE (AE) and Switzerland (CH); adding a new
-country pack does not yet configure a new drill automatically.
+[International Telecommunication Union (ITU) AI for Good Lab Hackathon: United Arab Emirates](https://aiforgood.itu.int/event/ai-for-good-sandbox-hackathon-united-arab-emirates/).
 
-Each participating role is represented by an AI agent. The agent selects among
-role-authorized actions, which the sandbox records in synthetic drill state;
-agents cite retrieved policy chunks when relevant evidence is available. A separate border gate can veto data
-transfers or route regulator notifications. Decisions and tool outcomes are
-written to a hash-chained audit log.
+Borderline rehearses how two countries' institutions respond when a medical AI
+product made in one country fails in the other. The drill is wired to the
+United Arab Emirates (UAE) and Switzerland (CH); country packs, a bridge pack
+and drill intents are plain YAML. Adding a new country pack does not yet
+configure a new drill automatically.
 
-The flagship use case is a fictional Dubai clinic deciding whether to deploy
-RetinaVision-DX, a Swiss-vendor, cloud-connected AI service for diabetic-
-retinopathy screening. In the scenario, the clinic encrypts retinal images and
-sends them to a vendor-operated compute environment in Switzerland; the clinic
-does not host the model weights. The service returns an image-quality result,
-screening result and referral recommendation to the clinic. Image retention,
-support-log retention, vendor access and any subprocessors are explicit
-questions for the pre-deployment review. A later model-update incident is a
-stress test of that approved workflow, not the product's sole use case.
+Three kinds of decision-maker take part, and every log entry records which one decided:
+
+- **Institution AI agents** (12 institutions) each see only their own view and
+  choose one of their allowed actions, with citations.
+- **An AI liaison reviewer** (a separate model call) answers three questions for
+  every cross-border letter (legal basis, both sides' transfer rules, right
+  counterpart), with exact quotes.
+- **Code makes the final check.** It verifies every quote word for word (a
+  fabricated quote becomes UNCLEAR), stops patient data without verified
+  legal-basis and transfer-rules quotes, delivers a letter only on three YES
+  answers, and flags every YES for human review. Every UNCLEAR or NO is typed
+  `policy_gap`, `implementation_gap`, `conflict` or `missing_evidence`; the last
+  goes to a homework list, not to gap candidates.
+
+Everything is written to a hash-chained audit log.
+
+The use case is a fictional Swiss diabetic-retinopathy screening service,
+RetinaVision-DX, used at fictional Dubai clinics: a model update misses
+referable disease in 47 synthetic patients, the update came from a compromised
+vendor account, and UAE retinal images held in Zurich were reused for retraining.
 
 > All scenario data is synthetic. Agent roles are simulated and never represent
-> any authority's official position.
+> any authority's official position. Nothing produced is a legal conclusion;
+> policy gaps are called candidates.
 
 The UAE, Swiss and global policy materials are a local, provenance-bearing
-prototype knowledge base. They are not complete legal collections and are not
-hosted by ITU. Publication in the ITU AI for Good Lab would be a possible
-hackathon outcome, not a current project status.
-See the [use-case and knowledge-base contribution note](report/USE_CASE_AND_KB_CONTRIBUTION.md)
-for the scenario assumptions, intended reviewer output and claim discipline.
+knowledge base (49 registered source and extraction files, 2,286 chunks), not a
+complete legal collection and not hosted by ITU. See the [use-case and knowledge-base note](report/USE_CASE_AND_KB_CONTRIBUTION.md).
 
-## Status
+## Status (8 November 2026)
 
-The latest primary local drill is `retinopathy-evidence-packet-20261105-1` (22 decisions, verified hash chain and no automated citation-screening findings). It first records missing vendor evidence, then supplies six fictional vendor exhibits and reaches `READY_FOR_HUMAN_REVIEW`: human review, clinic workflow fit, and transfer safeguards remain required before activation. The record is simulation evidence only; it does not establish legal accuracy, product quality or real-world applicability. The earlier `retinopathy-final-itu-criteria-20261103-4` incident run predates the revised explicit pre-deployment data-flow scenario. The technical-report draft, [six-minute demo walkthrough](report/DEMO_WALKTHROUGH.md) and full hackathon criteria crosswalk are available in [the report](report/technical-report-draft.md) and [criteria audit](docs/HACKATHON_CRITERIA_AUDIT.md).
+Three drills were run on local Ollama `qwen3:8b`; all three hash chains verify.
+Full comparison of actual against expected: [run review](report/run-review-2026-11-08-three-drills.md).
 
-The timeline gives participating agents role-specific event views; an optional
-judge-injected escalation can be enabled for a run. The latest expanded run,
-`vector-retrieval-retry-20261030-1`, used local Ollama `qwen3:8b` and the
-persistent Chroma index, completing all seven default stages with 31 decisions
-and a generated gap record. Its hash chain and retrieved/cited chunk links
-verify, but review found an off-topic rationale and multiple unsupported
-citations; it is not evidence of legal accuracy. See the
-[run review](report/run-review-vector-retrieval-retry-20261030-1.md). The
-earlier human-gate run `local-qwen3-human-gate-20261030-1` recorded a pause
-recommendation pending human approval; it did not pause the simulated service.
-The checked-in scenario actions only change synthetic drill state. No real
-clinical, regulatory, or data-transfer system is connected. If
-the configured model is unavailable, the drill stops; there is no scripted
-decision fallback. The Streamlit viewer displays each agent's visible facts,
-decisions, tool outcomes, evidence, and audit-chain status. `make replay` and
-`make report-figures` are not implemented yet.
+| Drill | Run | Decisions | Letters delivered | Result |
+|---|---|---|---|---|
+| A, governed (`retinopathy-governed`) | `governed-20261108-1` | 9 | 0 of 3 (3 expected) | The AI liaison reviewer answered UNCLEAR on legal basis for every letter; reported as a finding, not forced |
+| B, ungoverned (`retinopathy-ae-ch`, optional step 13) | `ungoverned-20261108-1` | 40 | 0 of 4 | Patient images stopped; 1 typed gap (`policy_gap`); 5 homework items |
+| C, insufficient evidence (`retinopathy-insufficient-evidence`) | `insufficient-20261108-1` | 7 | 0 of 1 | As expected: 2 homework items, no candidate created |
 
-A synthetic Dubai clinic-operator pause choice records a recommendation. The Streamlit viewer has
-a separate human review form; approval updates only the synthetic display
-state and is recorded in a separate hash-chained `human_approvals/log.jsonl`.
-Approver labels are self-entered and unauthenticated; no real clinic or system
-is controlled.
+Patient data never crossed the border. Code rejected two invented quotes. Known
+defect: in Drill B step 13 a request without a named receiver was routed by an
+older fixed rule, without the liaison check (`engine/actions.py`). The four gap
+candidates (CAND-001 to CAND-004) are all `SUPPORTED_CANDIDATE` under the
+project's four-part rule (`make assess-candidates`); they are unreviewed.
+Submission material: [technical report](report/technical-report-draft.md),
+[demo walkthrough](report/DEMO_WALKTHROUGH.md),
+[criteria audit](docs/HACKATHON_CRITERIA_AUDIT.md).
 
-The expanded timeline has passed static validation and a full local-model run.
-Verify its audit chain with `make verify-log RUN=local-qwen3-human-gate-20261030-1`. The
-generated gap and agent citations still need human evidence and legal review;
-the run is prototype evidence, not legal validation. Earlier incomplete
-OpenRouter attempts remain in `runs/` as historical runs.
+The Streamlit viewer (`make ui`) was built for an earlier pre-deployment run and
+has not been checked against the 8 November runs. `make replay` and
+`make report-figures` are not implemented.
 
 ## Layout
 
@@ -92,6 +90,19 @@ make verify-sources
 make index  # downloads the embedding model once (~220 MB)
 make drill INTENT=retinopathy-ae-ch RUN=demo-2026-10-30
 make verify-log RUN=demo-2026-10-30
+```
+
+To reproduce the 8 November drills fully offline with local Ollama (no API key;
+needs `ollama pull qwen3:8b` and `ollama pull nomic-embed-text`). Each run ID must be new:
+
+```sh
+export BORDERLINE_LLM_PROVIDER=ollama BORDERLINE_LLM_MODEL=qwen3:8b
+make drill INTENT=retinopathy-governed RUN=<new-id-A>
+make drill INTENT=retinopathy-ae-ch RUN=<new-id-B> DRILL_ARGS=--include-optional-events
+make drill INTENT=retinopathy-insufficient-evidence RUN=<new-id-C>
+make verify-log RUN=<id>; make audit-evidence RUN=<id>; make decision-trail RUN=<id>
+make step-coverage RUNS="retinopathy-governed=<A> retinopathy-ae-ch=<B> retinopathy-insufficient-evidence=<C>"
+make assess-candidates
 ```
 
 Create an API key from [OpenRouter](https://openrouter.ai/settings/keys) and
@@ -159,6 +170,10 @@ Run from the repo root.
 | `make index` | Build or update the local Chroma index from existing chunks |
 | `make drill INTENT=retinopathy-ae-ch` | Run the AI-agent drill; requires a configured model provider and API key for OpenRouter |
 | `make verify-log RUN=<run_id>` | Check the hash chain; name the first broken entry |
+| `make audit-evidence RUN=<run_id>` | Screen a run's citations (lexical and metadata only) |
+| `make decision-trail RUN=<run_id>` | Write who decided what, per step and per letter, to `report/` |
+| `make step-coverage RUNS="..."` | Show which steps and liaison branches ran across runs |
+| `make assess-candidates` | Apply the four-part rule to the gap-candidate register |
 | `make replay RUN=<run_id>` | Not implemented yet |
 | `make report-figures RUN=<run_id>` | Not implemented yet |
 | `make ui` | Start the Streamlit run viewer (install `.[ui]` first) |

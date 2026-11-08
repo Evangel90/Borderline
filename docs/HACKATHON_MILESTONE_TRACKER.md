@@ -1,7 +1,7 @@
 # ITU AI for Good Sandbox Hackathon
 # Borderline Diagnostic AI Governance Milestone Tracker
 
-**Version:** 0.2 · **Updated:** 4 November 2026 · **Submission deadline:** 10 November 2026  
+**Version:** 0.3 · **Updated:** 8 November 2026 · **Submission deadline:** 10 November 2026  
 **Solution:** Borderline · **Repository:** https://github.com/Evangel90/Borderline  
 **Status:** Not started / In progress / Blocked / Done · **Priority:** P0 / P1 / P2
 
@@ -56,7 +56,7 @@ Y.3172 describes an ML pipeline and management/orchestration concepts for future
 
 ## 2. Source and knowledge-base tracker
 
-`data/sources.csv` is the source register of record. The current report snapshot records 31 source records plus one linked OCR derivative, 32 source/extraction artifacts, and 1,859 chunks across AE, CH, and global packs. Refresh these counts with the final validation rather than assuming they remain current.
+`data/sources.csv` is the source register of record. On 8 November 2026 `make verify-sources` verified all 49 registered source and extraction files (26 UAE, 9 Swiss, 14 global rows), and the packs hold 2,286 chunks (UAE 888, Swiss 411, global 987); 9 files are registered but kept out of retrieval (for example, garbled Arabic text layers). Refresh these counts if the register changes.
 
 ### 2A. Source coverage and provenance
 
@@ -135,25 +135,28 @@ Current evidence supports one integrated flagship scenario, not three independen
 
 | Item | Recorded result | Evidence / interpretation |
 | --- | --- | --- |
-| Latest integrated run | `retinopathy-final-itu-criteria-20261103-4`, local `qwen3:8b` | 32 decisions, two assessments, all actions authorized, verified hash chain. Synthetic run, not legal validation. |
-| Assessments | `CLINICAL-CONFLICT-001` and `GAP-HEALTH-001` | Both `INSUFFICIENT_EVIDENCE`; neither establishes a legal or policy gap. |
-| Citation audit | 14 decisions without citations; two DHA citations flagged `UNSUPPORTED` | No-citation decisions need case-by-case review; two passages establish contextual scope only, not an incident duty or clinic licensing. |
-| Conditional EDE references | Three manufacturer-evidence decisions cite Article 68(7)/70(2) | Predicates remain unresolved; English translation cited and Arabic original controls. |
-| Retrieval seed | 9/10 exact-passage hit@6; 8/10 hit@3 | Ten curated questions; not a general retrieval, semantic support, or legal-accuracy estimate. |
-| Sources | 31 source records plus linked OCR derivative; 32 artifacts in prior validation | Re-run before freeze; counts can change. |
-| Index corpus | 1,859 chunks reported | Snapshot only; rebuild/recount if source corpus changes. |
+| Drill A, governed | `governed-20261108-1`, local `qwen3:8b`, 8 November 2026 | 9 decisions, hash chain verified, 0 audit-screen flags. **0 of 3 letters delivered (3 expected)**: the AI liaison reviewer answered UNCLEAR on legal basis each time; the recall list of 47 synthetic patients was stopped by code's patient-data rule. 5 homework items. Reported as a finding, not forced. |
+| Drill B, ungoverned | `ungoverned-20261108-1` (with optional step 13) | 40 decisions, 12 institutions, hash chain verified, 8 audit-screen flags (6 no citation, 2 citation needs review), 7 explanations replaced by code. 0 of 4 letters delivered; patient images stopped; 1 typed gap (`policy_gap`, MoHAP); 5 homework items. Step 13 request bypassed the liaison check (known defect, not fixed). |
+| Drill C, insufficient evidence | `insufficient-20261108-1` | 7 decisions, hash chain verified, 1 audit-screen flag. As expected: 1 letter blocked, 2 homework items, no candidate created. |
+| Quote check | All three runs | 52 of 54 liaison quotes verified; the 2 failures were invented by the reviewer (a misspelling; a page header stitched to FADP Art. 55). Two real quotes had their chunk IDs corrected by code (5 corrections). |
+| Step coverage | `report/step-coverage.json` | No unconditional step skipped or failed. All 5 blocked liaison branches covered; **no delivered branch covered**. |
+| Gap candidates | `make assess-candidates` | CAND-001 to CAND-004 all `SUPPORTED_CANDIDATE` under the four-part rule; unreviewed, not legal conclusions. |
+| Retrieval seed | `make evaluate-retrieval`, 8 November 2026 | 8/10 exact-passage hit@6; 7/10 hit@3. Ten curated questions; retrieval only. |
+| Tests | `.venv/bin/python -m pytest -q` | 147 passed. |
+
+Full review: [`report/run-review-2026-11-08-three-drills.md`](../report/run-review-2026-11-08-three-drills.md). Earlier runs (`retinopathy-final-itu-criteria-20261103-4`, `retinopathy-evidence-packet-20261105-1`) predate the liaison channel and are historical only.
 
 ### 5B. Reproduction and verification checklist
 
 | ID | Command / check | Status | Required recorded evidence |
 | --- | --- | --- | --- |
-| RUN-01 | `make verify-sources` | In progress | Save actual exit status and verified artifact count after final source edits. |
-| RUN-02 | `.venv/bin/python -m pytest -q` | In progress | Save actual current test count and failures; do not copy an older plan result. |
-| RUN-03 | `make verify-log RUN=retinopathy-final-itu-criteria-20261103-4` | In progress | Save actual verification output and run ID. |
-| RUN-04 | `make audit-evidence RUN=retinopathy-final-itu-criteria-20261103-4` | In progress | Save current output and adjudicate flagged citations in an accompanying review. |
-| RUN-05 | `make evaluate-retrieval` | In progress | Record current benchmark output and limits; confirm seed has not changed without report update. |
+| RUN-01 | `make verify-sources` | Done 8 Nov | 49 of 49 artifacts verified. |
+| RUN-02 | `.venv/bin/python -m pytest -q` | Done 8 Nov | 147 passed at `f6f3ba1`. |
+| RUN-03 | `make verify-log RUN=<A, B, C>` | Done 8 Nov | All three hash chains verified (`governed-20261108-1`, `ungoverned-20261108-1`, `insufficient-20261108-1`). |
+| RUN-04 | `make audit-evidence RUN=<A, B, C>` | Done 8 Nov; flags not yet adjudicated | 0, 8 and 1 flags; listed in the 8 November run review. |
+| RUN-05 | `make evaluate-retrieval` | Done 8 Nov | 8/10 hit@6, 7/10 hit@3. |
 | RUN-06 | `make evaluate-claims` | In progress | Record metrics against manual labels and list false positives/negatives; do not present selected seed as accuracy. |
-| RUN-07 | Full LLM drill | Done for current code snapshot | Existing final run is evidence; rerun only if code/data changes materially. Record provider, model, intent, run ID, and audit. |
+| RUN-07 | Three full drills (Ollama `qwen3:8b`) | Done 8 Nov | Run IDs above; decision trails in `report/decision-trail-*-20261108-1.md`. |
 | RUN-08 | Deterministic replay | Not started | `make replay` is not implemented. Separate immutable artifact inspection from nondeterministic fresh inference. |
 
 **Do not run evaluation commands and fill these rows with historical values as if freshly verified.** Enter the date, command output location, model/provider, code revision, and run ID when executing the final pass.
@@ -197,6 +200,8 @@ Add one row for each material work session. Use links to committed artifacts, no
 | 2026-11-01–02 | M1–M4 | Evidence triage, manual claim/retrieval seeds, source coverage, scenario branches, and UAE/Swiss source work. | `docs/HACKATHON_EXECUTION_PLAN.md`; dated reports in `report/`. | Team (confirm) |
 | 2026-11-03 | M5 | Added simulation-only product classification and corrective-action artifacts; completed final integrated drill and review. | `report/synthetic-product-dossier-retinavision-dx.md`; final run review. | Team (confirm) |
 | 2026-11-04 | Submission planning | Recast tracker as numbered task plan with owners, dependencies, acceptance criteria, and evidence pointers. | This document. | Team (confirm) |
+| 2026-11-07 | M3–M4 | Liaison channel with AI liaison reviewer and code quote check; evidence-sufficiency rule for gap candidates; three-drill split. | `docs/HANDOFF_2026-11-07.md`; `report/candidate-status.json`. | Team (confirm) |
+| 2026-11-08 | M5–M6 | Ran Drills A, B and C; reviewed actual against expected; updated technical report, demo walkthrough, README and this tracker from the new runs; drafted the filled submission document. | `report/run-review-2026-11-08-three-drills.md`; `report/technical-report-draft.md`. | Team (confirm) |
 | YYYY-MM-DD | M__ | Add completed work and actual result. | Link artifact/commit/run. | Assign name |
 
 ### 8B. Open decision log
@@ -204,7 +209,7 @@ Add one row for each material work session. Use links to committed artifacts, no
 | ID | Decision needed | Options / context | Decision | Status / owner |
 | --- | --- | --- | --- | --- |
 | DEC-01 | Who owns each open source, evaluation, UI, and submission task? | Assign team members; current tracker uses role placeholders. | — | Open / team lead |
-| DEC-02 | Whether to run another full drill before freeze | Current final run is complete; rerun if code, source, or intent changes materially. | Rerun only on material change; always re-run verification/audits. | In progress / release owner |
+| DEC-02 | Whether to run another full drill before freeze | Drill A delivered no letter; Drill B step 13 bypassed the liaison check. Options: submit as is, fix the bypass and re-run B, or add quotable synthetic assurances and re-run A and B. | 8 Nov: submit the current runs; report Drill A's blocks as a finding and the bypass as a known defect. | Decided / user |
 | DEC-03 | How to address two flagged DHA citations and 14 uncited decisions | Remove, replace with reviewed evidence, or retain as uncited operational choice with explicit limits. | Case-by-case adjudication; do not imply the referral passage establishes AI duty. | Open / evidence lead |
 | DEC-04 | Which candidate findings appear in submission | Safety/access; incident evidence and coordination; secondary-use questions. | Keep as evidence questions unless passage-level review supports stronger classification. | Open / gap-analysis owner |
 | DEC-05 | Team and contact fields | Names, affiliation, leader, contact. | — | Open / team lead |
@@ -221,8 +226,8 @@ Add one row for each material work session. Use links to committed artifacts, no
 | M2 — Processing and retrieval | Search reproduces reviewed passages and exposes misses | In progress | KB-06, EVAL-01/02 and current benchmark output. |
 | M3 — Agents and gates | Role decisions, authorizations, uncertainty, and human review are inspectable | In progress | COMP-02–COMP-06, EVAL-04/05/08. |
 | M4 — Scenario and findings | Staged conflict and candidate findings are tested, including negative control | In progress | SCN-06, COMP-08/09, EVAL-06. |
-| M5 — Evaluation | Current run, source, tests, citations, and hash chain reviewed | In progress | RUN-01–RUN-07 and EVAL-01–EVAL-10. |
-| M6 — Submission | Five-page report, demo, team metadata, and frozen artifacts ready | Not started | SUB-01–SUB-07 in Section 10. |
+| M5 — Evaluation | Current run, source, tests, citations, and hash chain reviewed | Done 8 Nov, except adjudication of 9 audit flags | RUN-01–RUN-07 and EVAL-01–EVAL-10. |
+| M6 — Submission | Five-page report, demo, team metadata, and frozen artifacts ready | In progress: report and demo rewritten 8 Nov; team fields and page count open | SUB-01–SUB-07 in Section 10. |
 
 ## 9. Map from tracker to the technical report
 
@@ -249,7 +254,7 @@ The current draft is [`report/technical-report-draft.md`](../report/technical-re
 | SUB-03 | Policy/strategy knowledge base and provenance | P0 / In progress | Evidence lead (assign) | Fresh source validation; source manifest and limitations are in repository; no confidential/patient data. |
 | SUB-04 | Y.3172 and AI Readiness mapping | P1 / Done with limits | Report owner (assign) | Mappings point to implemented components; state adaptation, qualitative relevance, and no formal conformance/national scores. |
 | SUB-05 | Final evaluation artifacts | P0 / In progress | Evaluation owner (assign) | Current tests, source hashes, run hash, run audit, benchmark outputs, manual review and limits saved with dates. |
-| SUB-06 | Demo script and visual evidence | P1 / Not started | Demo owner (assign) | Show incident, role differences, safety/access conflict, evidence limits, finding status, and audit trace in a short narrative. |
+| SUB-06 | Demo script and visual evidence | P1 / Script done 8 Nov ([walkthrough](../report/DEMO_WALKTHROUGH.md)); UI not checked against new runs | Demo owner (assign) | Show incident, role differences, safety/access conflict, evidence limits, finding status, and audit trace in a short narrative. |
 | SUB-07 | Team names, affiliation, leader, contact | P0 / Not started | Team lead (assign) | Replace placeholders in report and submission materials; confirm team eligibility separately. |
 | SUB-08 | Final freeze | P0 / Not started | Release owner (assign) | Record commit SHA, source-manifest state, final run ID, verification outputs, report version, and demo steps. |
 | SUB-09 | Demo video | P2 / Not started | Demo owner (assign) | Optional for initial submission and required if shortlisted according to project notes; record only synthetic scenario content. |
