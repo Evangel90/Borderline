@@ -1,0 +1,491 @@
+{
+  "run": "ungoverned-20261108-3",
+  "log": "runs/ungoverned-20261108-3/log.jsonl",
+  "hash_chain_ok": true,
+  "intent": "retinopathy-ae-ch.yaml",
+  "differences": [],
+  "letters": [
+    {
+      "entry_id": "log-6-mohap",
+      "step": 6,
+      "sender": "mohap",
+      "receiver": "swissmedic",
+      "patient_data": false,
+      "logged_status": "BLOCK",
+      "replayed_status": "BLOCK",
+      "decided_by": "code routing rule: at least one final answer is not YES",
+      "answers": [
+        {
+          "check": "legal_basis",
+          "proposed": "UNCLEAR",
+          "answer": "UNCLEAR",
+          "gap_type": "missing_evidence",
+          "final_decided_by": "AI liaison reviewer (qwen3:8b)",
+          "quotes": [
+            {
+              "chunk_id": "CH-DATA-FADP:p24:c1",
+              "verified": true,
+              "failure": "",
+              "corrected_from": ""
+            },
+            {
+              "chunk_id": "CH-HEALTH-TPA:p41:c1",
+              "verified": true,
+              "failure": "",
+              "corrected_from": ""
+            }
+          ]
+        },
+        {
+          "check": "transfer_rules",
+          "proposed": "YES",
+          "answer": "YES",
+          "gap_type": null,
+          "final_decided_by": "AI liaison reviewer (qwen3:8b)",
+          "quotes": [
+            {
+              "chunk_id": "CH-DATA-FADP:p24:c1",
+              "verified": true,
+              "failure": "",
+              "corrected_from": ""
+            }
+          ]
+        },
+        {
+          "check": "counterpart",
+          "proposed": "YES",
+          "answer": "YES",
+          "gap_type": null,
+          "final_decided_by": "AI liaison reviewer (qwen3:8b)",
+          "quotes": [
+            {
+              "chunk_id": "CH-HEALTH-TPA:p41:c1",
+              "verified": true,
+              "failure": "",
+              "corrected_from": ""
+            },
+            {
+              "chunk_id": "CH-DATA-FADP:p24:c1",
+              "verified": true,
+              "failure": "",
+              "corrected_from": ""
+            }
+          ]
+        }
+      ],
+      "differences": []
+    },
+    {
+      "entry_id": "log-6-uae_data_office",
+      "step": 6,
+      "sender": "uae_data_office",
+      "receiver": "fodio",
+      "patient_data": false,
+      "logged_status": "BLOCK",
+      "replayed_status": "BLOCK",
+      "decided_by": "code routing rule: at least one final answer is not YES",
+      "answers": [
+        {
+          "check": "legal_basis",
+          "proposed": "UNCLEAR",
+          "answer": "UNCLEAR",
+          "gap_type": "missing_evidence",
+          "final_decided_by": "AI liaison reviewer (qwen3:8b)",
+          "quotes": [
+            {
+              "chunk_id": "AE-DATA-PDPL-2021-EN:p6:c2",
+              "verified": false,
+              "failure": "Quote does not appear verbatim in the cited chunk.",
+              "corrected_from": ""
+            },
+            {
+              "chunk_id": "AE-HEALTH-ICT-LAW-2019:p8:c1",
+              "verified": true,
+              "failure": "",
+              "corrected_from": ""
+            },
+            {
+              "chunk_id": "CH-DATA-FADP:p4:c1",
+              "verified": true,
+              "failure": "",
+              "corrected_from": ""
+            },
+            {
+              "chunk_id": "CH-DATA-FADP:p4:c1",
+              "verified": true,
+              "failure": "",
+              "corrected_from": ""
+            }
+          ]
+        },
+        {
+          "check": "transfer_rules",
+          "proposed": "UNCLEAR",
+          "answer": "UNCLEAR",
+          "gap_type": "policy_gap",
+          "final_decided_by": "AI liaison reviewer (qwen3:8b)",
+          "quotes": [
+            {
+              "chunk_id": "AE-DATA-PDPL-2021-EN:p25:c2",
+              "verified": true,
+              "failure": "",
+              "corrected_from": ""
+            },
+            {
+              "chunk_id": "CH-DATA-FADP:p4:c1",
+              "verified": true,
+              "failure": "",
+              "corrected_from": ""
+            },
+            {
+              "chunk_id": "CH-DATA-FADP:p4:c1",
+              "verified": true,
+              "failure": "",
+              "corrected_from": ""
+            }
+          ]
+        },
+        {
+          "check": "counterpart",
+          "proposed": "UNCLEAR",
+          "answer": "UNCLEAR",
+          "gap_type": "missing_evidence",
+          "final_decided_by": "AI liaison reviewer (qwen3:8b)",
+          "quotes": [
+            {
+              "chunk_id": "AE-DATA-OFFICE-LAW-44-2021:p2:c2",
+              "verified": false,
+              "failure": "Quote does not appear verbatim in the cited chunk.",
+              "corrected_from": ""
+            },
+            {
+              "chunk_id": "CH-DATA-FADP:p4:c1",
+              "verified": true,
+              "failure": "",
+              "corrected_from": ""
+            },
+            {
+              "chunk_id": "CH-DATA-FADP:p4:c1",
+              "verified": false,
+              "failure": "Quote is shorter than 6 words.",
+              "corrected_from": ""
+            },
+            {
+              "chunk_id": "CH-DATA-FADP:p4:c1",
+              "verified": true,
+              "failure": "",
+              "corrected_from": ""
+            }
+          ]
+        }
+      ],
+      "differences": []
+    },
+    {
+      "entry_id": "log-9-dha",
+      "step": 9,
+      "sender": "dha",
+      "receiver": "swissmedic",
+      "patient_data": false,
+      "logged_status": "BLOCK",
+      "replayed_status": "BLOCK",
+      "decided_by": "code routing rule: at least one final answer is not YES",
+      "answers": [
+        {
+          "check": "legal_basis",
+          "proposed": "UNCLEAR",
+          "answer": "UNCLEAR",
+          "gap_type": "missing_evidence",
+          "final_decided_by": "AI liaison reviewer (qwen3:8b)",
+          "quotes": [
+            {
+              "chunk_id": "CH-DATA-FADP:p24:c1",
+              "verified": true,
+              "failure": "",
+              "corrected_from": ""
+            },
+            {
+              "chunk_id": "CH-HEALTH-TPA:p40:c1",
+              "verified": false,
+              "failure": "Quote does not appear verbatim in the cited chunk.",
+              "corrected_from": ""
+            },
+            {
+              "chunk_id": "AE-DATA-PDPL-2021-EN:p25:c2",
+              "verified": true,
+              "failure": "",
+              "corrected_from": ""
+            }
+          ]
+        },
+        {
+          "check": "transfer_rules",
+          "proposed": "YES",
+          "answer": "UNCLEAR",
+          "gap_type": "missing_evidence",
+          "final_decided_by": "code: 1 quote(s) failed the verbatim check; answer set to UNCLEAR / missing_evidence.",
+          "quotes": [
+            {
+              "chunk_id": "CH-HEALTH-TPA:p40:c1",
+              "verified": false,
+              "failure": "Quote does not appear verbatim in the cited chunk.",
+              "corrected_from": ""
+            },
+            {
+              "chunk_id": "AE-DATA-PDPL-2021-EN:p25:c2",
+              "verified": true,
+              "failure": "",
+              "corrected_from": ""
+            },
+            {
+              "chunk_id": "CH-DATA-FADP:p24:c1",
+              "verified": true,
+              "failure": "",
+              "corrected_from": ""
+            },
+            {
+              "chunk_id": "CH-DATA-FADP:p7:c1",
+              "verified": true,
+              "failure": "",
+              "corrected_from": ""
+            }
+          ]
+        },
+        {
+          "check": "counterpart",
+          "proposed": "YES",
+          "answer": "UNCLEAR",
+          "gap_type": "missing_evidence",
+          "final_decided_by": "code: 1 quote(s) failed the verbatim check; answer set to UNCLEAR / missing_evidence.",
+          "quotes": [
+            {
+              "chunk_id": "CH-HEALTH-TPA:p40:c1",
+              "verified": false,
+              "failure": "Quote does not appear verbatim in the cited chunk.",
+              "corrected_from": ""
+            },
+            {
+              "chunk_id": "CH-DATA-FADP:p24:c1",
+              "verified": true,
+              "failure": "",
+              "corrected_from": ""
+            },
+            {
+              "chunk_id": "CH-DATA-FADP:p7:c1",
+              "verified": true,
+              "failure": "",
+              "corrected_from": ""
+            }
+          ]
+        }
+      ],
+      "differences": []
+    },
+    {
+      "entry_id": "log-14-dha",
+      "step": 14,
+      "sender": "dha",
+      "receiver": "swissmedic",
+      "patient_data": true,
+      "logged_status": "BLOCK",
+      "replayed_status": "BLOCK",
+      "decided_by": "code: patient-data rule (no verified legal-basis and transfer-rules quotes)",
+      "answers": [
+        {
+          "check": "legal_basis",
+          "proposed": "UNCLEAR",
+          "answer": "UNCLEAR",
+          "gap_type": "missing_evidence",
+          "final_decided_by": "AI liaison reviewer (qwen3:8b)",
+          "quotes": [
+            {
+              "chunk_id": "AE-DHA-HEALTH-INFO-SHARING-PP13-2024:p16:c2",
+              "verified": true,
+              "failure": "",
+              "corrected_from": ""
+            },
+            {
+              "chunk_id": "AE-DATA-PDPL-2021-EN:p25:c2",
+              "verified": true,
+              "failure": "",
+              "corrected_from": ""
+            }
+          ]
+        },
+        {
+          "check": "transfer_rules",
+          "proposed": "UNCLEAR",
+          "answer": "UNCLEAR",
+          "gap_type": "missing_evidence",
+          "final_decided_by": "AI liaison reviewer (qwen3:8b)",
+          "quotes": [
+            {
+              "chunk_id": "CH-HEALTH-TPA:p40:c1",
+              "verified": true,
+              "failure": "",
+              "corrected_from": ""
+            }
+          ]
+        },
+        {
+          "check": "counterpart",
+          "proposed": "YES",
+          "answer": "YES",
+          "gap_type": null,
+          "final_decided_by": "AI liaison reviewer (qwen3:8b)",
+          "quotes": [
+            {
+              "chunk_id": "CH-HEALTH-TPA:p40:c1",
+              "verified": true,
+              "failure": "",
+              "corrected_from": ""
+            }
+          ]
+        }
+      ],
+      "differences": []
+    }
+  ],
+  "steps": [
+    {
+      "step": 1,
+      "phase": "Vendor pushes a model update; graders notice fewer referrals",
+      "ran": true,
+      "replayed": "run",
+      "condition": {},
+      "match": true
+    },
+    {
+      "step": 2,
+      "phase": "Spot audit confirms missed referable disease on one camera model",
+      "ran": true,
+      "replayed": "run",
+      "condition": {},
+      "match": true
+    },
+    {
+      "step": 3,
+      "phase": "Vendor finds the update was pushed from a compromised account",
+      "ran": true,
+      "replayed": "run",
+      "condition": {},
+      "match": true
+    },
+    {
+      "step": 4,
+      "phase": "Vendor finds the model was retrained on UAE patients' images held in Switzerland",
+      "ran": true,
+      "replayed": "run",
+      "condition": {},
+      "match": true
+    },
+    {
+      "step": 5,
+      "phase": "Controversy 1: the vendor says the images were used for research",
+      "ran": true,
+      "replayed": "run",
+      "condition": {},
+      "match": true
+    },
+    {
+      "step": 6,
+      "phase": "UAE authorities learn UAE patients' images were reused in Zurich",
+      "ran": true,
+      "replayed": "run",
+      "condition": {},
+      "match": true
+    },
+    {
+      "step": 7,
+      "phase": "The Swiss privacy regulator receives the UAE Data Office request",
+      "ran": false,
+      "replayed": "skip",
+      "condition": {
+        "regulatory_evidence_request.uae_data_office": "delivered"
+      },
+      "match": true
+    },
+    {
+      "step": 8,
+      "phase": "The liaison channel blocks the UAE Data Office request",
+      "ran": true,
+      "replayed": "run",
+      "condition": {
+        "regulatory_evidence_request.uae_data_office": "blocked_by_liaison_check"
+      },
+      "match": true
+    },
+    {
+      "step": 9,
+      "phase": "UAE regulators ask what left the country",
+      "ran": true,
+      "replayed": "run",
+      "condition": {},
+      "match": true
+    },
+    {
+      "step": 10,
+      "phase": "Swiss authorities receive the UAE request",
+      "ran": false,
+      "replayed": "skip",
+      "condition": {
+        "regulatory_evidence_request.dha": "delivered"
+      },
+      "match": true
+    },
+    {
+      "step": 11,
+      "phase": "The liaison channel blocks the UAE request",
+      "ran": true,
+      "replayed": "run",
+      "condition": {
+        "regulatory_evidence_request.dha": "blocked_by_liaison_check"
+      },
+      "match": true
+    },
+    {
+      "step": 12,
+      "phase": "Controversy 2: suspend the tool? The two sides disagree",
+      "ran": true,
+      "replayed": "run",
+      "condition": {},
+      "match": true
+    },
+    {
+      "step": 13,
+      "phase": "Optional escalation: patient images appear in an insurer pricing model",
+      "ran": true,
+      "replayed": "run",
+      "condition": {},
+      "match": true
+    },
+    {
+      "step": 14,
+      "phase": "DHA tries to send the patients' images to Switzerland for investigation",
+      "ran": true,
+      "replayed": "run",
+      "condition": {},
+      "match": true
+    },
+    {
+      "step": 15,
+      "phase": "Swissmedic receives the patients' images",
+      "ran": false,
+      "replayed": "skip",
+      "condition": {
+        "patient_data_disclosure.dha": "delivered"
+      },
+      "match": true
+    },
+    {
+      "step": 16,
+      "phase": "The liaison channel stops the patients' images at the border",
+      "ran": true,
+      "replayed": "run",
+      "condition": {
+        "patient_data_disclosure.dha": "blocked_by_liaison_check"
+      },
+      "match": true
+    }
+  ]
+}

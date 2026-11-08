@@ -1,4 +1,4 @@
-.PHONY: step-coverage fetch verify-sources ingest index drill verify-log audit-evidence assess-candidates evaluate-claims evaluate-retrieval replay report-figures ui itu-smoke
+.PHONY: step-coverage decision-trail verify-sources ingest index drill verify-log audit-evidence assess-candidates evaluate-claims evaluate-retrieval replay itu-smoke
 
 INTENT ?= retinopathy-ae-ch
 RUN ?=
@@ -6,13 +6,6 @@ DRILL_ARGS ?=
 PYTHON ?= $(CURDIR)/.venv/bin/python
 ITU_SIM := vendor/ITUAIReadiness/simulation
 PDF ?= $(CURDIR)/$(ITU_SIM)/server/knowledge/InputDocs/AI_Use_Cases/T-REC-Y.3172-201906-I!!PDF-E.pdf
-
-define todo
-	@echo "make $@: not implemented yet ($(1))"; exit 1
-endef
-
-fetch:
-	$(call todo,M1)
 
 verify-sources:
 	$(PYTHON) scripts/verify_sources.py
@@ -58,13 +51,7 @@ replay:
 	@if [ -z "$(RUN)" ]; then echo "Error: specify RUN=<run_id>"; exit 1; fi
 	$(PYTHON) scripts/replay.py --run $(RUN) $(REPLAY_ARGS)
 
-report-figures:
-	$(call todo,M4)
-
-ui:
-	STREAMLIT_BROWSER_GATHER_USAGE_STATS=false $(PYTHON) -m streamlit run ui/app.py --server.headless true
-
-# M0 check: ITU reference ingestion on one PDF, into a throwaway index.
+# Optional check: ITU reference ingestion on one PDF, into a throwaway index.
 # Needs `ollama serve` running and `ollama pull nomic-embed-text`.
 itu-smoke:
 	cd $(ITU_SIM) && AIREADY_CHROMADB_DIR=$(CURDIR)/index/itu-smoke \

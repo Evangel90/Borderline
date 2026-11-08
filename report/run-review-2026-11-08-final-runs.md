@@ -2,7 +2,7 @@
 
 **Model:** local `qwen3:8b` through Ollama, 16,384-token context, temperature 0, for every institution agent and for the AI liaison reviewer. **Code:** branch `incident-drill` at `b229477`; 174 tests pass. All four runs used the same code and model. **Status:** unreviewed synthetic drill output. Nothing here is a legal conclusion, and no person with legal standing has reviewed it. Run folders (`runs/`) are git-ignored, so the numbers below are copied from them.
 
-These four runs replace all earlier runs as the basis of the technical report. Earlier runs (made before the fixes to quoting, exhibits, the patient-data rule, letters without a receiver and space slips) are recorded in [`run-review-2026-11-08-three-drills.md`](run-review-2026-11-08-three-drills.md) as history only.
+These four runs, all on the same code, are the basis of the technical report. Their logs are in `runs/`, so every figure below can be re-checked with `make verify-log` and `make replay`.
 
 Abbreviations used below: Emirates Drug Establishment (EDE); Swiss Agency for Therapeutic Products (Swissmedic); Federal Data Protection and Information Commissioner (FDPIC); Dubai Health Authority (DHA); Ministry of Health and Prevention (MoHAP); Swiss National Cyber Security Centre (NCSC); UAE Personal Data Protection Law, Federal Decree-Law 45/2021 (PDPL); Swiss Federal Act on Data Protection (FADP); Swiss Therapeutic Products Act (TPA); Swiss Medical Devices Ordinance (MedDO); Organisation for Economic Co-operation and Development (OECD).
 

@@ -12,17 +12,35 @@ index/
 qdrant_storage/
 chromadb/
 
-# Drill outputs are generated locally; keep the runs directory placeholder only.
+# Drill outputs are generated locally. Only the four final runs the report is based on are
+# published, so `make replay` and `make verify-log` can be checked against them.
 /runs/*
 !/runs/.gitkeep
-/docs
-/AGENTS.md
-!/docs/
-/docs/*
-!/docs/HACKATHON_CRITERIA_AUDIT.md
-!/docs/HACKATHON_EXECUTION_PLAN.md
-!/docs/HACKATHON_MILESTONE_TRACKER.md
-!/docs/HANDOFF_2026-11-07.md
+!/runs/governed-20261108-4/
+!/runs/ungoverned-20261108-3/
+!/runs/insufficient-20261108-3/
+!/runs/governed-scripted-20261108-3/
 
-# Submission template: kept local for now (2026-11-07); revisit before submission.
+# Internal development notes (planning, criteria audits, handoffs): not part of the submission.
+/docs/
+/AGENTS.md
+
+# Streamlit viewer: built for an earlier scenario, not part of the submission.
+/ui/
+
+# Report folder: only the submission report and the material it cites are published.
+/report/*
+!/report/.gitkeep
+!/report/technical-report.md
+!/report/run-review-2026-11-08-final-runs.md
+!/report/decision-trail-governed-20261108-4.md
+!/report/decision-trail-ungoverned-20261108-3.md
+!/report/decision-trail-insufficient-20261108-3.md
+!/report/decision-trail-governed-scripted-20261108-3.md
+!/report/candidate-status.json
+!/report/step-coverage.json
+!/report/retrieval-evaluation-seed-20261101.md
+!/report/synthetic-product-dossier-retinavision-dx.md
+
+# Submission template and the Word submission are kept local.
 /AI for Good Hackathon Submission Template.docx

@@ -84,7 +84,7 @@ def main() -> int:
 
     out = args.out or os.path.join(ROOT, "runs", args.run, "replay.json")
     if os.path.isdir(os.path.dirname(out)):
-        payload = {"run": report.run, "log": report.log_path, "hash_chain_ok": report.hash_chain_ok,
+        payload = {"run": report.run, "log": os.path.relpath(report.log_path, ROOT), "hash_chain_ok": report.hash_chain_ok,
                    "intent": report.intent, "differences": total,
                    "letters": [asdict(letter) for letter in report.letters], "steps": report.steps}
         with open(out, "w", encoding="utf-8") as sink:

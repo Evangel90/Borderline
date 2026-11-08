@@ -1,130 +1,130 @@
 # Borderline
 
-A prototype for policy-grounded deployment and incident drills, built for the
-[International Telecommunication Union (ITU) AI for Good Lab Hackathon: United Arab Emirates](https://aiforgood.itu.int/event/ai-for-good-sandbox-hackathon-united-arab-emirates/).
+A multi-agent drill engine for cross-border medical-AI incidents, built for the
+[International Telecommunication Union (ITU) AI for Good Sandbox Hackathon: United Arab Emirates](https://aiforgood.itu.int/event/ai-for-good-sandbox-hackathon-united-arab-emirates/).
 
-Borderline rehearses how two countries' institutions respond when a medical AI
-product made in one country fails in the other. The drill is wired to the
-United Arab Emirates (UAE) and Switzerland (CH); country packs, a bridge pack
-and drill intents are plain YAML. Adding a new country pack does not yet
-configure a new drill automatically.
+When a medical AI product made in one country fails in another, both countries'
+regulators, data-protection authorities and cyber agencies must share information
+quickly, under different laws. Borderline rehearses that response before a real
+incident. It records which institution decided what, which letters may legally
+cross the border, and where the rules run out. The drill is wired to the United
+Arab Emirates (UAE) and Switzerland (CH); country packs, a bridge pack and drill
+intents are plain YAML (a readable configuration format).
+
+**Read first:** [technical report](report/technical-report.md) ·
+[final run review](report/run-review-2026-11-08-final-runs.md) ·
+decision trails for drills [A](report/decision-trail-governed-20261108-4.md),
+[B](report/decision-trail-ungoverned-20261108-3.md),
+[C](report/decision-trail-insufficient-20261108-3.md),
+[D](report/decision-trail-governed-scripted-20261108-3.md)
+
+## How it works
 
 Three kinds of decision-maker take part, and every log entry records which one decided:
 
-- **Institution AI agents** (12 institutions) each see only their own view and
-  choose one of their allowed actions, with citations.
+- **Institution AI agents** (12 UAE, Swiss and neutral institutions) each see only
+  their own view and choose one of their allowed actions, with citations.
 - **An AI liaison reviewer** (a separate model call) answers three questions for
-  every cross-border letter (legal basis, both sides' transfer rules, right
-  counterpart), with exact quotes.
-- **Code makes the final check.** It verifies every quote word for word (a
-  fabricated quote becomes UNCLEAR), stops patient data without verified
-  legal-basis and transfer-rules quotes, delivers a letter only on three YES
-  answers, and flags every YES for human review. Every UNCLEAR or NO is typed
-  `policy_gap`, `implementation_gap`, `conflict` or `missing_evidence`; the last
-  goes to a homework list, not to gap candidates.
+  every cross-border letter: is there a legal basis to share, is the transfer
+  allowed under both sides' rules, and is the receiver the right counterpart.
+  Every answer carries exact quotes.
+- **Code makes the final check.** It verifies every quote against the source
+  passage (a fabricated quote becomes UNCLEAR), stops patient data without
+  verified legal-basis and transfer-rules quotes and a recorded human approval,
+  delivers a letter only on three YES answers, and flags every YES for human
+  review. Every UNCLEAR or NO is typed `policy_gap`, `implementation_gap`,
+  `conflict` or `missing_evidence`; the last goes to a homework list.
 
-Everything is written to a hash-chained audit log.
+Everything is written to a hash-chained audit log. All AI decisions run on a local
+open-weight model (`qwen3:8b` through Ollama), so no prompt or passage leaves the machine.
 
-The use case is a fictional Swiss diabetic-retinopathy screening service,
-RetinaVision-DX, used at fictional Dubai clinics: a model update misses
-referable disease in 47 synthetic patients, the update came from a compromised
-vendor account, and UAE retinal images held in Zurich were reused for retraining.
+The use case is RetinaVision-DX, a fictional diabetic-retinopathy screening service
+from a fictional Swiss vendor, used at fictional Dubai clinics: a model update misses
+referable disease in 47 synthetic patients, the update came from a compromised vendor
+account, and UAE retinal images held in Zurich were reused for retraining.
 
-> All scenario data is synthetic. Agent roles are simulated and never represent
-> any authority's official position. Nothing produced is a legal conclusion;
-> policy gaps are called candidates.
+The knowledge base holds 49 registered UAE, Swiss and global source and extraction
+files (hashed in [`data/sources.csv`](data/sources.csv)), split into 2,286 passages
+that keep their document, page, language and legal status.
 
-The UAE, Swiss and global policy materials are a local, provenance-bearing
-knowledge base (49 registered source and extraction files, 2,286 chunks), not a
-complete legal collection and not hosted by ITU. See the [use-case and knowledge-base note](report/USE_CASE_AND_KB_CONTRIBUTION.md).
+> All scenario data is synthetic. Agent roles are simulated and do not represent any
+> authority's official position. Nothing produced is a legal conclusion; policy gaps
+> are called candidates.
 
-## Status (8 November 2026)
+## Results (8 November 2026)
 
-The submission is based on four final runs, all on the same code (`b229477`) with
-local Ollama `qwen3:8b`: three AI drills (A, B, C) and **Drill D, a scripted
-control for Drill A**: same letters as Drill A, but the project's hand-written
-reference answers stand in for the AI liaison reviewer, to test whether Drill A's
-blocks come from the AI review or from the law and the code. Drill D's liaison
-answers are not AI decisions. All four hash chains verify, and `make replay`
-reproduces all four with 0 differences.
-Full comparison of actual against expected: [final run review](report/run-review-2026-11-08-final-runs.md).
+Four runs on the same code with local `qwen3:8b`. Drill D is a scripted control
+for Drill A: the same letters, with the project's reference answers in place of the
+AI liaison reviewer, to show whether Drill A's outcome comes from the AI review or
+from the law and the code. Drill D's liaison answers are not AI decisions.
 
-| Drill | Run | Decisions | Letters delivered | Result |
+| Drill | Run | Decisions | Letters delivered | Highlights |
 |---|---|---|---|---|
-| A, governed (`retinopathy-governed`) | `governed-20261108-4` | 9 | 0 of 3 (3 expected) | Not as expected. The AI liaison reviewer said YES on legal basis each time, but misread the no-data transfer question (step 2) and joined quotes from two places (steps 5, 8); code rejected those |
-| B, ungoverned (`retinopathy-ae-ch`, optional step 13) | `ungoverned-20261108-3` | 40 | 0 of 5 | Patient images stopped; a letter naming no receiver blocked by code; 1 typed gap (`policy_gap`); 8 homework items |
-| C, insufficient evidence (`retinopathy-insufficient-evidence`) | `insufficient-20261108-3` | 7 | 0 of 1 | Not as expected: answers typed `policy_gap` and `implementation_gap` instead of homework; quotes real but some do not concern transfer |
-| **D, scripted control for A (not an AI decision)** (`retinopathy-governed`, `--reviewer scripted`) | `governed-scripted-20261108-3` | 11 | 3 of 3 | Reference answers stood in for the AI liaison reviewer; code still checked all 21 quotes and the human approval for the recall list. Shows the route works; says nothing about the AI review |
+| A, governed | `governed-20261108-4` | 9 | 0 of 3 | The AI reviewer found the right provisions (YES on legal basis each time); code rejected quotes it had joined from two places |
+| B, ungoverned (with optional step 13) | `ungoverned-20261108-3` | 40 | 0 of 5 | Patient images stopped at the border; a letter naming no receiver blocked; 1 typed gap; 8 homework items |
+| C, insufficient evidence | `insufficient-20261108-3` | 7 | 0 of 1 | Letter without a reciprocity assurance blocked; answers typed as gaps for human review |
+| D, scripted control for A | `governed-scripted-20261108-3` | 11 | 3 of 3 | All 21 quotes verified; the recall list crossed only with a matching recorded human approval |
 
-Patient data crossed only in Drill D, with verified national-law quotes and a
-recorded human approval matching the letter. Running all four drills again after one change to the quote check gave byte-identical logs for A, C and D; B differed only in two quotes that the change now accepts. The four gap candidates
-(CAND-001 to CAND-004) are all `SUPPORTED_CANDIDATE` under the project's
-four-part rule (`make assess-candidates`); they are unreviewed. Earlier runs,
-made before the final fixes, are kept as history in the
-[earlier run review](report/run-review-2026-11-08-three-drills.md).
-Submission material: [technical report](report/technical-report-draft.md),
-[demo walkthrough](report/DEMO_WALKTHROUGH.md),
-[criteria audit](docs/HACKATHON_CRITERIA_AUDIT.md).
+All four hash chains verify and all four replay with 0 differences. The four gap
+candidates (CAND-001 to CAND-004) meet the project's four-part evidence rule
+(`make assess-candidates`) and await expert review.
 
-The Streamlit viewer (`make ui`) was built for an earlier pre-deployment run and
-has not been checked against the final runs. `make report-figures` is not
-implemented.
+Check any run yourself, without calling a model:
 
-`make replay RUN=<id>` is a **code replay**: without calling any model, it re-runs
-every code decision over the AI answers recorded in the log (quote checks, chunk-ID
-corrections, the patient-data rule, three-YES routing, action authorization and
-which conditional steps should run) and reports any difference. All four
-final runs replay with 0 differences. It does not show that a model would
-answer the same way again. Replaying an edited copy of a log
-(`REPLAY_ARGS="--log edited.jsonl"`) shows what code does with a changed answer;
-the hash-chain check reports the edit.
+```sh
+make verify-log RUN=governed-20261108-4
+make replay RUN=governed-20261108-4
+```
+
+`make replay` re-runs every code decision (quote checks, the patient-data rule,
+three-YES routing, action authorization and which conditional steps run) over the
+AI answers recorded in the log and reports any difference.
 
 ## Layout
 
 ```
-packs/ae/, packs/ch/      country packs: documents/, institutions/*.yaml, chunks.jsonl
-packs/bridge/ae-ch.yaml   what links the two countries (adequacy, treaties)
-packs/global/             global benchmarks, neutral adviser, ITU standards
+packs/ae/, packs/ch/      country packs: institutions/*.yaml, chunks.jsonl
+packs/bridge/ae-ch.yaml   what links the two countries (counterparts, reference answers)
+packs/global/             global benchmarks, neutral adviser
 intents/                  staged drill specs (the Y.3172 "ML intent")
-engine/                   AI agents, action sandbox, orchestrator, gates
+engine/                   AI agents, liaison reviewer, action sandbox, orchestrator, replay
 audit/                    hash-chained log and verifier
-gaps/                     gap register
+gaps/                     gap-candidate register, absence searches, evidence rule
 data/raw/, data/sources.csv   source files and provenance register
-runs/<run_id>/            log.jsonl, gaps.jsonl
-ui/                       Streamlit timeline
-report/, video/           submission material
+runs/<run_id>/            the four final runs: log.jsonl, gaps.jsonl, homework, replay
+report/                   technical report, run review, decision trails
 ```
 
-## Setup and demo
+## Setup
 
 ```sh
 git clone --recurse-submodules https://github.com/Evangel90/Borderline.git
 cd Borderline
 python3.11 -m venv .venv
 .venv/bin/pip install -e .
-export OPENROUTER_API_KEY=your-key
 make verify-sources
-make index  # downloads the embedding model once (~220 MB)
-make drill INTENT=retinopathy-ae-ch RUN=demo-2026-10-30
-make verify-log RUN=demo-2026-10-30
+make index        # downloads the local embedding model once (~220 MB)
 ```
 
-To reproduce the final 8 November runs with local Ollama (no application programming
-interface (API) key; needs `ollama pull qwen3:8b`; search uses the local embedding model
-`paraphrase-multilingual-MiniLM-L12-v2`, which `make index` downloads once through fastembed).
-Each run ID must be new:
+To run the drills as in the final runs (local Ollama, no application programming
+interface (API) key; `ollama pull qwen3:8b` first). Each run ID must be new:
 
 ```sh
 export BORDERLINE_LLM_PROVIDER=ollama BORDERLINE_LLM_MODEL=qwen3:8b
 make drill INTENT=retinopathy-governed RUN=<new-id-A>
 make drill INTENT=retinopathy-ae-ch RUN=<new-id-B> DRILL_ARGS=--include-optional-events
 make drill INTENT=retinopathy-insufficient-evidence RUN=<new-id-C>
-make drill INTENT=retinopathy-governed RUN=<new-id> DRILL_ARGS="--reviewer scripted"  # Drill D, not an AI decision
-python scripts/liaison_rehearsal.py --repeat 3 expect=ROUTE:retinopathy-governed:2:ede expect=BLOCK:retinopathy-ae-ch:14:dha
+make drill INTENT=retinopathy-governed RUN=<new-id-D> DRILL_ARGS="--reviewer scripted"
 make verify-log RUN=<id>; make audit-evidence RUN=<id>; make decision-trail RUN=<id>
 make step-coverage RUNS="retinopathy-governed=<A> retinopathy-ae-ch=<B> retinopathy-insufficient-evidence=<C>"
 make assess-candidates
 ```
+
+### Technical notes
+
+Search combines keyword matching with the local multilingual embedding model
+`paraphrase-multilingual-MiniLM-L12-v2` (through fastembed). A hosted model can be
+used instead by setting `BORDERLINE_LLM_PROVIDER=openrouter`:
 
 Create an API key from [OpenRouter](https://openrouter.ai/settings/keys) and
 export it as `OPENROUTER_API_KEY`. The default model `openrouter/free` routes
@@ -171,46 +171,31 @@ code](https://github.com/CrashingGuru/ITUAIReadiness) (MIT), pinned as a git
 submodule; `make itu-smoke` is optional and requires that project's dependencies
 and a locally running Ollama embedding model.
 
-To review saved drill runs in the Streamlit timeline, install the optional UI
-dependency and start the viewer:
-
-```sh
-.venv/bin/pip install -e '.[ui]'
-make ui
-```
-
 ## Commands
 
 Run from the repo root.
 
 | Command | What it does |
 | --- | --- |
-| `make fetch` | Not implemented yet |
 | `make verify-sources` | Re-hash sources and flag any change |
 | `make ingest` | Rebuild provenance-bearing chunks and update the local vector index |
 | `make index` | Build or update the local Chroma index from existing chunks |
-| `make drill INTENT=retinopathy-ae-ch` | Run the AI-agent drill; requires a configured model provider and API key for OpenRouter |
+| `make drill INTENT=<intent> RUN=<id>` | Run a drill with the configured model provider |
 | `make verify-log RUN=<run_id>` | Check the hash chain; name the first broken entry |
-| `make audit-evidence RUN=<run_id>` | Screen a run's citations (lexical and metadata only) |
+| `make replay RUN=<run_id>` | Code replay: re-run every code decision over the logged AI answers, no model call; exit 1 on any difference |
+| `make audit-evidence RUN=<run_id>` | Screen a run's citations |
 | `make decision-trail RUN=<run_id>` | Write who decided what, per step and per letter, to `report/` |
 | `make step-coverage RUNS="..."` | Show which steps and liaison branches ran across runs |
-| `make assess-candidates` | Apply the four-part rule to the gap-candidate register |
-| `make replay RUN=<run_id>` | Code replay: re-run every code decision over the logged AI answers, no model call; exit 1 on any difference |
-| `make report-figures RUN=<run_id>` | Not implemented yet |
-| `make ui` | Start the Streamlit run viewer (install `.[ui]` first) |
+| `make assess-candidates` | Apply the four-part evidence rule to the gap-candidate register |
+| `make evaluate-retrieval` | Measure retrieval on the ten-question seed |
 
-## Scope and limitations
+## Scope
 
-This is a synthetic policy-drill prototype, not a clinical tool or legal
-opinion. Each AI agent chooses from actions declared in its institution profile;
-Python validates the chosen action and runs a corresponding sandbox tool. The
-border gate has veto authority over transfers and external notifications. These
-tools only update in-memory drill state and the local audit log. The model's
-short rationale is logged; private chain-of-thought is neither requested nor
-stored. The hash chain is tamper-evident but not digitally signed or externally
-anchored. Gap evidence is scenario-specific and retrieved from selected source
-documents; it is not an autonomous legal conclusion. Review citations and actions against current
-authoritative sources before real-world use.
+Borderline is a synthetic policy-drill prototype, not a clinical tool or legal
+opinion. Actions only update drill state and the local audit log; no clinical,
+regulatory or data-transfer system is connected. The hash chain is tamper-evident
+but not digitally signed. Citations and actions should be checked against current
+authoritative sources before any real-world use.
 
 ## License
 

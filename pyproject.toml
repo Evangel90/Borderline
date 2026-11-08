@@ -14,13 +14,10 @@ dependencies = [
 ]
 
 [project.optional-dependencies]
-# Runs vendor/ITUAIReadiness ingestion (M0 check, ITU-format export)
+# Runs vendor/ITUAIReadiness ingestion (optional check)
 itu = [
     "ollama>=0.4.0",
     "pydantic-settings>=2.0.0",
-]
-ui = [
-    "streamlit>=1.40",
 ]
 
 [tool.setuptools]
