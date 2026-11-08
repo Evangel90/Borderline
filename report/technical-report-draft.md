@@ -43,9 +43,11 @@ Three decision-makers take part, and each log entry names which one decided: **i
 
 ## Use-case requirements
 
-- **Critical:** every claim has an exact, code-verified quote and chunk ID; no output is a legal conclusion. Patient data never crosses without verified legal-basis and transfer-rules quotes and a recorded human approval. Each institution acts only on what it sees, within its mandate, and the log shows who decided.
-- **Expected:** missing documents become homework, not proof of absence; each gap candidate has a verified global comparison.
-- **Added value:** the engine is country-agnostic. Country packs, a bridge pack and drill intents are plain YAML (a readable configuration format) and can be swapped.
+- It is **critical** that every claim has an exact, code-verified quote and chunk ID, and that no output is presented as a legal conclusion.
+- It is **critical** that patient data never crosses the border without verified legal-basis and transfer-rules quotes and a recorded human approval.
+- It is **critical** that each institution acts only on what it sees, within its mandate, and that the log shows who decided.
+- It is **expected** that missing documents become homework, not proof of absence, and that each gap candidate has a verified global comparison.
+- It is **of added value** that the engine is country-agnostic: country packs, a bridge pack and drill intents are plain YAML (a readable configuration format) and can be swapped.
 
 ## Demo scenarios: three AI drills and one scripted control
 
