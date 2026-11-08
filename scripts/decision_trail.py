@@ -15,6 +15,9 @@ import sys
 from pathlib import Path
 
 ROOT = Path(__file__).resolve().parent.parent
+sys.path.insert(0, str(ROOT))
+
+from engine.liaison import SCRIPTED_REVIEWER, reviewer_label  # noqa: E402
 
 WORDING = {
     "MODEL_EXPLANATION": "agent's own words",
@@ -34,7 +37,7 @@ def final_by(check: dict, model: str) -> str:
         return "code: reviewer gave no usable answer"
     if check["answer"] != check["proposed_answer"]:
         return "code: answer changed by code check"
-    return f"AI liaison reviewer ({model})"
+    return reviewer_label(model)
 
 
 def trail(run_id: str) -> str:
@@ -82,7 +85,8 @@ def trail(run_id: str) -> str:
             f"{review.get('status_decided_by', 'code routing rule')}.",
             f"- Quotes: {review.get('quotes_verified', 0)} of {review.get('quotes_checked', 0)} verified by code.",
             "",
-            "| Question | AI liaison reviewer proposed | Final | Final answer decided by | Needs human check |",
+            f"| Question | {'Scripted reviewer (not AI) proposed' if model == SCRIPTED_REVIEWER else 'AI liaison reviewer proposed'} "
+            "| Final | Final answer decided by | Needs human check |",
             "|---|---|---|---|---|",
         ]
         for c in e["liaison_checks"]:

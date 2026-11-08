@@ -12,7 +12,7 @@ from engine.models import (
     PolicyEvidence, PolicyGap,
 )
 from engine.gates import BorderGate
-from engine.liaison import CANDIDATE_GAP_TYPES, LiaisonChannel, LiaisonReviewer
+from engine.liaison import NOT_LAW, CANDIDATE_GAP_TYPES, LiaisonChannel, LiaisonReviewer, ScriptedReviewer
 from engine.agent import InstitutionalAgent
 from engine.actions import ActionExecutor
 from engine.knowledge import KnowledgeIndex
@@ -31,7 +31,7 @@ class DrillOrchestrator:
     def _step_enabled(step: StepPayload, state: Dict[str, Any]) -> bool:
         return all(state.get(key) == value for key, value in step.requires_state.items())
 
-    def __init__(self, intent_path: str, run_id: str):
+    def __init__(self, intent_path: str, run_id: str, reviewer: str = "ai"):
         self.intent_path = intent_path
         self.run_id = run_id
         self.run_dir = os.path.join("runs", run_id)
@@ -75,16 +75,25 @@ class DrillOrchestrator:
         )
 
         # An AI liaison reviewer answers the three liaison questions; code verifies its quotes.
+        # reviewer="scripted" swaps in the labelled scripted reviewer (not an AI decision).
+        if reviewer not in ("ai", "scripted"):
+            raise ValueError(f"Unknown reviewer '{reviewer}'; use 'ai' or 'scripted'.")
+        if reviewer == "scripted" and not self.intent.scripted_reviews:
+            raise ValueError(f"Intent '{self.intent.id}' has no scripted_reviews for a scripted run.")
+        liaison_reviewer = (ScriptedReviewer(self.intent.scripted_reviews) if reviewer == "scripted"
+                            else LiaisonReviewer(self.llm, self.knowledge_index))
         self.liaison = (
             LiaisonChannel(
                 self.bridge, {inst.id: inst for inst, _ in institutions},
-                LiaisonReviewer(self.llm, self.knowledge_index),
+                liaison_reviewer,
                 library={c.chunk_id: c for pack in self.chunks.values() for c in pack},
                 exhibits=self.intent.exhibits,
                 approvals=self.intent.standing_approvals,
             )
             if self.bridge.liaison else None
         )
+        if isinstance(liaison_reviewer, ScriptedReviewer) and self.liaison:
+            liaison_reviewer.bind(self.liaison)
         self.action_executor = ActionExecutor(self.simulation_state, self.liaison)
 
         self.agents: Dict[str, InstitutionalAgent] = self._init_agents(institutions)
@@ -502,7 +511,7 @@ class DrillOrchestrator:
                     for check in typed
                 ),
                 host_citation=", ".join(sorted({q["chunk_id"] for q in verified if q["jurisdiction"] == own})) or "None recorded.",
-                partner_citation=", ".join(sorted({q["chunk_id"] for q in verified if q["jurisdiction"] not in {own, "GLOBAL"}})) or "None recorded.",
+                partner_citation=", ".join(sorted({q["chunk_id"] for q in verified if q["jurisdiction"] not in {own} | NOT_LAW})) or "None recorded.",
                 global_benchmark=", ".join(sorted({q["chunk_id"] for q in verified if q["jurisdiction"] == "GLOBAL"})) or "No global example paired yet.",
                 remediation_recommendation="Establish who may exchange incident evidence across the border, on what legal basis, and through which counterpart.",
                 finding_method=(

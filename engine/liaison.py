@@ -35,7 +35,7 @@ from engine.quotes import (  # re-exported for callers of the liaison channel
 )
 from engine.models import (
     LIAISON_ANSWERS, LIAISON_GAP_TYPES, BridgeConfig, Chunk, DrillExhibit, Institution,
-    LiaisonAnswer, LiaisonReview, LiaisonRule, StandingApproval,
+    LiaisonAnswer, LiaisonQuote, LiaisonReview, LiaisonRule, ScriptedLetter, StandingApproval,
 )
 
 QUESTIONS = {
@@ -149,6 +149,15 @@ def question_notes(payload: dict[str, Any]) -> dict[str, str]:
     }
 
 
+SCRIPTED_REVIEWER = "scripted reference answers (not an AI decision)"
+
+
+def reviewer_label(reviewer_model: str) -> str:
+    if reviewer_model == SCRIPTED_REVIEWER:
+        return f"scripted reviewer: {SCRIPTED_REVIEWER}"
+    return f"AI liaison reviewer ({reviewer_model})"
+
+
 def final_decided_by(check: dict[str, Any], reviewer_model: str) -> str:
     """Who made the final answer: the AI reviewer, or a code rule that changed it."""
     if check["proposed_answer"] is None:
@@ -157,7 +166,7 @@ def final_decided_by(check: dict[str, Any], reviewer_model: str) -> str:
         return "code: " + next(
             (note for note in check["adjustments"] if "set to UNCLEAR" in note), "answer changed by code check"
         )
-    return f"AI liaison reviewer ({reviewer_model})"
+    return reviewer_label(reviewer_model)
 
 
 class Reviewer(Protocol):
@@ -168,6 +177,54 @@ class Reviewer(Protocol):
 
     def review(self, sender: Institution, receiver: Institution, request_type: str,
                payload: dict[str, Any], evidence: list[Chunk]) -> LiaisonReview: ...
+
+
+class ScriptedReviewer:
+    """Stands in for the AI liaison reviewer in a clearly labelled scripted run.
+
+    Each answer is the bridge pack's hand-written reference answer for the letter, with fixed
+    quotes from the drill intent. Nothing else changes: code verifies every quote, applies the
+    national-law and patient-data rules and the human-approval check. It shows whether the route
+    works when the answers are right; it says nothing about what an AI reviewer would decide."""
+
+    model_name = SCRIPTED_REVIEWER
+
+    def __init__(self, scripts: list[ScriptedLetter]):
+        self.scripts = scripts
+        self.channel: "LiaisonChannel | None" = None
+
+    def bind(self, channel: "LiaisonChannel") -> None:
+        self.channel = channel
+
+    def _script(self, sender: Institution, receiver: Institution, request_type: str) -> ScriptedLetter:
+        for script in self.scripts:
+            if (script.sender, script.receiver, script.request_type) == (sender.id, receiver.id, request_type):
+                return script
+        raise ValueError(f"No scripted quotes for {sender.id} -> {receiver.id} ({request_type}).")
+
+    def gather_evidence(self, sender: Institution, receiver: Institution,
+                        request_type: str, payload: dict[str, Any]) -> list[Chunk]:
+        try:
+            script = self._script(sender, receiver, request_type)
+        except ValueError:
+            return []  # review() raises the same error, which the channel logs and blocks on
+        wanted = list(dict.fromkeys(q.chunk_id for quotes in script.quotes.values() for q in quotes))
+        return [self.channel.library[cid] for cid in wanted if cid in self.channel.library]
+
+    def review(self, sender: Institution, receiver: Institution, request_type: str,
+               payload: dict[str, Any], evidence: list[Chunk]) -> LiaisonReview:
+        script = self._script(sender, receiver, request_type)
+        reference = self.channel.reference(sender, receiver, request_type, payload)
+        answers = {}
+        for key in QUESTIONS:
+            rule = reference[key]
+            answers[key] = LiaisonAnswer(
+                answer=rule.answer,
+                reason=f"Scripted (reference answer, not an AI decision): {rule.reason}",
+                gap_type=None if rule.answer == "YES" else "missing_evidence",
+                quotes=[LiaisonQuote(chunk_id=q.chunk_id, quote=q.quote) for q in script.quotes.get(key, [])],
+            )
+        return LiaisonReview(**answers)
 
 
 class LiaisonReviewer:

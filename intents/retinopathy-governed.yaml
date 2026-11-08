@@ -122,6 +122,74 @@ standing_approvals:
       quote: "c. serious risks to health can thereby be averted in the specific case"
     note: "Approved in advance for this recall only: these fields, these 47 patients, Switzerland to the UAE, no images."
 
+# Used ONLY in a scripted-reviewer run (make drill INTENT=retinopathy-governed DRILL_ARGS="--reviewer scripted").
+# The answers come from the bridge pack's reference answers; these are the fixed quotes behind them.
+# Code verifies each quote and applies every rule exactly as in an AI run. Not an AI decision.
+scripted_reviews:
+  - sender: ede
+    receiver: swissmedic
+    request_type: cross_border_evidence_request
+    quotes:
+      legal_basis:
+        - chunk_id: "CH-HEALTH-TPA:p40:c1"
+          quote: "The federal authorities responsible for the enforcement of this Act may disclose information which is not publicly accessible to the foreign authorities and institutions responsible for the enforcement of therapeutic product regulations and to international organisations, provided that it is ensured that:"
+        - chunk_id: "EXH-EDE-VIGILANCE-ASSURANCE:p1:c1"
+          quote: "Its staff handling this request are bound by official secrecy."
+        - chunk_id: "EXH-EDE-VIGILANCE-ASSURANCE:p1:c1"
+          quote: "The information received will be used exclusively in its administrative procedure enforcing medical-device regulations in connection with this incident and will not be passed on to third parties."
+      transfer_rules:
+        - chunk_id: "CH-HEALTH-TPA:p40:c1"
+          quote: "b. only information required for the enforcement of therapeutic product regulations is transmitted;"
+        - chunk_id: "EXH-EDE-VIGILANCE-ASSURANCE:p1:c1"
+          quote: "It does not ask for manufacturing or trade secrets, and it asks for no personal data."
+      counterpart:
+        - chunk_id: "CH-HEALTH-TPA:p40:c1"
+          quote: "to the foreign authorities and institutions responsible for the enforcement of therapeutic product regulations"
+        - chunk_id: "EXH-EDE-VIGILANCE-ASSURANCE:p1:c1"
+          quote: "The Emirates Drug Establishment is the authority responsible for enforcing medical-device regulations in the United Arab Emirates."
+  - sender: swissmedic
+    receiver: ede
+    request_type: patient_data_disclosure
+    quotes:
+      legal_basis:
+        - chunk_id: "CH-HEALTH-TPA:p40:c1"
+          quote: "They may disclose personal data, including data on health and on administrative or criminal proceedings or sanctions, if legislation in the state concerned guarantees adequate protection of the privacy of the data subject."
+        - chunk_id: "CH-HEALTH-TPA:p40:c1"
+          quote: "c. serious risks to health can thereby be averted in the specific case;"
+        - chunk_id: "EXH-EDE-RECALL-ASSURANCE:p1:c1"
+          quote: "Untreated referable retinopathy can progress to sight loss; the recall is needed to avert that serious risk to these patients' health."
+      transfer_rules:
+        - chunk_id: "CH-HEALTH-TPA:p40:c1"
+          quote: "In the absence of such legislation, the data may only be disclosed if:"
+        - chunk_id: "CH-HEALTH-TPA:p40:c1"
+          quote: "c. serious risks to health can thereby be averted in the specific case;"
+        - chunk_id: "EXH-EDE-RECALL-ASSURANCE:p1:c1"
+          quote: "Only the fields a recall needs are requested: case reference, clinic, screening date and missed finding."
+      counterpart:
+        - chunk_id: "CH-HEALTH-TPA:p40:c1"
+          quote: "The federal authorities responsible for the enforcement of this Act may disclose information which is not publicly accessible to the foreign authorities and institutions responsible for the enforcement of therapeutic product regulations"
+  - sender: uae_data_office
+    receiver: fodio
+    request_type: data_protection_assistance_request
+    quotes:
+      legal_basis:
+        - chunk_id: "CH-DATA-FADP:p24:c1"
+          quote: "The FDPIC may exchange information or personal data with foreign authorities that are responsible for data protection in order that they may fulfil their respective statutory duties in relation to data protection, provided the following requirements are satisfied:"
+        - chunk_id: "EXH-DATA-OFFICE-ASSURANCE:p1:c1"
+          quote: "The UAE Data Office guarantees reciprocity: it will provide the Commissioner with administrative assistance in comparable data-protection matters."
+      transfer_rules:
+        - chunk_id: "CH-DATA-FADP:p24:c1"
+          quote: "b. The information and personal data are used only in the proceedings related to data protection that are the subject of the request for administrative assistance."
+        - chunk_id: "EXH-DATA-OFFICE-ASSURANCE:p1:c1"
+          quote: "will not disclose the information to third parties without the Commissioner's prior approval, and will comply with any requirements and restrictions the Commissioner imposes."
+      counterpart:
+        - chunk_id: "CH-DATA-FADP:p24:c1"
+          quote: "The FDPIC may exchange information or personal data with foreign authorities that are responsible for data protection"
+        - chunk_id: "AE-DATA-PDPL-2021-EN:p6:c2"
+          quote: "c. Each Controller or Processor residing outside the State and carrying out the activities of processing Personal Data of Data Subjects inside the State."
+        - chunk_id: "EXH-DATA-OFFICE-ASSURANCE:p1:c1"
+          quote: "The UAE Data Office is the authority responsible for data protection under Federal Decree-Law No. 45 of 2021"
+
 timeline:
   - step: 1
     time_offset: "T+4h"

@@ -19,13 +19,18 @@ def main():
         action="store_true",
         help="Include reserve judge-injected events marked optional in the intent.",
     )
+    parser.add_argument(
+        "--reviewer", choices=["ai", "scripted"], default="ai",
+        help="ai (default): the AI liaison reviewer answers. scripted: the bridge pack's reference "
+             "answers with the intent's fixed quotes stand in (labelled, not an AI decision).",
+    )
     args = parser.parse_args()
 
     intent_file = f"intents/{args.intent}.yaml"
     run_id = args.run_id or f"{args.intent}-{int(time.time())}"
 
     try:
-        orchestrator = DrillOrchestrator(intent_path=intent_file, run_id=run_id)
+        orchestrator = DrillOrchestrator(intent_path=intent_file, run_id=run_id, reviewer=args.reviewer)
         orchestrator.run(include_optional=args.include_optional_events)
     except (OllamaError, ValueError) as exc:
         parser.exit(2, f"LLM runtime error: {exc}\n")

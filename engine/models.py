@@ -181,6 +181,16 @@ class StandingApproval(BaseModel):
     note: str = ""
 
 
+class ScriptedLetter(BaseModel):
+    """Fixed quotes for one letter, used only in a scripted-reviewer run (not an AI decision).
+    The answers themselves come from the bridge pack's reference answers; code still verifies
+    every quote and applies every rule."""
+    sender: str
+    receiver: str
+    request_type: str
+    quotes: Dict[str, List[ApprovalBasis]]
+
+
 class DrillIntent(BaseModel):
     id: str
     title: str
@@ -191,6 +201,7 @@ class DrillIntent(BaseModel):
     timeline: List[StepPayload]
     exhibits: List[DrillExhibit] = Field(default_factory=list)
     standing_approvals: List[StandingApproval] = Field(default_factory=list)
+    scripted_reviews: List[ScriptedLetter] = Field(default_factory=list)
 
     @model_validator(mode="after")
     def validate_timeline_actors(self) -> "DrillIntent":

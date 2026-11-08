@@ -73,7 +73,7 @@ def main() -> int:
                 "answers": [{"check": c["check"], "proposed": c["proposed_answer"], "final": c["answer"],
                              "gap_type": c["gap_type"], "adjustments": c["adjustments"],
                              "reason": c["reason"][:300],
-                             "quotes": [{"chunk_id": q["chunk_id"], "verified": q["verified"],
+                             "quotes": [{"chunk_id": q["chunk_id"], "verified": q["verified"], "quote": q["quote"],
                                          "failure": q.get("failure", "")} for q in c["quotes"]]}
                             for c in decision.checks],
             }

@@ -772,3 +772,58 @@ def test_reviewer_is_told_what_the_transfer_question_means_for_this_letter():
     assert "no personal or patient data" in question_notes({"patient_data_included": False})["transfer_rules"]
     assert "carries patient" in question_notes({"patient_data_included": True})["transfer_rules"]
     assert "carries patient" in question_notes({})["transfer_rules"]  # not stated: treat as carrying data
+
+
+# --- Scripted-reviewer run: reference answers stand in for the AI, and code still checks everything. ---
+
+def scripted(quotes):
+    from engine.liaison import ScriptedReviewer
+    from engine.models import ApprovalBasis, ScriptedLetter
+    script = ScriptedLetter(sender="ae_health", receiver="ch_device", request_type="cross_border_evidence_request",
+                            quotes={k: [ApprovalBasis(chunk_id=c.chunk_id, quote=q) for c, q in v]
+                                    for k, v in quotes.items()})
+    reviewer = ScriptedReviewer([script])
+    chan = LiaisonChannel(bridge(), INSTITUTIONS, reviewer, library={c.chunk_id: c for c in EVIDENCE})
+    reviewer.bind(chan)
+    return chan
+
+
+def test_scripted_reviewer_is_labelled_not_an_ai_decision():
+    chan = scripted({"legal_basis": [(CH_BASIS, CH_BASIS.text)]})
+    decision = send(chan, {"patient_data_included": False})
+    assert decision.review["reviewer_model"] == "scripted reference answers (not an AI decision)"
+    assert all(c["final_decided_by"].startswith(("scripted reviewer", "code:")) for c in decision.checks)
+    assert not any("AI liaison reviewer" in c["final_decided_by"] for c in decision.checks)
+
+
+def test_scripted_reviewer_quotes_are_still_verified_by_code():
+    chan = scripted({"legal_basis": [(CH_BASIS, "The authority may disclose anything to anyone abroad at all.")]})
+    basis = by_key(send(chan, {"patient_data_included": False}), "legal_basis")
+    assert basis["quotes"][0]["verified"] is False
+    assert basis["answer"] == "UNCLEAR"
+
+
+def test_scripted_reviewer_without_a_script_for_the_letter_blocks():
+    from engine.liaison import ScriptedReviewer
+    reviewer = ScriptedReviewer([])
+    chan = LiaisonChannel(bridge(), INSTITUTIONS, reviewer, library={c.chunk_id: c for c in EVIDENCE})
+    reviewer.bind(chan)
+    decision = send(chan, {"patient_data_included": False})
+    assert decision.status == "BLOCK"
+    assert decision.review["reviewer_status"] == "REVIEWER_FAILED"
+    assert "No scripted quotes" in decision.review["reviewer_error"]
+
+
+def test_drill_a_scripted_quotes_all_verify_against_the_packs():
+    import yaml
+    from engine.liaison import exhibit_chunk
+    from engine.models import DrillIntent
+    from engine.quotes import verify_quote
+    from engine.replay import load_chunks
+    intent = DrillIntent(**yaml.safe_load(open("intents/retinopathy-governed.yaml", encoding="utf-8")))
+    library = {**load_chunks("."), **{exhibit_chunk(e).chunk_id: exhibit_chunk(e) for e in intent.exhibits}}
+    quotes = [q for s in intent.scripted_reviews for qs in s.quotes.values() for q in qs]
+    assert len(quotes) == 21
+    for q in quotes:
+        record = verify_quote(q.chunk_id, q.quote, "", library)
+        assert record["verified"] and "quote_corrected_from" not in record, (q.chunk_id, record["failure"])
