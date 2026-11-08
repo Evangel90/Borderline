@@ -314,16 +314,16 @@ Run from the repository root.
 
 ## Configuration
 
-| Variable | Default | Purpose |
+| Variable | Default | What it sets |
 |---|---|---|
-| `BORDERLINE_LLM_PROVIDER` | `openrouter` | `ollama` for the local model used in the final runs |
-| `BORDERLINE_LLM_MODEL` | `qwen3:8b` (Ollama), `openrouter/free` (OpenRouter) | Model ID |
-| `BORDERLINE_OLLAMA_URL` | `http://127.0.0.1:11434` | Local Ollama service |
-| `BORDERLINE_OLLAMA_NUM_CTX` | `16384` | Context window; code refuses a prompt that would not fit |
-| `BORDERLINE_LLM_TIMEOUT` | `180` | Seconds per model call |
-| `OPENROUTER_API_KEY` | none | Needed only for the hosted option |
-| `BORDERLINE_VECTOR_PATH` | `index/chroma` | Where the search index is built |
-| `BORDERLINE_EMBEDDING_MODEL` | MiniLM (above) | Another supported fastembed text model |
+| `BORDERLINE_LLM_PROVIDER` | `openrouter` | Which model service to call: `ollama` (local; used for the final runs) or `openrouter` (hosted) |
+| `BORDERLINE_LLM_MODEL` | `qwen3:8b` with Ollama; `openrouter/free` with OpenRouter | Which model to use |
+| `BORDERLINE_OLLAMA_URL` | `http://127.0.0.1:11434` | Address of the local Ollama service |
+| `BORDERLINE_OLLAMA_NUM_CTX` | `16384` | Context window in tokens; code refuses a prompt that would not fit |
+| `BORDERLINE_LLM_TIMEOUT` | `180` | Seconds to wait for each model call |
+| `OPENROUTER_API_KEY` | none | Key for the hosted option; not needed with Ollama |
+| `BORDERLINE_VECTOR_PATH` | `index/chroma` | Folder where the search index is built |
+| `BORDERLINE_EMBEDDING_MODEL` | `sentence-transformers/paraphrase-multilingual-MiniLM-L12-v2` | Embedding model used for search (any fastembed text model) |
 
 Variables can also be set in a `.env` file in the repository root (the shell takes
 precedence). With the hosted option, prompts, synthetic events and retrieved
