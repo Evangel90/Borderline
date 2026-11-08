@@ -52,8 +52,11 @@ evaluate-claims:
 evaluate-retrieval:
 	$(PYTHON) scripts/evaluate_retrieval.py
 
+# Code replay: re-runs every code decision over the logged AI answers; no model is called.
+# Usage: make replay RUN=<run_id> [REPLAY_ARGS="--log edited.jsonl"]
 replay:
-	$(call todo,M2)
+	@if [ -z "$(RUN)" ]; then echo "Error: specify RUN=<run_id>"; exit 1; fi
+	$(PYTHON) scripts/replay.py --run $(RUN) $(REPLAY_ARGS)
 
 report-figures:
 	$(call todo,M4)

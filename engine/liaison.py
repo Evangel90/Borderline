@@ -391,47 +391,59 @@ class LiaisonChannel:
             review_record["reviewer_error"] = f"{type(exc).__name__}: {exc}"[:500]
 
         reference = self.reference(sender, receiver, request_type, payload)
-        checks = []
-        for key in QUESTIONS:
-            check = finalize_answer(key, getattr(review, key) if review else None, shown)
-            check["decided_by"] = review_record["reviewer_model"]
-            check["final_decided_by"] = final_decided_by(check, review_record["reviewer_model"])
-            check["reference_answer"] = reference[key].answer
-            check["reference_reason"] = reference[key].reason
-            check["agrees_with_reference"] = reference[key].answer == check["answer"]
-            checks.append(check)
+        return decide_liaison(review, shown, payload, review_record, reference)
 
-        status = "ROUTE" if all(check["answer"] == "YES" for check in checks) else "BLOCK"
 
-        # Patient-data floor (design rule 7). Checked on its own, after everything else,
-        # so no change to the routing rule above can let patient data through without it.
-        carries_patient_data = payload.get("patient_data_included") is not False
-        by_key = {check["check"]: check for check in checks}
-        basis_verified = all(
-            by_key[key]["answer"] == "YES"
-            and any(quote["verified"] for quote in by_key[key]["quotes"])
-            for key in ("legal_basis", "transfer_rules")
-        )
-        hard_floor_applied = carries_patient_data and not basis_verified
-        if hard_floor_applied:
-            status = "BLOCK"
-        if hard_floor_applied:
-            status_by = "code: patient-data rule (no verified legal-basis and transfer-rules quotes)"
-        elif status == "ROUTE":
-            status_by = "code routing rule: all three final answers YES"
-        else:
-            status_by = "code routing rule: at least one final answer is not YES"
-        review_record.update(
-            status_decided_by=status_by,
-            patient_data_carried=carries_patient_data,
-            hard_floor_applied=hard_floor_applied,
-            quotes_checked=sum(len(check["quotes"]) for check in checks),
-            quotes_verified=sum(q["verified"] for check in checks for q in check["quotes"]),
-            yes_answers_for_human_review=[
-                check["check"] for check in checks if check["human_review_required"]
-            ],
-            disagreements_with_reference=[
-                check["check"] for check in checks if not check["agrees_with_reference"]
-            ],
-        )
-        return LiaisonDecision(status, checks, review_record)
+def decide_liaison(review: LiaisonReview | None, shown: dict[str, Chunk], payload: dict[str, Any],
+                   review_record: dict[str, Any],
+                   reference: dict[str, LiaisonRule]) -> LiaisonDecision:
+    """Code's whole decision on one letter, given the reviewer's proposed answers.
+
+    Pure: no model call and no state. The drill calls it with the live review; `make replay`
+    calls it with the answers recorded in the log, so both go through the same code.
+    """
+    review_record = dict(review_record)
+    checks = []
+    for key in QUESTIONS:
+        check = finalize_answer(key, getattr(review, key) if review else None, shown)
+        check["decided_by"] = review_record["reviewer_model"]
+        check["final_decided_by"] = final_decided_by(check, review_record["reviewer_model"])
+        check["reference_answer"] = reference[key].answer
+        check["reference_reason"] = reference[key].reason
+        check["agrees_with_reference"] = reference[key].answer == check["answer"]
+        checks.append(check)
+
+    status = "ROUTE" if all(check["answer"] == "YES" for check in checks) else "BLOCK"
+
+    # Patient-data floor (design rule 7). Checked on its own, after everything else,
+    # so no change to the routing rule above can let patient data through without it.
+    carries_patient_data = payload.get("patient_data_included") is not False
+    by_key = {check["check"]: check for check in checks}
+    basis_verified = all(
+        by_key[key]["answer"] == "YES"
+        and any(quote["verified"] for quote in by_key[key]["quotes"])
+        for key in ("legal_basis", "transfer_rules")
+    )
+    hard_floor_applied = carries_patient_data and not basis_verified
+    if hard_floor_applied:
+        status = "BLOCK"
+    if hard_floor_applied:
+        status_by = "code: patient-data rule (no verified legal-basis and transfer-rules quotes)"
+    elif status == "ROUTE":
+        status_by = "code routing rule: all three final answers YES"
+    else:
+        status_by = "code routing rule: at least one final answer is not YES"
+    review_record.update(
+        status_decided_by=status_by,
+        patient_data_carried=carries_patient_data,
+        hard_floor_applied=hard_floor_applied,
+        quotes_checked=sum(len(check["quotes"]) for check in checks),
+        quotes_verified=sum(q["verified"] for check in checks for q in check["quotes"]),
+        yes_answers_for_human_review=[
+            check["check"] for check in checks if check["human_review_required"]
+        ],
+        disagreements_with_reference=[
+            check["check"] for check in checks if not check["agrees_with_reference"]
+        ],
+    )
+    return LiaisonDecision(status, checks, review_record)

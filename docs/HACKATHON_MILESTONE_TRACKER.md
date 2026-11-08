@@ -38,7 +38,7 @@ Y.3172 describes an ML pipeline and management/orchestration concepts for future
 | P | Policy, authorization, and safety guardrails. | Institution action allow-lists, evidence triage, cross-border/notification gates, and simulated human review. | **PIPE-06 In progress:** complete passage-level review of final run’s claims and exceptions. Existing checks are partial and are not a legal rules engine. Evidence: `engine/actions.py`, `engine/gates.py`, `engine/evidence.py`. |
 | D | Distribution of proposed or authorized outputs. | Orchestrator dispatches an action to a synthetic handler and records its outcome/state change. | **PIPE-07 Done:** synthetic dispatch is exercised in the final run. No external regulator message or real clinical action occurs. Evidence: `engine/orchestrator.py`, run log. |
 | SINK | Target/output and audit trail. | Run decisions, evidence references, tool results, state, and hash-chained audit log; Streamlit viewer displays saved runs. | **PIPE-08 In progress:** prepare a judge-friendly walkthrough and verify the UI against the final run. Evidence: `ui/app.py`, `runs/`, `audit/`. |
-| Sandbox / MLFO | Isolated execution and lifecycle management. | Local run artifacts are immutable by run ID; fresh LLM output can vary. | **PIPE-09 P2 Not started:** deterministic replay is not implemented; explicitly label this limitation in reproduction instructions. `make replay` is currently unimplemented. |
+| Sandbox / MLFO | Isolated execution and lifecycle management. | Local run artifacts are immutable by run ID; fresh LLM output can vary. | **PIPE-09 Done 8 Nov (code replay):** `make replay RUN=<id>` re-runs every code decision over the logged AI answers without a model call; 0 differences on all three 8 November runs. Fresh model output is still not reproducible. |
 
 **Flow in one line:** synthetic incident and registered sources (SRC) → collection and provenance (C) → extraction/chunking (PP) → hybrid policy retrieval and agents (M) → role and evidence gates (P) → synthetic action dispatch (D) → decisions, findings, and audit trail (SINK).
 
@@ -157,7 +157,7 @@ Full review: [`report/run-review-2026-11-08-three-drills.md`](../report/run-revi
 | RUN-05 | `make evaluate-retrieval` | Done 8 Nov | 8/10 hit@6, 7/10 hit@3. |
 | RUN-06 | `make evaluate-claims` | In progress | Record metrics against manual labels and list false positives/negatives; do not present selected seed as accuracy. |
 | RUN-07 | Three full drills (Ollama `qwen3:8b`) | Done 8 Nov | Run IDs above; decision trails in `report/decision-trail-*-20261108-1.md`. |
-| RUN-08 | Deterministic replay | Not started | `make replay` is not implemented. Separate immutable artifact inspection from nondeterministic fresh inference. |
+| RUN-08 | Code replay | Done 8 Nov | `make replay` on A, B and C: 8 letters, 24 answers, 54 quotes re-checked, 0 differences. It does not re-run the model. |
 
 **Do not run evaluation commands and fill these rows with historical values as if freshly verified.** Enter the date, command output location, model/provider, code revision, and run ID when executing the final pass.
 
@@ -187,7 +187,7 @@ Full review: [`report/run-review-2026-11-08-three-drills.md`](../report/run-revi
 | Audit | Local hash-chained JSONL | Tamper-evident local trace; not a signature or external timestamp. | Verify final run and state limitation. |
 | UI | Streamlit | Fast local inspection of runs and human review state. | Improve judge-facing narrative only after evidence is stable. |
 | Evaluation | Pytest, retrieval seed, claim seed, run audit | Existing regression and curated review harnesses. | Add independent questions and manual semantic labels before broad claims. |
-| Replay | Not implemented | Fresh LLM inference is nondeterministic. | Report this limitation; avoid implying deterministic replay exists. |
+| Replay | Code replay implemented (`engine/replay.py`) | Fresh LLM inference is nondeterministic, so only code decisions are replayed. | Say "code replay", never "deterministic replay of the model". |
 
 ## 8. Work log and decision log
 
@@ -250,7 +250,7 @@ The current draft is [`report/technical-report-draft.md`](../report/technical-re
 | ID | Deliverable | Priority / status | Owner | Acceptance criteria / evidence |
 | --- | --- | --- | --- | --- |
 | SUB-01 | Technical report in official template, no more than five pages | P0 / In progress | Report owner (assign) | Render final file; record page count; verify names, citations, tables, and all numerical claims against frozen artifacts. |
-| SUB-02 | Public repository and reproducible instructions | P0 / In progress | Release owner (assign) | README specifies setup, model/provider, source verification, run and audit commands; notes `make replay` and `make report-figures` are not implemented. |
+| SUB-02 | Public repository and reproducible instructions | P0 / In progress | Release owner (assign) | README specifies setup, model/provider, source verification, run and audit commands; explains what `make replay` does and does not show; notes `make report-figures` is not implemented. |
 | SUB-03 | Policy/strategy knowledge base and provenance | P0 / In progress | Evidence lead (assign) | Fresh source validation; source manifest and limitations are in repository; no confidential/patient data. |
 | SUB-04 | Y.3172 and AI Readiness mapping | P1 / Done with limits | Report owner (assign) | Mappings point to implemented components; state adaptation, qualitative relevance, and no formal conformance/national scores. |
 | SUB-05 | Final evaluation artifacts | P0 / In progress | Evaluation owner (assign) | Current tests, source hashes, run hash, run audit, benchmark outputs, manual review and limits saved with dates. |

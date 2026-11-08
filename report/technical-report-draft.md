@@ -99,7 +99,7 @@ What the runs show:
 - **Patient data never crossed.** The recall list (Drill A step 5) and the patient images (Drill B step 14) were both stopped by code's patient-data rule.
 - **Code caught two invented quotes.** In one, a word was misspelt ("Reciprocy"). In the other, a page header was joined to FADP Art. 55, skipping all of Art. 54 in between. Code also moved two real but mislabelled quotes to their correct chunk IDs (five corrections logged), without changing any quote text.
 - **The governed letters were not delivered.** This was a result, not a forced outcome. In Drill A the AI liaison reviewer answered UNCLEAR on legal basis for all three letters, and code did not overrule it. For the recall list, the deciding clause was shown to it: "serious risks to health can thereby be averted in the specific case" (`CH-HEALTH-TPA:p40:c1`). It did not cite it. The assurances (official secrecy, reciprocity) existed only as data fields, not as quotable documents. The project's own reference table also answers UNCLEAR on legal basis for these letters.
-- **A confident YES is not a correct YES.** In Drill B the reviewer answered YES on legal basis for DHA → Swissmedic, citing a PDPL transfer rule for companies (`AE-DATA-PDPL-2021-EN:p25:c2`). The PDPL excludes health data covered by its own law. The quote was real, so code accepted it, and flagged it for human review. At step 9 only a failed quote stopped that letter. Code checks that a quote is real, not that it supports the answer; a person must check that.
+- **A confident YES is not a correct YES.** In Drill B the reviewer answered YES on legal basis for DHA → Swissmedic, citing a PDPL transfer rule for companies (`AE-DATA-PDPL-2021-EN:p25:c2`). The PDPL excludes health data covered by its own law. The quote was real, so code accepted it, and flagged it for human review. At step 9 only a failed quote stopped that letter. Code checks that a quote is real, not that it supports the answer; a person must check that. Replaying an edited copy of the log (`make replay`) shows the consequence. If the reviewer had answered YES on transfer rules with that same real PDPL sentence at step 14, code would have let the patient images through. An invented quote in the same place is still rejected.
 - **Known defect.** In Drill B step 13, a request with no named receiver was routed by an older fixed rule, without the three-question check. Only an unverified claim was involved, and nothing real was sent. It is recorded as a defect, not fixed.
 - **No "delivered" branch is covered in any run.** All 5 blocked branches are covered; no step failed.
 
@@ -132,7 +132,7 @@ The drills support these candidates in practice. In Drill A, the reviewer could 
 - Code verifies that quotes are real, not that they apply. Free-text reasons are not verified.
 - Arabic originals could not be quoted. Resolution 51/2021 is missing.
 - The knowledge base is local, not hosted by ITU. Retrieval finds the exact passage in the top six for 8 of 10 test questions (7 of 10 in the top three); this measures retrieval only.
-- Deterministic replay (`make replay`) is not implemented.
+- `make replay` is a code replay: it re-runs every code decision over the logged AI answers, without calling the model, and reproduces all three runs with 0 differences (8 letters, 54 quotes). It cannot show that the model would answer the same way again.
 
 ## References
 

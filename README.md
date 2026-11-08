@@ -59,8 +59,17 @@ Submission material: [technical report](report/technical-report-draft.md),
 [criteria audit](docs/HACKATHON_CRITERIA_AUDIT.md).
 
 The Streamlit viewer (`make ui`) was built for an earlier pre-deployment run and
-has not been checked against the 8 November runs. `make replay` and
-`make report-figures` are not implemented.
+has not been checked against the 8 November runs. `make report-figures` is not
+implemented.
+
+`make replay RUN=<id>` is a **code replay**: without calling any model, it re-runs
+every code decision over the AI answers recorded in the log (quote checks, chunk-ID
+corrections, the patient-data rule, three-YES routing, action authorization and
+which conditional steps should run) and reports any difference. All three
+8 November runs replay with 0 differences. It does not show that a model would
+answer the same way again. Replaying an edited copy of a log
+(`REPLAY_ARGS="--log edited.jsonl"`) shows what code does with a changed answer;
+the hash-chain check reports the edit.
 
 ## Layout
 
@@ -174,7 +183,7 @@ Run from the repo root.
 | `make decision-trail RUN=<run_id>` | Write who decided what, per step and per letter, to `report/` |
 | `make step-coverage RUNS="..."` | Show which steps and liaison branches ran across runs |
 | `make assess-candidates` | Apply the four-part rule to the gap-candidate register |
-| `make replay RUN=<run_id>` | Not implemented yet |
+| `make replay RUN=<run_id>` | Code replay: re-run every code decision over the logged AI answers, no model call; exit 1 on any difference |
 | `make report-figures RUN=<run_id>` | Not implemented yet |
 | `make ui` | Start the Streamlit run viewer (install `.[ui]` first) |
 
