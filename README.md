@@ -23,15 +23,16 @@ configuration format).
 1. [Start here](#start-here)
 2. [The use case](#the-use-case)
 3. [How it works](#how-it-works)
-4. [The knowledge base](#the-knowledge-base)
-5. [The drills](#the-drills)
-6. [Results](#results-8-november-2026)
-7. [Gap candidates](#gap-candidates)
-8. [Reproducibility guide](#reproducibility-guide)
-9. [Repository map](#repository-map)
-10. [Commands](#commands)
-11. [Configuration](#configuration)
-12. [Scope](#scope)
+4. [The AI agents and their roles](#the-ai-agents-and-their-roles)
+5. [The knowledge base](#the-knowledge-base)
+6. [The drills](#the-drills)
+7. [Results](#results-8-november-2026)
+8. [Gap candidates](#gap-candidates)
+9. [Reproducibility guide](#reproducibility-guide)
+10. [Repository map](#repository-map)
+11. [Commands](#commands)
+12. [Configuration](#configuration)
+13. [Scope](#scope)
 
 ## Start here
 
@@ -39,6 +40,7 @@ configuration format).
 |---|---|
 | Read the submission | [Technical report](report/technical-report.md) |
 | See every drill result against what was expected | [Final run review](report/run-review-2026-11-08-final-runs.md) |
+| See what each AI agent does | [The AI agents and their roles](#the-ai-agents-and-their-roles) |
 | See who decided what, step by step | Decision trails for drills [A](report/decision-trail-governed-20261108-4.md), [B](report/decision-trail-ungoverned-20261108-3.md), [C](report/decision-trail-insufficient-20261108-3.md), [D](report/decision-trail-governed-scripted-20261108-3.md) |
 | Check the results yourself in a few minutes | [Reproducibility guide](#reproducibility-guide) |
 | See the code that makes the final decision | [`engine/liaison.py`](engine/liaison.py), [`engine/quotes.py`](engine/quotes.py) |
@@ -59,18 +61,11 @@ liaison channel. Product background:
 Three kinds of decision-maker take part, and every log entry records which one decided.
 
 **1. Institution AI agents.** Twelve institutions, each a separate agent with its
-own profile, mandate and allowed actions:
-
-| Side | Institutions (profiles) |
-|---|---|
-| UAE | Dubai Health Authority (DHA), Ministry of Health and Prevention (MoHAP), Emirates Drug Establishment (EDE), UAE Data Office, UAE cyber incident coordination, the screening service, the clinic operator ([`packs/ae/institutions/`](packs/ae/institutions)) |
-| Switzerland | Swiss Agency for Therapeutic Products (Swissmedic), Federal Data Protection and Information Commissioner (FDPIC), National Cyber Security Centre (NCSC), the vendor ([`packs/ch/institutions/`](packs/ch/institutions)) |
-| Neutral | Policy and legal adviser ([`packs/global/institutions/`](packs/global/institutions)) |
-
-Each agent sees only its institution's view of the event and passages retrieved
-from its own country's texts plus global guidance. In one stateless model call it
-chooses one allowed action and explains it with citations
-([`engine/agent.py`](engine/agent.py)).
+own profile, mandate and allowed actions; see
+[the AI agents and their roles](#the-ai-agents-and-their-roles). Each agent sees only
+its institution's view of the event and passages retrieved from its own country's
+texts plus global guidance. In one stateless model call it chooses one allowed
+action and explains it with citations ([`engine/agent.py`](engine/agent.py)).
 
 **2. An AI liaison reviewer.** Every cross-border letter goes to a separate model
 call that answers three questions, each YES, NO or UNCLEAR with exact quotes
@@ -101,6 +96,29 @@ before, so any edit breaks the chain at that entry.
 All AI decisions run on a local open-weight model (`qwen3:8b` through Ollama) at
 temperature 0, so no prompt, passage or patient fact leaves the machine and the same
 inputs give the same log ([`engine/llm.py`](engine/llm.py)).
+
+## The AI agents and their roles
+
+Thirteen AI roles take part: twelve institution agents and the liaison reviewer. All
+run on the same local model; what differs is each one's mandate, what it is shown, and
+the actions it may take. Profiles are simulations written for the drill, not
+official positions of the real institutions. Drill D uses the same agents as Drill A.
+
+| AI agent (profile) | Side | Role in the drill | What it may do | Drills |
+|---|---|---|---|---|
+| [Dubai Health Authority (DHA)](packs/ae/institutions/dha.yaml) | UAE | Dubai health regulator for the clinics where the AI failed | Open a clinical incident review; request follow-up review of affected patients; assess suspending the screening service and the vendor's "research" claim; send a request or patient data abroad through the liaison channel | A, B |
+| [Ministry of Health and Prevention (MoHAP)](packs/ae/institutions/mohap.yaml) | UAE | Federal health regulator, including the rule that health data stays in the UAE | Open a safety inquiry; request a device incident report; assess where patient data is held; send a regulatory notification or request abroad | B, C |
+| [Emirates Drug Establishment (EDE)](packs/ae/institutions/ede.yaml) | UAE | Federal medical-products regulator | Request evidence from the manufacturer; assess a device safety action; coordinate with health authorities; send a vigilance request to Swissmedic | A, B, C |
+| [UAE Data Office](packs/ae/institutions/uae_data_office.yaml) | UAE | Personal-data regulator; must first check whether it is competent for health data | Assess its own competence; assess the basis and safeguards for a transfer; pause a transfer for review; refer to the competent authority; send a request to the FDPIC | A, B, C |
+| [UAE cyber incident coordination](packs/ae/institutions/uae_cyber.yaml) | UAE | Cyber responder for the compromised vendor account | Open a cyber incident review; request access and credential evidence | B |
+| [Screening service](packs/ae/institutions/screening_ai.yaml) | UAE | Operator of the deployed screening AI | Report the model update; pause the service; flag cases for human review | B |
+| [Clinic operator](packs/ae/institutions/dubai_clinic_operator.yaml) | UAE | Runs the Dubai clinics using the AI | Recommend halting the AI at the clinics; escalate to MoHAP; request manual review of screenings | B |
+| [Swiss Agency for Therapeutic Products (Swissmedic)](packs/ch/institutions/swissmedic.yaml) | Switzerland | Medical-device regulator for the vendor's product | Review the foreign incident report; request a manufacturer report; consider a field safety action; send the 47-patient recall list to EDE | A, B, C |
+| [Federal Data Protection and Information Commissioner (FDPIC)](packs/ch/institutions/fodio.yaml) | Switzerland | Data-protection authority for disclosures from Switzerland | Assess the direction and scope of a transfer; request safeguards; recommend pausing a disclosure | A, B, C |
+| [National Cyber Security Centre (NCSC)](packs/ch/institutions/ncsc.yaml) | Switzerland | Cyber authority; decides whether the vendor must report the incident | Assess the vendor's reporting duty; request security evidence | B, C |
+| [RetinaSwiss AG](packs/ch/institutions/retina_swiss_ag.yaml) | Switzerland | The fictional vendor of the screening AI | Confirm the model deployment; preserve security evidence; record the secondary use of images and its research claim; handle telemetry requests; roll the model back | A, B |
+| [Policy and legal adviser](packs/global/institutions/policy_adviser.yaml) | Neutral | Compares both countries' sources; the only agent that sees both | Prepare gap material for human review; request missing evidence | A, B, C |
+| AI liaison reviewer ([`engine/liaison.py`](engine/liaison.py)) | Neither side | Checks every cross-border letter before code decides whether it is delivered | Answer the three questions (legal basis, transfer rules, counterpart) with YES, NO or UNCLEAR and exact quotes | A, B, C (scripted reference answers in D) |
 
 ## The knowledge base
 
