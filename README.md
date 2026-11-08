@@ -40,49 +40,42 @@ complete legal collection and not hosted by ITU. See the [use-case and knowledge
 
 ## Status (8 November 2026)
 
-Three AI drills (A, B, C) were run on local Ollama `qwen3:8b`, plus **Drill D, a scripted
-control for Drill A**: same letters as Drill A, but the project's hand-written reference answers stand in for the AI liaison reviewer, to test whether Drill A's blocks come from the AI review or from the law and the code. Drill D's liaison answers are not AI decisions. Drill A was run a second time after fixes. All five hash chains verify.
-Full comparison of actual against expected: [run review](report/run-review-2026-11-08-three-drills.md).
+The submission is based on four final runs, all on the same code (`e2a31f5`) with
+local Ollama `qwen3:8b`: three AI drills (A, B, C) and **Drill D, a scripted
+control for Drill A**: same letters as Drill A, but the project's hand-written
+reference answers stand in for the AI liaison reviewer, to test whether Drill A's
+blocks come from the AI review or from the law and the code. Drill D's liaison
+answers are not AI decisions. All four hash chains verify, and `make replay`
+reproduces all four with 0 differences.
+Full comparison of actual against expected: [final run review](report/run-review-2026-11-08-final-runs.md).
 
 | Drill | Run | Decisions | Letters delivered | Result |
 |---|---|---|---|---|
-| A, governed (`retinopathy-governed`) | `governed-20261108-1` | 9 | 0 of 3 (3 expected) | The AI liaison reviewer answered UNCLEAR on legal basis for every letter; reported as a finding, not forced |
-| A, run 2 after fixes | `governed-20261108-2` | 9 | 0 of 3 (3 expected) | The AI liaison reviewer said YES on legal basis each time, but misread the no-data transfer question (step 2) and joined quotes from two places (steps 5, 8); code rejected those |
-| B, ungoverned (`retinopathy-ae-ch`, optional step 13) | `ungoverned-20261108-1` | 40 | 0 of 4 | Patient images stopped; 1 typed gap (`policy_gap`); 5 homework items |
-| C, insufficient evidence (`retinopathy-insufficient-evidence`) | `insufficient-20261108-1` | 7 | 0 of 1 | As expected: 2 homework items, no candidate created |
-| **D, scripted control for A (not an AI decision)** (`retinopathy-governed`, `--reviewer scripted`) | `governed-scripted-20261108-1` | 11 | 3 of 3 | Reference answers stood in for the AI liaison reviewer; code still checked all 21 quotes and the human approval for the recall list. Shows the route works; says nothing about the AI review |
+| A, governed (`retinopathy-governed`) | `governed-20261108-3` | 9 | 0 of 3 (3 expected) | Not as expected. The AI liaison reviewer said YES on legal basis each time, but misread the no-data transfer question (step 2) and joined quotes from two places (steps 5, 8); code rejected those |
+| B, ungoverned (`retinopathy-ae-ch`, optional step 13) | `ungoverned-20261108-2` | 40 | 0 of 5 | Patient images stopped; a letter naming no receiver blocked by code; 1 typed gap (`policy_gap`); 8 homework items |
+| C, insufficient evidence (`retinopathy-insufficient-evidence`) | `insufficient-20261108-2` | 7 | 0 of 1 | Not as expected: answers typed `policy_gap` and `implementation_gap` instead of homework; quotes real but some do not concern transfer |
+| **D, scripted control for A (not an AI decision)** (`retinopathy-governed`, `--reviewer scripted`) | `governed-scripted-20261108-2` | 11 | 3 of 3 | Reference answers stood in for the AI liaison reviewer; code still checked all 21 quotes and the human approval for the recall list. Shows the route works; says nothing about the AI review |
 
-After the Drill A run we wrote its assurances as labelled synthetic exhibits, had
-each letter name the provision it relies on, accepted quotes with at most two
-character slips (logging the exact source text), and required a recorded human
-approval matching the letter before patient data crosses. A rehearsal of the AI
-liaison reviewer on the three Drill A letters (Emirates Drug Establishment to
-Swissmedic, Swissmedic to the Emirates Drug Establishment, UAE Data Office to the
-Swiss Federal Data Protection and Information Commissioner) (3 attempts each, plus two controls
-that must block) still delivered 0 of 9; both controls stayed blocked
-([`report/liaison-rehearsal-20261108.json`](report/liaison-rehearsal-20261108.json)).
-
-In the AI runs, patient data never crossed the border. Code rejected two invented quotes. In Drill B
-step 13 a request without a named receiver was routed by an older fixed rule,
-without the liaison check. Fixed after the run (`engine/actions.py`): such a
-letter is now blocked; `make replay` on that log flags step 13. Drill B was not re-run. The four gap
-candidates (CAND-001 to CAND-004) are all `SUPPORTED_CANDIDATE` under the
-project's four-part rule (`make assess-candidates`); they are unreviewed.
+Patient data crossed only in Drill D, with verified national-law quotes and a
+recorded human approval matching the letter. Running Drills A and D a second
+time on the same code gave byte-identical logs. The four gap candidates
+(CAND-001 to CAND-004) are all `SUPPORTED_CANDIDATE` under the project's
+four-part rule (`make assess-candidates`); they are unreviewed. Earlier runs,
+made before the final fixes, are kept as history in the
+[earlier run review](report/run-review-2026-11-08-three-drills.md).
 Submission material: [technical report](report/technical-report-draft.md),
 [demo walkthrough](report/DEMO_WALKTHROUGH.md),
 [criteria audit](docs/HACKATHON_CRITERIA_AUDIT.md).
 
 The Streamlit viewer (`make ui`) was built for an earlier pre-deployment run and
-has not been checked against the 8 November runs. `make report-figures` is not
+has not been checked against the final runs. `make report-figures` is not
 implemented.
 
 `make replay RUN=<id>` is a **code replay**: without calling any model, it re-runs
 every code decision over the AI answers recorded in the log (quote checks, chunk-ID
 corrections, the patient-data rule, three-YES routing, action authorization and
-which conditional steps should run) and reports any difference. All three
-8 November AI runs replayed with 0 differences under the code they ran with; under the
-current code Drill A shows 5 differences, all from one misspelt quote now accepted as a
-slip, with no outcome changed. It does not show that a model would
+which conditional steps should run) and reports any difference. All four
+final runs replay with 0 differences. It does not show that a model would
 answer the same way again. Replaying an edited copy of a log
 (`REPLAY_ARGS="--log edited.jsonl"`) shows what code does with a changed answer;
 the hash-chain check reports the edit.

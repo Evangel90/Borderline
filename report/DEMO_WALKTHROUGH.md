@@ -1,57 +1,56 @@
-# Borderline demo walkthrough (8 November 2026 runs)
+# Borderline demo walkthrough (final runs, 8 November 2026)
 
 ## One-sentence story
 
-When a Swiss-made screening AI fails in Dubai, Borderline rehearses which cross-border letters may legally go out, which AI agent decided what, and where the rules run out. Code checks every quote and stops patient data unless a verified legal basis is quoted.
+When a Swiss-made screening AI fails in Dubai, Borderline rehearses which cross-border letters may legally go out, which AI agent decided what, and where the rules run out. Code checks every quote and stops patient data unless a verified legal basis is quoted and a recorded human approval matches the disclosure.
 
 Abbreviations, spelled out once: Emirates Drug Establishment (EDE); Swiss Agency for Therapeutic Products (Swissmedic); Federal Data Protection and Information Commissioner (FDPIC); Dubai Health Authority (DHA); Ministry of Health and Prevention (MoHAP); Therapeutic Products Act (TPA); Federal Act on Data Protection (FADP); Personal Data Protection Law (PDPL).
 
 ## Before you start
 
-The demo uses saved runs, not live model calls. The three runs below exist only on the machine that produced them (`runs/` is git-ignored). Their decision trails are committed in `report/`.
+The demo uses the four final runs, all made on the same code (`e2a31f5`), not live model calls. The runs exist only on the machine that produced them (`runs/` is git-ignored). Their decision trails are committed in `report/`.
 
 | Drill | Run ID | Decision trail |
 |---|---|---|
-| A, governed | `governed-20261108-1` | `report/decision-trail-governed-20261108-1.md` |
-| B, ungoverned (with optional step 13) | `ungoverned-20261108-1` | `report/decision-trail-ungoverned-20261108-1.md` |
-| C, insufficient evidence | `insufficient-20261108-1` | `report/decision-trail-insufficient-20261108-1.md` |
-| A, run 2 after fixes | `governed-20261108-2` | `report/decision-trail-governed-20261108-2.md` |
-| D, scripted control for A (not an AI decision) | `governed-scripted-20261108-1` | `report/decision-trail-governed-scripted-20261108-1.md` |
+| A, governed | `governed-20261108-3` | `report/decision-trail-governed-20261108-3.md` |
+| B, ungoverned (with optional step 13) | `ungoverned-20261108-2` | `report/decision-trail-ungoverned-20261108-2.md` |
+| C, insufficient evidence | `insufficient-20261108-2` | `report/decision-trail-insufficient-20261108-2.md` |
+| D, scripted control for A (not an AI decision) | `governed-scripted-20261108-2` | `report/decision-trail-governed-scripted-20261108-2.md` |
 
 ## Sequence (about six minutes)
 
 1. **Set the scene (0:00–0:40).** RetinaVision-DX is a fictional Swiss diabetic-retinopathy screening service used at fictional Dubai clinics. An update misses referable disease in 47 synthetic patients, the update came from a compromised vendor account, and UAE images in Zurich were reused for retraining. Say "fictional" and "synthetic"; the laws are real.
 
-2. **Who decides (0:40–1:30).** Open `report/decision-trail-ungoverned-20261108-1.md`. Show the first table: 12 institutions, each an AI agent (`qwen3:8b`, run locally) choosing from its own allowed actions. Then show a letter table and its three columns:
+2. **Who decides (0:40–1:30).** Open `report/decision-trail-ungoverned-20261108-2.md`. Show the first table: 12 institutions, each an AI agent (`qwen3:8b`, run locally) choosing from its own allowed actions. Then show a letter table and its three columns:
    - "AI liaison reviewer proposed";
    - "Final";
    - "Final answer decided by", which names either the reviewer or a code rule.
 
-3. **Patient data stopped at the border (1:30–2:30).** Still in Drill B, go to step 14. DHA tries to send patient images to Swissmedic. The reviewer said YES on legal basis, citing a PDPL company-transfer rule, and UNCLEAR on transfer rules. Code's patient-data rule blocked the letter. Point out the honest part: the YES was flagged for human review because the quote is real, but the PDPL excludes health data covered by its own law (`AE-DATA-PDPL-2021-EN:p6:c2`). Code checks that a quote is real; a person checks that it applies.
+3. **Patient data stopped at the border (1:30–2:15).** Still in Drill B, go to step 14. DHA tries to send patient images to Swissmedic. The reviewer answered UNCLEAR on legal basis and transfer rules, and code's patient-data rule blocked the letter. Then show step 13: DHA's request named no receiver, so code blocked it without asking the three questions.
 
-4. **Code catches an invented quote (2:30–3:15).** Drill B step 9: the reviewer said YES three times, but its transfer-rules "quote" joined a page header to FADP Art. 55 and skipped Art. 54. Code found it was not in the source and set the answer to UNCLEAR, so the letter was blocked.
+4. **Code catches joined quotes (2:15–3:00).** Drill B step 9: the reviewer proposed YES on transfer rules and counterpart, but its quotes joined TPA Art. 64's heading to paragraph 2, so code set those answers to UNCLEAR and the letter was blocked. Be honest about one rejected quote, "ProperProtection": it is a dropped space, a copy slip the current rule does not catch.
 
-5. **The governed drill, and why it did not deliver (3:15–4:15).** Open `report/decision-trail-governed-20261108-1.md`. The three letters were written to the conditions of real provisions (TPA Art. 64, FADP Art. 55), but all three were blocked. In each case the reviewer answered UNCLEAR on legal basis, and code did not overrule it. Present this as a finding: the assurances existed only as data fields, not as quotable documents, and the project's own reference table also says UNCLEAR. We did not loosen any check to make the letters pass. Then open `report/decision-trail-governed-scripted-20261108-1.md` (Drill D): the same letters, with the hand-written reference answers in place of the AI liaison reviewer, were all delivered, so the blocks come from the AI review. Say plainly that Drill D's answers are not AI decisions, and show step 9, where the receiving FDPIC agent still recommended pausing.
+5. **The governed drill, and its control (3:00–4:15).** Open `report/decision-trail-governed-20261108-3.md` (Drill A). The three letters were written to real provisions (TPA Art. 64, FADP Art. 55), with the senders' assurances as labelled synthetic exhibits. The reviewer said YES on legal basis each time, but misread the transfer question at step 2 and joined quotes at steps 5 and 8, so all three were blocked. We did not loosen any check. Then open `report/decision-trail-governed-scripted-20261108-2.md` (Drill D): the same letters, with the hand-written reference answers in place of the AI reviewer, were all delivered, and the recall list crossed only because a recorded human approval matched it. Say plainly that Drill D's answers are not AI decisions, and show step 9, where the receiving FDPIC agent still recommended pausing.
 
-6. **Homework, not accusations (4:15–5:00).** Open `report/decision-trail-insufficient-20261108-1.md` (Drill C). The letter without a reciprocity assurance was blocked, and the open questions went to the homework list (`liaison_homework.jsonl`, 2 items), not to gap candidates. Resolution 51/2021 is registered as missing and is not hunted for.
+6. **When evidence is missing (4:15–5:00).** Open `report/decision-trail-insufficient-20261108-2.md` (Drill C). The letter without a reciprocity assurance was blocked. Say that this drill did not go as expected: the reviewer typed its UNCLEAR answers as `policy_gap` and `implementation_gap` instead of sending them to homework, quoting real FADP passages that do not concern transfer. Code checks that quotes are real, not that they apply; a person must review that record. Resolution 51/2021 is registered as missing and is not hunted for.
 
 7. **Proof and candidates (5:00–6:00).** Run:
 
    ```sh
-   make verify-log RUN=ungoverned-20261108-1
-   make step-coverage RUNS="retinopathy-governed=governed-20261108-1 retinopathy-ae-ch=ungoverned-20261108-1 retinopathy-insufficient-evidence=insufficient-20261108-1"
+   make verify-log RUN=ungoverned-20261108-2
+   make replay RUN=governed-20261108-3
    make assess-candidates
    ```
 
-   The hash chain verifies. Step coverage shows every blocked branch covered; delivered branches were reached only in Drill D (scripted). The candidate assessment shows four `SUPPORTED_CANDIDATE`s (candidates, unreviewed, not legal conclusions). Close on CAND-003: neither country is in the International Medical Device Regulators Forum (IMDRF) incident-report exchange.
+   The hash chain verifies, and the replay re-runs every code decision with 0 differences. The candidate assessment shows four `SUPPORTED_CANDIDATE`s (candidates, unreviewed, not legal conclusions). Close on CAND-003: neither country is in the International Medical Device Regulators Forum (IMDRF) incident-report exchange.
 
 ## Optional user interface (UI) route
 
-`make ui` starts the Streamlit viewer. It was built for the earlier pre-deployment run and **has not been checked against the 8 November runs**. Use the decision-trail files unless the viewer has been checked first.
+`make ui` starts the Streamlit viewer. It was built for the earlier pre-deployment run and **has not been checked against the final runs**. Use the decision-trail files unless the viewer has been checked first.
 
 ## Presenter checklist
 
 - Say "candidate", never "finding" or "violation". Nothing here is a legal conclusion.
 - Name the decider every time: institution AI agent, AI liaison reviewer, or code.
-- Say plainly that no governed letter was delivered by the AI liaison reviewer in either Drill A run, that Drill D's deliveries used scripted answers, and that one request at Drill B step 13 bypassed the liaison check (fixed after the run; `make replay RUN=ungoverned-20261108-1` shows the one difference).
+- Say plainly that the AI liaison reviewer delivered no governed letter, that Drill D's deliveries used scripted answers, and that Drill C did not go as expected.
 - Expand each abbreviation the first time you say it.

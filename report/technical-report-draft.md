@@ -2,7 +2,7 @@
 
 **Team:** Borderline · **Team leader:** Oladipo Evangel · **Members:** Oladipo Evangel, Professor James Agajo
 **Contact:** [oladipoevangel90@gmail.com](mailto:oladipoevangel90@gmail.com), +2348135001380 · **GitHub:** [github.com/Evangel90/Borderline](https://github.com/Evangel90/Borderline/tree/incident-drill) (branch `incident-drill`)
-**Status:** submission draft, 8 November 2026. Results come from three AI drill runs on 8 November 2026 (A `governed-20261108-1`, B `ungoverned-20261108-1`, C `insufficient-20261108-1`), a rehearsal of the AI liaison reviewer and a second Drill A run (`governed-20261108-2`) after fixes, and Drill D (`governed-scripted-20261108-1`), a scripted control whose liaison answers are **not AI decisions**. Nothing in this report is a legal conclusion; no person with legal standing has reviewed it. Policy gaps are called **candidates**.
+**Status:** submission draft, 8 November 2026. All results come from four runs on 8 November 2026, all on the same code (commit `e2a31f5`) and model: A `governed-20261108-3`, B `ungoverned-20261108-2`, C `insufficient-20261108-2`, and D `governed-scripted-20261108-2`, a scripted control whose liaison answers are **not AI decisions**. Nothing in this report is a legal conclusion; no person with legal standing has reviewed it. Policy gaps are called **candidates**.
 
 ## Introduction
 
@@ -19,17 +19,18 @@ Three kinds of decision-maker take part, and every log entry records which one d
    - **Switzerland:** the Swiss Agency for Therapeutic Products (Swissmedic), the Federal Data Protection and Information Commissioner (FDPIC), the National Cyber Security Centre (NCSC) and the vendor.
    - **Neutral:** a policy adviser.
 2. **An AI liaison reviewer**, a separate model call (not the sender). For every cross-border letter it answers three questions: is there a legal basis to share; is the transfer allowed under both sides' rules; is the receiver the right counterpart. Each answer is YES, NO or UNCLEAR, and must come with exact quotes.
-3. **Code makes the final check.** It verifies every quote word for word against the passage the reviewer was shown, normalising whitespace only. A fabricated or uncited quote turns the answer into UNCLEAR. Code:
-   - moves a real quote to its correct chunk ID only if the exact text occurs in exactly one shown passage, and never rewrites the text;
-   - blocks patient data unless the legal-basis and transfer-rules answers both carry verified quotes;
-   - delivers a letter only on three YES answers, and flags every YES for human review.
+3. **Code makes the final check.** It verifies every quote word for word against a passage the reviewer was shown. It normalises whitespace, and accepts at most two character slips within one continuous passage, logging the exact source text in place of the slip. A fabricated, joined or uncited quote turns the answer into UNCLEAR. Code:
+   - moves a real quote to its correct chunk ID only if the text occurs in exactly one shown passage, and never rewrites it beyond a logged slip;
+   - accepts a legal-basis YES only on a national-law quote, never on global guidance or a drill exhibit (a synthetic document labelled as such);
+   - lets patient data cross only with two keys: verified national-law quotes behind YES on legal basis and transfer rules, and a recorded human approval whose scope matches the letter exactly;
+   - blocks a letter that names no receiver, delivers a letter only on three YES answers, and flags every YES for human review.
 
    Every UNCLEAR or NO is typed `policy_gap`, `implementation_gap`, `conflict` or `missing_evidence`. Only the first three can become gap candidates; `missing_evidence` goes to a homework list.
 
 ## Use-case requirements
 
 - It is **critical** that every claim carries an exact quote with its chunk ID, verified by code, and that no output is presented as a legal conclusion.
-- It is **critical** that patient data never crosses the border without a verified legal-basis quote and a verified transfer-rules quote.
+- It is **critical** that patient data never crosses the border without a verified legal-basis quote, a verified transfer-rules quote and a recorded human approval for that disclosure.
 - It is **critical** that each institution acts only on what it can see and only within its mandate, and that the log shows who decided what.
 - It is **expected** that missing documents are recorded as homework, not treated as proof that a rule is absent, and that each gap candidate is paired with a verified global comparison.
 - It is **of added value** that the engine is country-agnostic: country packs, a bridge pack and a drill intent are plain YAML (a readable configuration format) and can be swapped.
@@ -38,9 +39,9 @@ Three kinds of decision-maker take part, and every log entry records which one d
 
 | Drill | What it tests | Steps | Expected | Actual (8 November 2026) |
 |---|---|---|---|---|
-| A, governed (`retinopathy-governed`); run twice | Three letters written to the conditions of a real provision: EDE → Swissmedic vigilance request (Therapeutic Products Act (TPA) Art. 64(1)); Swissmedic → EDE recall list of 47 patients (TPA Art. 64(2)(c)); UAE Data Office → FDPIC on staff data (Federal Act on Data Protection (FADP) Art. 55) | 11 | 3 delivered | Run 1: **0 delivered**; the reviewer answered UNCLEAR on legal basis each time. Run 2, after fixes: **0 delivered**; joined quotes and a misread question |
-| B, ungoverned (`retinopathy-ae-ch`, with optional step 13) | Progressive incident with 12 institutions; DHA tries to send patient images to Switzerland | 16 | letters blocked with typed gaps; images stopped | 4 of 4 blocked; images stopped; 1 typed gap (`policy_gap`); 5 homework items |
-| C, insufficient evidence (`retinopathy-insufficient-evidence`) | Questions whose deciding document is missing | 8 | homework, not candidates | as expected: 1 letter blocked, 2 homework items, no candidate created |
+| A, governed (`retinopathy-governed`) | Three letters written to the conditions of a real provision, with the senders' assurances as labelled synthetic exhibits: EDE → Swissmedic vigilance request (Therapeutic Products Act (TPA) Art. 64(1)); Swissmedic → EDE recall list of 47 patients (TPA Art. 64(2)(c)), with a recorded human approval; UAE Data Office → FDPIC on staff data (Federal Act on Data Protection (FADP) Art. 55) | 11 | 3 delivered | **0 delivered**: the reviewer said YES on legal basis each time, but misread one question and joined quotes from two places, which code rejected |
+| B, ungoverned (`retinopathy-ae-ch`, with optional step 13) | Progressive incident with 12 institutions; DHA tries to send patient images to Switzerland | 16 | letters blocked with typed gaps; images stopped | 4 of 4 blocked; a fifth letter, naming no receiver, blocked by code; images stopped; 1 typed gap (`policy_gap`); 8 homework items |
+| C, insufficient evidence (`retinopathy-insufficient-evidence`) | Questions whose deciding document is missing | 8 | homework, not candidates | **not as expected**: 1 letter blocked, but its UNCLEAR answers were typed `policy_gap` and `implementation_gap`, so a typed gap record was created and no homework |
 | D, scripted control for A (`retinopathy-governed`, `--reviewer scripted`) | Why D exists: same letters as Drill A, but the project's hand-written reference answers stand in for the AI liaison reviewer, to test whether Drill A's blocks come from the AI review or from the law and the code. Institution agents are still AI; code still checks every quote and the human approval | 11 | 3 delivered if the law and code allow it | 3 delivered; not an AI result |
 
 ## Mapping to ITU-T Y.3172 and the AI Readiness Framework 2.0
@@ -55,7 +56,7 @@ Y.3172 is the International Telecommunication Union (ITU) architecture for machi
 | M (model) | 12 institution agents and the AI liaison reviewer, `qwen3:8b`, temperature 0, one stateless call each | 8 | Institution profiles in [`packs/ae/institutions/`](../packs/ae/institutions), [`packs/ch/institutions/`](../packs/ch/institutions), [`packs/global/institutions/`](../packs/global/institutions) |
 | P (policy) | Code: action allow-lists, quote verification, patient-data rule, three-YES routing, human-review flag on every YES | 10, 7 | FADP Art. 55 (`CH-DATA-FADP:p24:c1`); Personal Data Protection Law (PDPL) health-data exclusion (`AE-DATA-PDPL-2021-EN:p6:c2`) |
 | D (distributor) | Synthetic action handlers; a letter is delivered, blocked or routed in drill state only | 5 | [`packs/bridge/ae-ch.yaml`](../packs/bridge/ae-ch.yaml) (counterparts and reference answers) |
-| SINK | Hash-chained log (`log.jsonl`), decision trail, homework list, gap register, Streamlit viewer | 8 | [`decision-trail-governed-20261108-1.md`](decision-trail-governed-20261108-1.md), [`decision-trail-ungoverned-20261108-1.md`](decision-trail-ungoverned-20261108-1.md), [`decision-trail-insufficient-20261108-1.md`](decision-trail-insufficient-20261108-1.md), [`decision-trail-governed-scripted-20261108-1.md`](decision-trail-governed-scripted-20261108-1.md) |
+| SINK | Hash-chained log (`log.jsonl`), decision trail, homework list, gap register, Streamlit viewer | 8 | [`decision-trail-governed-20261108-3.md`](decision-trail-governed-20261108-3.md), [`decision-trail-ungoverned-20261108-2.md`](decision-trail-ungoverned-20261108-2.md), [`decision-trail-insufficient-20261108-2.md`](decision-trail-insufficient-20261108-2.md), [`decision-trail-governed-scripted-20261108-2.md`](decision-trail-governed-scripted-20261108-2.md) |
 
 ## Requirements mapped to domain-specific policies
 
@@ -91,24 +92,22 @@ Drill B releases events in stages: model update and fewer referrals; missed dise
 
 | Run | Decisions | Hash chain | Letters delivered / sent | Quotes verified | Audit-screen flags | Homework |
 |---|---|---|---|---|---|---|
-| A `governed-20261108-1` | 9 | verified | 0 / 3 | 18 of 19 | 0 | 5 |
-| A, run 2 after fixes `governed-20261108-2` | 9 | verified | 0 / 3 | 10 of 13 | 1 | 5 |
-| B `ungoverned-20261108-1` | 40 | verified | 0 / 4 | 25 of 26 | 8 | 5 |
-| C `insufficient-20261108-1` | 7 | verified | 0 / 1 | 9 of 9 | 1 | 2 |
-| D, scripted control (not an AI decision) `governed-scripted-20261108-1` | 11 | verified | 3 / 3 | 21 of 21 | 2 | 0 |
+| A `governed-20261108-3` | 9 | verified | 0 / 3 | 10 of 13 | 1 | 5 |
+| B `ungoverned-20261108-2` | 40 | verified | 0 / 5 | 22 of 30 | 8 | 8 |
+| C `insufficient-20261108-2` | 7 | verified | 0 / 1 | 6 of 6 | 1 | 0 |
+| D, scripted control (not an AI decision) `governed-scripted-20261108-2` | 11 | verified | 3 / 3 | 21 of 21 | 2 | 0 |
 
 What the runs show:
 
-- **Patient data crossed only with both keys.** In the AI runs the recall list (Drill A step 5) and the patient images (Drill B step 14) were both stopped by code's patient-data rule. In Drill D the recall list crossed, because its legal-basis quotes verified and a recorded human approval (a drill fact) matched the letter exactly.
-- **Code caught two invented quotes.** In one, a word was misspelt ("Reciprocy"); code now accepts up to two character slips in one continuous passage and logs the exact source text instead. In the other, a page header was joined to FADP Art. 55, skipping all of Art. 54 in between. Code also moved two real but mislabelled quotes to their correct chunk IDs (five corrections logged), without changing any quote text.
-- **The governed letters were not delivered.** This was a result, not a forced outcome. In Drill A the AI liaison reviewer answered UNCLEAR on legal basis for all three letters, and code did not overrule it. For the recall list, the deciding clause was shown to it: "serious risks to health can thereby be averted in the specific case" (`CH-HEALTH-TPA:p40:c1`). It did not cite it. The assurances (official secrecy, reciprocity) existed only as data fields, not as quotable documents. The project's own reference table also answers UNCLEAR on legal basis for these letters.
-- **After fixes, the AI reviewer still blocked them; correct answers delivered them.** We wrote the assurances as labelled synthetic exhibits, named the provision each letter relies on, and added a human-approval key for patient data. In a rehearsal (each letter three times) and in a full second run of Drill A (`governed-20261108-2`), the AI reviewer now said YES on legal basis for all three letters, but none was delivered. At step 2 it answered UNCLEAR on transfer rules for a letter carrying no personal data. At steps 5 and 8 its legal-basis quotes joined text from two places: the opening of TPA Art. 64(1) with Art. 64(2), and the opening of PDPL Art. 2(1) with item (c), skipping (a) and (b). Code rejected both. Both controls stayed blocked 3 of 3. In Drill D, with the reference answers standing in, all three letters were delivered. So the blocks come from the AI review, not from missing law or code.
+- **Patient data crossed only with both keys.** The recall list (Drill A step 5) and the patient images (Drill B step 14) were stopped by code's patient-data rule. In Drill D the recall list crossed, because its legal-basis quotes verified and a recorded human approval (a drill fact) matched the letter exactly.
+- **The AI reviewer did not deliver the governed letters.** This is a result, not a forced outcome. It found the right provisions and said YES on legal basis for all three letters, but at step 2 it answered UNCLEAR on transfer rules for a letter carrying no personal data ("The passages do not include the document you would need to determine transfer rules"). At steps 5 and 8 its legal-basis quotes joined text from two places: the opening of TPA Art. 64(1) with Art. 64(2), and the opening of Personal Data Protection Law (PDPL) Art. 2(1) with item (c), skipping (a) and (b). Code rejected both. In Drill D, with the reference answers standing in, all three letters were delivered. So the blocks come from the AI review, not from missing law or code.
+- **Code rejected joined and cut quotes.** 8 of Drill B's 30 quotes failed: TPA Art. 64's heading joined to its paragraph 2; "The Office shall: 9." skipping items 1 to 8; a quote shortened with "..."; a two-word fragment. One failure was a dropped space ("ProperProtection"), a copy slip the current slip rule does not catch because it merges two words. Code accepted one quote with a character slip (Drill A step 5) and logged the exact source text.
 - **Delivered is not accepted.** In Drill D the FDPIC's AI agent received the step 8 letter and recommended pausing, citing the general foreign-disclosure rule (FADP Art. 16) rather than Art. 55, which the letter relied on. Whether that is right needs a person.
-- **A confident YES is not a correct YES.** In Drill B the reviewer answered YES on legal basis for DHA → Swissmedic, citing a PDPL transfer rule for companies (`AE-DATA-PDPL-2021-EN:p25:c2`). The PDPL excludes health data covered by its own law. The quote was real, so code accepted it, and flagged it for human review. At step 9 only a failed quote stopped that letter. Code checks that a quote is real, not that it supports the answer; a person must check that. Replaying an edited copy of the log (`make replay`) shows the consequence. If the reviewer had answered YES on transfer rules with that same real PDPL sentence at step 14, the code at run time would have let the patient images through. The current code blocks it: no recorded human approval matches that letter.
-- **Defect found and fixed.** In Drill B step 13, a request with no named receiver was routed by an older fixed rule, without the three-question check. Only an unverified claim was involved, and nothing real was sent. Fixed after the run: a letter that names no receiver is now blocked by code, never routed by the older rule; `make replay` on this log flags step 13 as its one difference. Drill B was not re-run.
-- **Delivered branches are covered only by Drill D.** All 5 blocked branches are covered by the AI runs; no step failed.
+- **A letter with no receiver is blocked.** At Drill B step 13 DHA's AI agent sent a request that named no receiver. Code blocked it, because the three questions cannot be asked; nothing crossed.
+- **Typed gaps where homework was expected.** In Drill C the reviewer typed its UNCLEAR answers `policy_gap` (legal basis, quoting the UAE Data Office's competences) and `implementation_gap` (transfer rules), quoting four real FADP passages that do not concern transfer, such as Art. 15 on a representative's duties. Code checks that quotes are real, not that they apply, so the typed record stands and needs human review.
+- **Coverage and reproducibility.** Every blocked branch ran in Drills A, B and C; the delivered branches (steps 3, 6, 9) ran only in Drill D. No step failed. Running Drills A and D again on the same code produced byte-identical logs.
 
-Full details are in [`report/run-review-2026-11-08-three-drills.md`](run-review-2026-11-08-three-drills.md).
+Full details are in [`report/run-review-2026-11-08-final-runs.md`](run-review-2026-11-08-final-runs.md).
 
 ## Policy and standards gap candidates derived from the mapping
 
@@ -128,16 +127,16 @@ They are **candidates, not findings**. They are unreviewed, and "absent" means a
 | CAND-001 | implementation | The PDPL excludes "e. Personal Health Data that has legislation regulating its protection and processing." (`AE-DATA-PDPL-2021-EN:p6:c2`), so no single UAE authority is clearly competent to protect UAE health data held abroad. | The Organisation for Economic Co-operation and Development (OECD) 2007 privacy-enforcement Recommendation lists 38 adherents, including Switzerland and no non-members: "Spain Sweden Switzerland Türkiye United Kingdom United States Non-Members None" (`OECD-LEGAL-0352-ADHERENTS-2026:p8:c1`) |
 | CAND-004 | policy | The exceptions to Art. 13 are in a resolution the project could not obtain: "a. Cabinet Decision No. (51) of year 2021 on exemption for storage and transfer of health records and information must be abide to:" (`AE-DHA-HEALTH-DATA-PROTECTION-PP11-2022:p27:c1`) | By analogy only, EU national derogations are published: "The Commission shall keep the information publicly available." (`EU-MDR-2017-745:p30:c1`) |
 
-The drills support these candidates in practice. In Drill A, the reviewer could not settle legal basis even when the letters met a real provision's conditions. In Drill C, the missing reciprocity arrangement, manufacturer report and Resolution 51 exceptions went to homework, not to candidates. Only one typed gap came from the liaison channel (MoHAP's legal basis, `policy_gap`). Its quotes need human review before it adds support.
+The drills bear on these candidates without proving them. Two typed gap records came from the liaison channel: in Drill B, the UAE Data Office's transfer rules (`policy_gap`, quoting PDPL Art. 23); in Drill C, legal basis (`policy_gap`) and transfer rules (`implementation_gap`) for a request with no reciprocity assurance, whose transfer quotes do not concern transfer. Both need human review before they add support.
 
 ## Scope and limitations
 
 - Synthetic scenario; open-weight local model; no clinical, regulatory or data-transfer system is connected.
-- Drills B and C were run once; Drill A twice (before and after fixes). Results from an 8-billion-parameter model vary, and the reviewer sometimes picks the wrong provision.
-- Code verifies that quotes are real, not that they apply. Free-text reasons are not verified.
+- Each drill was run once on the final code; Drills A and D were also run a second time, with byte-identical logs. Results from an 8-billion-parameter model vary between prompts, and the reviewer sometimes joins quotes or picks the wrong provision.
+- Code verifies that quotes are real, not that they apply. Free-text reasons are not verified. The slip rule does not catch a dropped space between two words.
 - Arabic originals could not be quoted. Resolution 51/2021 is missing.
 - The knowledge base is local, not hosted by ITU. Retrieval finds the exact passage in the top six for 8 of 10 test questions (7 of 10 in the top three); this measures retrieval only.
-- `make replay` is a code replay: it re-runs every code decision over the logged AI answers, without calling the model, and reproduced all three AI runs with 0 differences (8 letters, 54 quotes); Drill D also replays with 0 differences. Under the current code, Drill A shows 5 differences, all from the "Reciprocy" quote now accepted as a slip; no letter outcome changes. It cannot show that the model would answer the same way again.
+- `make replay` is a code replay: it re-runs every code decision over the logged answers, without calling the model. All four runs replay with 0 differences (11 letters, 70 quotes). It cannot show that the model would answer the same way again.
 - Drill D shows that the route works when the answers are right. It says nothing about whether an AI can do the review, and it is not counted in any AI result.
 
 ## References
@@ -146,4 +145,4 @@ The drills support these candidates in practice. In Drill A, the reviewer could 
 - ITU-T Y.3172: [https://www.itu.int/rec/T-REC-Y.3172-201906-I/en](https://www.itu.int/rec/T-REC-Y.3172-201906-I/en)
 - ITU AI Ready, Report 2.0: [https://www.itu.int/epublications/publication/ai-ready-analysis-towards-a-standardized-readiness-framework](https://www.itu.int/epublications/publication/ai-ready-analysis-towards-a-standardized-readiness-framework)
 - A criterion-by-criterion evidence map is in [`docs/HACKATHON_CRITERIA_AUDIT.md`](../docs/HACKATHON_CRITERIA_AUDIT.md).
-- Source register [`data/sources.csv`](../data/sources.csv); run review [`report/run-review-2026-11-08-three-drills.md`](run-review-2026-11-08-three-drills.md); decision trails [`decision-trail-governed-20261108-1.md`](decision-trail-governed-20261108-1.md), [`decision-trail-ungoverned-20261108-1.md`](decision-trail-ungoverned-20261108-1.md), [`decision-trail-insufficient-20261108-1.md`](decision-trail-insufficient-20261108-1.md), [`decision-trail-governed-scripted-20261108-1.md`](decision-trail-governed-scripted-20261108-1.md); rehearsal [`report/liaison-rehearsal-20261108.json`](liaison-rehearsal-20261108.json); candidate status [`report/candidate-status.json`](candidate-status.json).
+- Source register [`data/sources.csv`](../data/sources.csv); run review [`report/run-review-2026-11-08-final-runs.md`](run-review-2026-11-08-final-runs.md); decision trails [`decision-trail-governed-20261108-3.md`](decision-trail-governed-20261108-3.md), [`decision-trail-ungoverned-20261108-2.md`](decision-trail-ungoverned-20261108-2.md), [`decision-trail-insufficient-20261108-2.md`](decision-trail-insufficient-20261108-2.md), [`decision-trail-governed-scripted-20261108-2.md`](decision-trail-governed-scripted-20261108-2.md); candidate status [`report/candidate-status.json`](candidate-status.json).

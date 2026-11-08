@@ -1,4 +1,6 @@
-# Run review: Drills A, B and C, and Drill D (scripted control), 8 November 2026
+# Run review: earlier runs of Drills A to D, 8 November 2026 (superseded)
+
+> **Superseded.** These runs were made before the final fixes. The technical report is based only on the final runs in [`run-review-2026-11-08-final-runs.md`](run-review-2026-11-08-final-runs.md). This file is kept as history.
 
 **Model:** local `qwen3:8b` through Ollama, 16,384-token context, temperature 0, for every institution agent and for the liaison reviewer. **Code:** branch `incident-drill` at `f6f3ba1`; 147 tests pass. **Status:** unreviewed synthetic drill output. Nothing here is a legal conclusion, and no person with legal standing has reviewed it. Run folders (`runs/`) are git-ignored, so the numbers below are copied from them.
 
