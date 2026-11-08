@@ -15,6 +15,7 @@ The demo uses saved runs, not live model calls. The three runs below exist only 
 | A, governed | `governed-20261108-1` | `report/decision-trail-governed-20261108-1.md` |
 | B, ungoverned (with optional step 13) | `ungoverned-20261108-1` | `report/decision-trail-ungoverned-20261108-1.md` |
 | C, insufficient evidence | `insufficient-20261108-1` | `report/decision-trail-insufficient-20261108-1.md` |
+| D, scripted control for A (not an AI decision) | `governed-scripted-20261108-1` | `report/decision-trail-governed-scripted-20261108-1.md` |
 
 ## Sequence (about six minutes)
 
@@ -29,7 +30,7 @@ The demo uses saved runs, not live model calls. The three runs below exist only 
 
 4. **Code catches an invented quote (2:30–3:15).** Drill B step 9: the reviewer said YES three times, but its transfer-rules "quote" joined a page header to FADP Art. 55 and skipped Art. 54. Code found it was not in the source and set the answer to UNCLEAR, so the letter was blocked.
 
-5. **The governed drill, and why it did not deliver (3:15–4:15).** Open `report/decision-trail-governed-20261108-1.md`. The three letters were written to the conditions of real provisions (TPA Art. 64, FADP Art. 55), but all three were blocked. In each case the reviewer answered UNCLEAR on legal basis, and code did not overrule it. Present this as a finding: the assurances existed only as data fields, not as quotable documents, and the project's own reference table also says UNCLEAR. We did not loosen any check to make the letters pass.
+5. **The governed drill, and why it did not deliver (3:15–4:15).** Open `report/decision-trail-governed-20261108-1.md`. The three letters were written to the conditions of real provisions (TPA Art. 64, FADP Art. 55), but all three were blocked. In each case the reviewer answered UNCLEAR on legal basis, and code did not overrule it. Present this as a finding: the assurances existed only as data fields, not as quotable documents, and the project's own reference table also says UNCLEAR. We did not loosen any check to make the letters pass. Then open `report/decision-trail-governed-scripted-20261108-1.md` (Drill D): the same letters, with the hand-written reference answers in place of the AI liaison reviewer, were all delivered, so the blocks come from the AI review. Say plainly that Drill D's answers are not AI decisions, and show step 9, where the receiving FDPIC agent still recommended pausing.
 
 6. **Homework, not accusations (4:15–5:00).** Open `report/decision-trail-insufficient-20261108-1.md` (Drill C). The letter without a reciprocity assurance was blocked, and the open questions went to the homework list (`liaison_homework.jsonl`, 2 items), not to gap candidates. Resolution 51/2021 is registered as missing and is not hunted for.
 

@@ -1,4 +1,6 @@
-# Decision trail: governed-scripted-20261108-1
+# Decision trail: governed-scripted-20261108-1 (Drill D, scripted control for Drill A)
+
+**Drill D is a scripted control, not an AI result.** Same letters as Drill A, but the project's hand-written reference answers stand in for the AI liaison reviewer, to test whether Drill A's blocks come from the AI review or from the law and the code. Institution agents are still AI; code still checks every quote and the human approval.
 
 Unreviewed synthetic drill output; nothing here is a legal conclusion. Every AI decision was made by a model that sees only what its institution can see, and it may have missed things a person would consider.
 

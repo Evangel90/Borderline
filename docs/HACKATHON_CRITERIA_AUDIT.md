@@ -5,7 +5,7 @@
 
 ## Criteria mapped to the 8 November 2026 runs (supersedes the recommendation below)
 
-Runs: `governed-20261108-1` (Drill A), `ungoverned-20261108-1` (Drill B), `insufficient-20261108-1` (Drill C), local `qwen3:8b`. "Section" means a section of `report/technical-report-draft.md`. Nothing here is a legal conclusion.
+Runs: `governed-20261108-1` (Drill A), `ungoverned-20261108-1` (Drill B), `insufficient-20261108-1` (Drill C), local `qwen3:8b`; plus `governed-scripted-20261108-1` (Drill D, a scripted control for Drill A whose liaison answers are not AI decisions). "Section" means a section of `report/technical-report-draft.md`. Nothing here is a legal conclusion.
 
 | Judging criterion (official requirements and evaluation emphasis) | Report section | Evidence from the new runs | Honest status |
 | --- | --- | --- | --- |
@@ -17,7 +17,7 @@ Runs: `governed-20261108-1` (Drill A), `ungoverned-20261108-1` (Drill B), `insuf
 | Domain-specific policy and standards gaps with accurate global examples (critical) | Gap candidates table | CAND-001 to CAND-004 `SUPPORTED_CANDIDATE`, each with verified local and global quotes and an absence-search record | Candidates, unreviewed; only 1 typed gap came from the runs' liaison answers |
 | Data protection in practice | Error scenarios (patient data) | Recall list (A step 5) and patient images (B step 14) stopped by code's patient-data rule | Drill A shows the rule also stops data the scenario intended to pass |
 | ITU-T Y.3172 and AI Readiness 2.0 alignment | Mapping table | Each pipeline node mapped to a component, 5 of 13 Readiness dimensions, and cited documents | Adaptation only; no conformance or readiness score |
-| Reproducibility and open source | Scope and limitations; README | Exact Ollama commands in README; 153 tests pass; open-weight model, no API key needed; `make replay` reproduces every code decision in all three runs (0 differences) | Single run per drill; replay does not re-ask the model |
+| Reproducibility and open source | Scope and limitations; README | Exact Ollama commands in README; 167 tests pass; open-weight model, no API key needed; `make replay` reproduces every code decision in all three runs (0 differences) | Single run per drill; replay does not re-ask the model |
 | Five-page report in official template | Whole report | `report/technical-report-draft.md`; Word version drafted for review | Page count not yet confirmed; team fields empty |
 
 ## Recommendation

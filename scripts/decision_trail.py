@@ -43,9 +43,17 @@ def final_by(check: dict, model: str) -> str:
 def trail(run_id: str) -> str:
     with open(ROOT / "runs" / run_id / "log.jsonl", encoding="utf-8") as source:
         entries = [json.loads(line) for line in source if line.strip()]
+    scripted = any((e.get("liaison_review") or {}).get("reviewer_model") == SCRIPTED_REVIEWER for e in entries)
     lines = [
-        f"# Decision trail: {run_id}",
+        f"# Decision trail: {run_id}" + (" (Drill D, scripted control for Drill A)" if scripted else ""),
         "",
+    ] + ([
+        "**Drill D is a scripted control, not an AI result.** Same letters as Drill A, but the "
+        "project's hand-written reference answers stand in for the AI liaison reviewer, to test "
+        "whether Drill A's blocks come from the AI review or from the law and the code. Institution "
+        "agents are still AI; code still checks every quote and the human approval.",
+        "",
+    ] if scripted else []) + [
         "Unreviewed synthetic drill output; nothing here is a legal conclusion. Every AI decision "
         "was made by a model that sees only what its institution can see, and it may have missed "
         "things a person would consider.",

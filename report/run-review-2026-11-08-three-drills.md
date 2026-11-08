@@ -1,4 +1,4 @@
-# Run review: the three drills, 8 November 2026
+# Run review: Drills A, B and C, and Drill D (scripted control), 8 November 2026
 
 **Model:** local `qwen3:8b` through Ollama, 16,384-token context, temperature 0, for every institution agent and for the liaison reviewer. **Code:** branch `incident-drill` at `f6f3ba1`; 147 tests pass. **Status:** unreviewed synthetic drill output. Nothing here is a legal conclusion, and no person with legal standing has reviewed it. Run folders (`runs/`) are git-ignored, so the numbers below are copied from them.
 
@@ -17,6 +17,9 @@ Abbreviations used below: Emirates Drug Establishment (EDE); Swiss Agency for Th
 | `governed-20261108-1` | A, governed | 9 | verified | 0 | 0 | **0 of 3** | 5 | 0 |
 | `ungoverned-20261108-1` (with optional step 13) | B, ungoverned | 40 | verified | 8 (6 no citation, 2 citation needs review) | 7 | 0 of 4 | 5 | 1 (`policy_gap`) |
 | `insufficient-20261108-1` | C, insufficient evidence | 7 | verified | 1 (no citation) | 1 | 0 of 1 | 2 | 0 |
+| `governed-scripted-20261108-1` | **D, scripted control for A (not an AI decision)**; added later, see the last section | 11 | verified | 2 | 0 | 3 of 3 | 0 | 0 |
+
+Drill D is not a new scenario: same letters as Drill A, but the project's hand-written reference answers stand in for the AI liaison reviewer, to test whether Drill A's blocks come from the AI review or from the law and the code.
 
 Final hashes: A `28952df2…bf49c48`, B `7942a805…b63e07`, C `e4ef7515…98cc8f`.
 
@@ -160,11 +163,11 @@ Their support comes from the register's verified quotes and search records. This
 
 ## Failed or skipped work
 
-- **Not done in the AI runs:** no "delivered" branch was reached. The scripted-reviewer run below covers them, labelled as not an AI decision.
+- **Not done in the AI runs:** no "delivered" branch was reached. Drill D (scripted control, last section) covers them, labelled as not an AI decision.
 - **Known defect, not fixed:** the step 13 bypass of the liaison check (`engine/actions.py:141`).
 - **Not checked by code:** the reviewer's free-text `reason` field. Only the `quotes` list is verified. Wrong chunk IDs and stray Chinese text appear in reason text in Drills A and C.
 - **Arabic:** no Arabic quote was used or verified in any run. The Arabic chunks in the knowledge base are still garbled (see the 7 November handoff).
-- **Not re-run:** none of the three drills was repeated. Each result is a single run of a non-deterministic model at temperature 0.
+- **Not re-run:** none of the three AI drills was repeated. Each result is a single run of a non-deterministic model at temperature 0.
 
 ## Options for the user (option 2 applied afterwards; see the last section)
 
@@ -191,7 +194,7 @@ All three hash chains verified. The replay shows the outcomes follow from the lo
 
 The patient-data rule requires verified quotes. It does not check that a quote applies to health data, to this direction of transfer or to these institutions. Every YES is flagged for human review, but nothing waits for that review before a letter is delivered. This is the main open weakness. Fixing it means a design decision (for example: patient data never routes without a recorded human approval, or the legal-basis quote must come from the sending country's health-data law). No change has been made.
 
-## After the runs: fixes, rehearsal and a scripted-reviewer run of Drill A
+## After the runs: fixes, rehearsal and Drill D (scripted control for Drill A)
 
 **Fixes** (commit `d203ab1`): Drill A's assurances are now labelled synthetic exhibits the reviewer is shown and can quote (never a legal basis); each letter names the provision it relies on, which is always shown; a quote matching one continuous passage except for at most two character slips is accepted and replaced by the exact source text (stitched and Arabic quotes still need exact text); the letter's facts are stated first; patient data needs verified national-law quotes **and** a recorded human approval matching the letter's sender, receiver, purpose, fields, number of people and images; reference answers change only when an assurance exhibit is present.
 
@@ -207,7 +210,7 @@ The patient-data rule requires verified quotes. It does not check that a quote a
 
 Changing the rule so one bad quote is dropped rather than sinking the answer was considered and not adopted: step 8's legal basis would then have rested on PDPL Art. 23(1)(a), a companies' contract-transfer rule that does not apply.
 
-**Scripted-reviewer run** `governed-scripted-20261108-1` (`--reviewer scripted`, commit `e4adbea`; not an AI decision). The bridge pack's reference answers, with 21 fixed quotes from the intent, stood in for the AI liaison reviewer; the institution agents were still `qwen3:8b`. Hash chain verified; 11 decisions; 21 of 21 quotes verified; 3 of 3 letters delivered; the recall list crossed because `APPROVAL-SWISSMEDIC-RECALL-001` matched it; replay 0 differences; 2 audit-screen flags (no citation for EDE's letter at step 2, a citation needing review at step 6); no candidates, no homework.
+**Drill D, scripted control** `governed-scripted-20261108-1` (`--reviewer scripted`, commit `e4adbea`; not an AI decision). The bridge pack's reference answers, with 21 fixed quotes from the intent, stood in for the AI liaison reviewer; the institution agents were still `qwen3:8b`. Hash chain verified; 11 decisions; 21 of 21 quotes verified; 3 of 3 letters delivered; the recall list crossed because `APPROVAL-SWISSMEDIC-RECALL-001` matched it; replay 0 differences; 2 audit-screen flags (no citation for EDE's letter at step 2, a citation needing review at step 6); no candidates, no homework.
 
 What the receiving agents did after delivery (never seen before):
 - Step 3: Swissmedic opened a review of the foreign incident report; RetinaSwiss AG requested a model rollback for human review (no citation).

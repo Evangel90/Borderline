@@ -40,7 +40,8 @@ complete legal collection and not hosted by ITU. See the [use-case and knowledge
 
 ## Status (8 November 2026)
 
-Three drills were run on local Ollama `qwen3:8b`; all three hash chains verify.
+Three AI drills (A, B, C) were run on local Ollama `qwen3:8b`, plus **Drill D, a scripted
+control for Drill A**: same letters as Drill A, but the project's hand-written reference answers stand in for the AI liaison reviewer, to test whether Drill A's blocks come from the AI review or from the law and the code. Drill D's liaison answers are not AI decisions. All four hash chains verify.
 Full comparison of actual against expected: [run review](report/run-review-2026-11-08-three-drills.md).
 
 | Drill | Run | Decisions | Letters delivered | Result |
@@ -48,7 +49,7 @@ Full comparison of actual against expected: [run review](report/run-review-2026-
 | A, governed (`retinopathy-governed`) | `governed-20261108-1` | 9 | 0 of 3 (3 expected) | The AI liaison reviewer answered UNCLEAR on legal basis for every letter; reported as a finding, not forced |
 | B, ungoverned (`retinopathy-ae-ch`, optional step 13) | `ungoverned-20261108-1` | 40 | 0 of 4 | Patient images stopped; 1 typed gap (`policy_gap`); 5 homework items |
 | C, insufficient evidence (`retinopathy-insufficient-evidence`) | `insufficient-20261108-1` | 7 | 0 of 1 | As expected: 2 homework items, no candidate created |
-| A, **scripted reviewer (not an AI decision)** | `governed-scripted-20261108-1` | 11 | 3 of 3 | Reference answers stood in for the AI liaison reviewer; code still checked all 21 quotes and the human approval for the recall list. Shows the route works; says nothing about the AI review |
+| **D, scripted control for A (not an AI decision)** (`retinopathy-governed`, `--reviewer scripted`) | `governed-scripted-20261108-1` | 11 | 3 of 3 | Reference answers stood in for the AI liaison reviewer; code still checked all 21 quotes and the human approval for the recall list. Shows the route works; says nothing about the AI review |
 
 After the Drill A run we wrote its assurances as labelled synthetic exhibits, had
 each letter name the provision it relies on, accepted quotes with at most two
@@ -122,7 +123,7 @@ export BORDERLINE_LLM_PROVIDER=ollama BORDERLINE_LLM_MODEL=qwen3:8b
 make drill INTENT=retinopathy-governed RUN=<new-id-A>
 make drill INTENT=retinopathy-ae-ch RUN=<new-id-B> DRILL_ARGS=--include-optional-events
 make drill INTENT=retinopathy-insufficient-evidence RUN=<new-id-C>
-make drill INTENT=retinopathy-governed RUN=<new-id> DRILL_ARGS="--reviewer scripted"  # labelled, not an AI decision
+make drill INTENT=retinopathy-governed RUN=<new-id> DRILL_ARGS="--reviewer scripted"  # Drill D, not an AI decision
 python scripts/liaison_rehearsal.py --repeat 3 expect=ROUTE:retinopathy-governed:2:ede expect=BLOCK:retinopathy-ae-ch:14:dha
 make verify-log RUN=<id>; make audit-evidence RUN=<id>; make decision-trail RUN=<id>
 make step-coverage RUNS="retinopathy-governed=<A> retinopathy-ae-ch=<B> retinopathy-insufficient-evidence=<C>"

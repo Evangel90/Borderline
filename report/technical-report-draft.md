@@ -2,7 +2,7 @@
 
 **Team:** Borderline · **Team leader:** Oladipo Evangel · **Members:** Oladipo Evangel, Professor James Agajo
 **Contact:** [oladipoevangel90@gmail.com](mailto:oladipoevangel90@gmail.com), +2348135001380 · **GitHub:** [github.com/Evangel90/Borderline](https://github.com/Evangel90/Borderline/tree/incident-drill) (branch `incident-drill`)
-**Status:** submission draft, 8 November 2026. All results are from three local drill runs on 8 November 2026 (`governed-20261108-1`, `ungoverned-20261108-1`, `insufficient-20261108-1`), a rehearsal of the AI liaison reviewer after fixes, and one labelled scripted-reviewer run of Drill A (`governed-scripted-20261108-1`, not an AI decision). Nothing in this report is a legal conclusion; no person with legal standing has reviewed it. Policy gaps are called **candidates**.
+**Status:** submission draft, 8 November 2026. Results come from three AI drill runs on 8 November 2026 (A `governed-20261108-1`, B `ungoverned-20261108-1`, C `insufficient-20261108-1`), a rehearsal of the AI liaison reviewer after fixes, and Drill D (`governed-scripted-20261108-1`), a scripted control whose liaison answers are **not AI decisions**. Nothing in this report is a legal conclusion; no person with legal standing has reviewed it. Policy gaps are called **candidates**.
 
 ## Introduction
 
@@ -34,13 +34,14 @@ Three kinds of decision-maker take part, and every log entry records which one d
 - It is **expected** that missing documents are recorded as homework, not treated as proof that a rule is absent, and that each gap candidate is paired with a verified global comparison.
 - It is **of added value** that the engine is country-agnostic: country packs, a bridge pack and a drill intent are plain YAML (a readable configuration format) and can be swapped.
 
-## Demo scenarios: three drills
+## Demo scenarios: three AI drills and one scripted control
 
 | Drill | What it tests | Steps | Expected | Actual (8 November 2026) |
 |---|---|---|---|---|
 | A, governed (`retinopathy-governed`) | Three letters written to the conditions of a real provision: EDE → Swissmedic vigilance request (Therapeutic Products Act (TPA) Art. 64(1)); Swissmedic → EDE recall list of 47 patients (TPA Art. 64(2)(c)); UAE Data Office → FDPIC on staff data (Federal Act on Data Protection (FADP) Art. 55) | 11 | 3 delivered | **0 delivered**: all 3 blocked; the reviewer answered UNCLEAR on legal basis each time |
 | B, ungoverned (`retinopathy-ae-ch`, with optional step 13) | Progressive incident with 12 institutions; DHA tries to send patient images to Switzerland | 16 | letters blocked with typed gaps; images stopped | 4 of 4 blocked; images stopped; 1 typed gap (`policy_gap`); 5 homework items |
 | C, insufficient evidence (`retinopathy-insufficient-evidence`) | Questions whose deciding document is missing | 8 | homework, not candidates | as expected: 1 letter blocked, 2 homework items, no candidate created |
+| D, scripted control for A (`retinopathy-governed`, `--reviewer scripted`) | Why D exists: same letters as Drill A, but the project's hand-written reference answers stand in for the AI liaison reviewer, to test whether Drill A's blocks come from the AI review or from the law and the code. Institution agents are still AI; code still checks every quote and the human approval | 11 | 3 delivered if the law and code allow it | 3 delivered; not an AI result |
 
 ## Mapping to ITU-T Y.3172 and the AI Readiness Framework 2.0
 
@@ -93,18 +94,18 @@ Drill B releases events in stages: model update and fewer referrals; missed dise
 | A `governed-20261108-1` | 9 | verified | 0 / 3 | 18 of 19 | 0 | 5 |
 | B `ungoverned-20261108-1` | 40 | verified | 0 / 4 | 25 of 26 | 8 | 5 |
 | C `insufficient-20261108-1` | 7 | verified | 0 / 1 | 9 of 9 | 1 | 2 |
-| A, scripted reviewer (not an AI decision) `governed-scripted-20261108-1` | 11 | verified | 3 / 3 | 21 of 21 | 2 | 0 |
+| D, scripted control (not an AI decision) `governed-scripted-20261108-1` | 11 | verified | 3 / 3 | 21 of 21 | 2 | 0 |
 
 What the runs show:
 
-- **Patient data crossed only with both keys.** In the AI runs the recall list (Drill A step 5) and the patient images (Drill B step 14) were both stopped by code's patient-data rule. In the scripted run the recall list crossed, because its legal-basis quotes verified and a recorded human approval (a drill fact) matched the letter exactly.
+- **Patient data crossed only with both keys.** In the AI runs the recall list (Drill A step 5) and the patient images (Drill B step 14) were both stopped by code's patient-data rule. In Drill D the recall list crossed, because its legal-basis quotes verified and a recorded human approval (a drill fact) matched the letter exactly.
 - **Code caught two invented quotes.** In one, a word was misspelt ("Reciprocy"); code now accepts up to two character slips in one continuous passage and logs the exact source text instead. In the other, a page header was joined to FADP Art. 55, skipping all of Art. 54 in between. Code also moved two real but mislabelled quotes to their correct chunk IDs (five corrections logged), without changing any quote text.
 - **The governed letters were not delivered.** This was a result, not a forced outcome. In Drill A the AI liaison reviewer answered UNCLEAR on legal basis for all three letters, and code did not overrule it. For the recall list, the deciding clause was shown to it: "serious risks to health can thereby be averted in the specific case" (`CH-HEALTH-TPA:p40:c1`). It did not cite it. The assurances (official secrecy, reciprocity) existed only as data fields, not as quotable documents. The project's own reference table also answers UNCLEAR on legal basis for these letters.
-- **After fixes, the AI reviewer still blocked them; correct answers delivered them.** We wrote the assurances as labelled synthetic exhibits, named the provision each letter relies on, and added a human-approval key for patient data. In a rehearsal (each letter three times), the AI reviewer now said YES on legal basis, but 0 of 9 attempts were delivered: it misread the no-data transfer question, and joined or paraphrased quotes, which code rejected. Both controls stayed blocked 3 of 3. With the reference answers standing in, all three letters were delivered. So the blocks come from the AI review, not from missing law or code. One cause was ours: the step 8 letter paraphrased PDPL Art. 2(1)(c), and the reviewer quoted the paraphrase.
-- **Delivered is not accepted.** In the scripted run the FDPIC's AI agent received the step 8 letter and recommended pausing, citing the general foreign-disclosure rule (FADP Art. 16) rather than Art. 55, which the letter relied on. Whether that is right needs a person.
+- **After fixes, the AI reviewer still blocked them; correct answers delivered them.** We wrote the assurances as labelled synthetic exhibits, named the provision each letter relies on, and added a human-approval key for patient data. In a rehearsal (each letter three times), the AI reviewer now said YES on legal basis, but 0 of 9 attempts were delivered: it misread the no-data transfer question, and joined or paraphrased quotes, which code rejected. Both controls stayed blocked 3 of 3. In Drill D, with the reference answers standing in, all three letters were delivered. So the blocks come from the AI review, not from missing law or code. One cause was ours: the step 8 letter paraphrased PDPL Art. 2(1)(c), and the reviewer quoted the paraphrase.
+- **Delivered is not accepted.** In Drill D the FDPIC's AI agent received the step 8 letter and recommended pausing, citing the general foreign-disclosure rule (FADP Art. 16) rather than Art. 55, which the letter relied on. Whether that is right needs a person.
 - **A confident YES is not a correct YES.** In Drill B the reviewer answered YES on legal basis for DHA → Swissmedic, citing a PDPL transfer rule for companies (`AE-DATA-PDPL-2021-EN:p25:c2`). The PDPL excludes health data covered by its own law. The quote was real, so code accepted it, and flagged it for human review. At step 9 only a failed quote stopped that letter. Code checks that a quote is real, not that it supports the answer; a person must check that. Replaying an edited copy of the log (`make replay`) shows the consequence. If the reviewer had answered YES on transfer rules with that same real PDPL sentence at step 14, the code at run time would have let the patient images through. The current code blocks it: no recorded human approval matches that letter.
 - **Known defect.** In Drill B step 13, a request with no named receiver was routed by an older fixed rule, without the three-question check. Only an unverified claim was involved, and nothing real was sent. It is recorded as a defect, not fixed.
-- **Delivered branches are covered only by the scripted run.** All 5 blocked branches are covered by the AI runs; no step failed.
+- **Delivered branches are covered only by Drill D.** All 5 blocked branches are covered by the AI runs; no step failed.
 
 Full details are in [`report/run-review-2026-11-08-three-drills.md`](run-review-2026-11-08-three-drills.md).
 
@@ -135,8 +136,8 @@ The drills support these candidates in practice. In Drill A, the reviewer could 
 - Code verifies that quotes are real, not that they apply. Free-text reasons are not verified.
 - Arabic originals could not be quoted. Resolution 51/2021 is missing.
 - The knowledge base is local, not hosted by ITU. Retrieval finds the exact passage in the top six for 8 of 10 test questions (7 of 10 in the top three); this measures retrieval only.
-- `make replay` is a code replay: it re-runs every code decision over the logged AI answers, without calling the model, and reproduced all three runs with 0 differences (8 letters, 54 quotes). Under the current code, Drill A shows 5 differences, all from the "Reciprocy" quote now accepted as a slip; no letter outcome changes. It cannot show that the model would answer the same way again.
-- The scripted run shows that the route works when the answers are right. It says nothing about whether an AI can do the review, and it is not counted in any AI result.
+- `make replay` is a code replay: it re-runs every code decision over the logged AI answers, without calling the model, and reproduced all three AI runs with 0 differences (8 letters, 54 quotes); Drill D also replays with 0 differences. Under the current code, Drill A shows 5 differences, all from the "Reciprocy" quote now accepted as a slip; no letter outcome changes. It cannot show that the model would answer the same way again.
+- Drill D shows that the route works when the answers are right. It says nothing about whether an AI can do the review, and it is not counted in any AI result.
 
 ## References
 
