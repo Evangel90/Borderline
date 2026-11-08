@@ -75,7 +75,10 @@ def main() -> int:
     print(f"\n{len(report.letters)} letters, {sum(len(l.answers) for l in report.letters)} answers, "
           f"{report.quotes_checked} quotes re-checked. {len(total)} differences.")
     if not total and report.hash_chain_ok:
-        print("Every letter outcome in this run follows from the logged AI answers and the code rules.")
+        scripted = any(l.decided_by and any(a["final_decided_by"].startswith("scripted reviewer")
+                                            for a in l.answers) for l in report.letters)
+        source = "logged scripted reference answers (not AI decisions)" if scripted else "logged AI answers"
+        print(f"Every letter outcome in this run follows from the {source} and the code rules.")
     elif not total:
         print("The code reproduces this log, but the log's hash chain is broken: it was edited after the run.")
 

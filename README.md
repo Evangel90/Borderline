@@ -48,8 +48,19 @@ Full comparison of actual against expected: [run review](report/run-review-2026-
 | A, governed (`retinopathy-governed`) | `governed-20261108-1` | 9 | 0 of 3 (3 expected) | The AI liaison reviewer answered UNCLEAR on legal basis for every letter; reported as a finding, not forced |
 | B, ungoverned (`retinopathy-ae-ch`, optional step 13) | `ungoverned-20261108-1` | 40 | 0 of 4 | Patient images stopped; 1 typed gap (`policy_gap`); 5 homework items |
 | C, insufficient evidence (`retinopathy-insufficient-evidence`) | `insufficient-20261108-1` | 7 | 0 of 1 | As expected: 2 homework items, no candidate created |
+| A, **scripted reviewer (not an AI decision)** | `governed-scripted-20261108-1` | 11 | 3 of 3 | Reference answers stood in for the AI liaison reviewer; code still checked all 21 quotes and the human approval for the recall list. Shows the route works; says nothing about the AI review |
 
-Patient data never crossed the border. Code rejected two invented quotes. Known
+After the Drill A run we wrote its assurances as labelled synthetic exhibits, had
+each letter name the provision it relies on, accepted quotes with at most two
+character slips (logging the exact source text), and required a recorded human
+approval matching the letter before patient data crosses. A rehearsal of the AI
+liaison reviewer on the three Drill A letters (Emirates Drug Establishment to
+Swissmedic, Swissmedic to the Emirates Drug Establishment, UAE Data Office to the
+Swiss Federal Data Protection and Information Commissioner) (3 attempts each, plus two controls
+that must block) still delivered 0 of 9; both controls stayed blocked
+([`report/liaison-rehearsal-20261108.json`](report/liaison-rehearsal-20261108.json)).
+
+In the AI runs, patient data never crossed the border. Code rejected two invented quotes. Known
 defect: in Drill B step 13 a request without a named receiver was routed by an
 older fixed rule, without the liaison check (`engine/actions.py`). The four gap
 candidates (CAND-001 to CAND-004) are all `SUPPORTED_CANDIDATE` under the
@@ -66,7 +77,9 @@ implemented.
 every code decision over the AI answers recorded in the log (quote checks, chunk-ID
 corrections, the patient-data rule, three-YES routing, action authorization and
 which conditional steps should run) and reports any difference. All three
-8 November runs replay with 0 differences. It does not show that a model would
+8 November AI runs replayed with 0 differences under the code they ran with; under the
+current code Drill A shows 5 differences, all from one misspelt quote now accepted as a
+slip, with no outcome changed. It does not show that a model would
 answer the same way again. Replaying an edited copy of a log
 (`REPLAY_ARGS="--log edited.jsonl"`) shows what code does with a changed answer;
 the hash-chain check reports the edit.
@@ -109,6 +122,8 @@ export BORDERLINE_LLM_PROVIDER=ollama BORDERLINE_LLM_MODEL=qwen3:8b
 make drill INTENT=retinopathy-governed RUN=<new-id-A>
 make drill INTENT=retinopathy-ae-ch RUN=<new-id-B> DRILL_ARGS=--include-optional-events
 make drill INTENT=retinopathy-insufficient-evidence RUN=<new-id-C>
+make drill INTENT=retinopathy-governed RUN=<new-id> DRILL_ARGS="--reviewer scripted"  # labelled, not an AI decision
+python scripts/liaison_rehearsal.py --repeat 3 expect=ROUTE:retinopathy-governed:2:ede expect=BLOCK:retinopathy-ae-ch:14:dha
 make verify-log RUN=<id>; make audit-evidence RUN=<id>; make decision-trail RUN=<id>
 make step-coverage RUNS="retinopathy-governed=<A> retinopathy-ae-ch=<B> retinopathy-insufficient-evidence=<C>"
 make assess-candidates
