@@ -136,13 +136,6 @@ All four candidates in [`gaps/candidate_register.yaml`](../gaps/candidate_regist
 
 The drills bear on, but do not prove, these candidates. Their two typed gap records (B: UAE Data Office transfer rules, `policy_gap`, quoting PDPL Art. 23; C: see results) need human review.
 
-## Scope
-
-- A synthetic scenario on a local open-weight model; no clinical, regulatory or data-transfer system is connected, and no output has had legal review.
-- Code verifies that every quote is real; whether a provision applies to the facts is left to people, as every YES is flagged for human review.
-- Each drill was run once on the final code. An 8-billion-parameter reviewer sometimes joins quotes or misreads a question, which the code catches; the model can be swapped by one setting.
-- Drill D shows that the route works when the answers are right; it is not counted as an AI result.
-
 ## References
 
 - ITU AI for Good Sandbox Hackathon, UAE: [https://aiforgood.itu.int/event/ai-for-good-sandbox-hackathon-united-arab-emirates/](https://aiforgood.itu.int/event/ai-for-good-sandbox-hackathon-united-arab-emirates/)
