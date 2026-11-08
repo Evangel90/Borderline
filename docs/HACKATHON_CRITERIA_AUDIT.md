@@ -5,7 +5,7 @@
 
 ## Criteria mapped to the 8 November 2026 runs (supersedes the recommendation below)
 
-Runs: `governed-20261108-1` (Drill A), `ungoverned-20261108-1` (Drill B), `insufficient-20261108-1` (Drill C), local `qwen3:8b`; plus `governed-scripted-20261108-1` (Drill D, a scripted control for Drill A whose liaison answers are not AI decisions). "Section" means a section of `report/technical-report-draft.md`. Nothing here is a legal conclusion.
+Runs: `governed-20261108-1` and `governed-20261108-2` (Drill A, before and after fixes), `ungoverned-20261108-1` (Drill B), `insufficient-20261108-1` (Drill C), local `qwen3:8b`; plus `governed-scripted-20261108-1` (Drill D, a scripted control for Drill A whose liaison answers are not AI decisions). "Section" means a section of `report/technical-report-draft.md`. Nothing here is a legal conclusion.
 
 | Judging criterion (official requirements and evaluation emphasis) | Report section | Evidence from the new runs | Honest status |
 | --- | --- | --- | --- |

@@ -15,6 +15,7 @@ The demo uses saved runs, not live model calls. The three runs below exist only 
 | A, governed | `governed-20261108-1` | `report/decision-trail-governed-20261108-1.md` |
 | B, ungoverned (with optional step 13) | `ungoverned-20261108-1` | `report/decision-trail-ungoverned-20261108-1.md` |
 | C, insufficient evidence | `insufficient-20261108-1` | `report/decision-trail-insufficient-20261108-1.md` |
+| A, run 2 after fixes | `governed-20261108-2` | `report/decision-trail-governed-20261108-2.md` |
 | D, scripted control for A (not an AI decision) | `governed-scripted-20261108-1` | `report/decision-trail-governed-scripted-20261108-1.md` |
 
 ## Sequence (about six minutes)

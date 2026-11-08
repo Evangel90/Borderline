@@ -41,12 +41,13 @@ complete legal collection and not hosted by ITU. See the [use-case and knowledge
 ## Status (8 November 2026)
 
 Three AI drills (A, B, C) were run on local Ollama `qwen3:8b`, plus **Drill D, a scripted
-control for Drill A**: same letters as Drill A, but the project's hand-written reference answers stand in for the AI liaison reviewer, to test whether Drill A's blocks come from the AI review or from the law and the code. Drill D's liaison answers are not AI decisions. All four hash chains verify.
+control for Drill A**: same letters as Drill A, but the project's hand-written reference answers stand in for the AI liaison reviewer, to test whether Drill A's blocks come from the AI review or from the law and the code. Drill D's liaison answers are not AI decisions. Drill A was run a second time after fixes. All five hash chains verify.
 Full comparison of actual against expected: [run review](report/run-review-2026-11-08-three-drills.md).
 
 | Drill | Run | Decisions | Letters delivered | Result |
 |---|---|---|---|---|
 | A, governed (`retinopathy-governed`) | `governed-20261108-1` | 9 | 0 of 3 (3 expected) | The AI liaison reviewer answered UNCLEAR on legal basis for every letter; reported as a finding, not forced |
+| A, run 2 after fixes | `governed-20261108-2` | 9 | 0 of 3 (3 expected) | The AI liaison reviewer said YES on legal basis each time, but misread the no-data transfer question (step 2) and joined quotes from two places (steps 5, 8); code rejected those |
 | B, ungoverned (`retinopathy-ae-ch`, optional step 13) | `ungoverned-20261108-1` | 40 | 0 of 4 | Patient images stopped; 1 typed gap (`policy_gap`); 5 homework items |
 | C, insufficient evidence (`retinopathy-insufficient-evidence`) | `insufficient-20261108-1` | 7 | 0 of 1 | As expected: 2 homework items, no candidate created |
 | **D, scripted control for A (not an AI decision)** (`retinopathy-governed`, `--reviewer scripted`) | `governed-scripted-20261108-1` | 11 | 3 of 3 | Reference answers stood in for the AI liaison reviewer; code still checked all 21 quotes and the human approval for the recall list. Shows the route works; says nothing about the AI review |
