@@ -40,7 +40,7 @@ complete legal collection and not hosted by ITU. See the [use-case and knowledge
 
 ## Status (8 November 2026)
 
-The submission is based on four final runs, all on the same code (`e2a31f5`) with
+The submission is based on four final runs, all on the same code (`b229477`) with
 local Ollama `qwen3:8b`: three AI drills (A, B, C) and **Drill D, a scripted
 control for Drill A**: same letters as Drill A, but the project's hand-written
 reference answers stand in for the AI liaison reviewer, to test whether Drill A's
@@ -51,14 +51,13 @@ Full comparison of actual against expected: [final run review](report/run-review
 
 | Drill | Run | Decisions | Letters delivered | Result |
 |---|---|---|---|---|
-| A, governed (`retinopathy-governed`) | `governed-20261108-3` | 9 | 0 of 3 (3 expected) | Not as expected. The AI liaison reviewer said YES on legal basis each time, but misread the no-data transfer question (step 2) and joined quotes from two places (steps 5, 8); code rejected those |
-| B, ungoverned (`retinopathy-ae-ch`, optional step 13) | `ungoverned-20261108-2` | 40 | 0 of 5 | Patient images stopped; a letter naming no receiver blocked by code; 1 typed gap (`policy_gap`); 8 homework items |
-| C, insufficient evidence (`retinopathy-insufficient-evidence`) | `insufficient-20261108-2` | 7 | 0 of 1 | Not as expected: answers typed `policy_gap` and `implementation_gap` instead of homework; quotes real but some do not concern transfer |
-| **D, scripted control for A (not an AI decision)** (`retinopathy-governed`, `--reviewer scripted`) | `governed-scripted-20261108-2` | 11 | 3 of 3 | Reference answers stood in for the AI liaison reviewer; code still checked all 21 quotes and the human approval for the recall list. Shows the route works; says nothing about the AI review |
+| A, governed (`retinopathy-governed`) | `governed-20261108-4` | 9 | 0 of 3 (3 expected) | Not as expected. The AI liaison reviewer said YES on legal basis each time, but misread the no-data transfer question (step 2) and joined quotes from two places (steps 5, 8); code rejected those |
+| B, ungoverned (`retinopathy-ae-ch`, optional step 13) | `ungoverned-20261108-3` | 40 | 0 of 5 | Patient images stopped; a letter naming no receiver blocked by code; 1 typed gap (`policy_gap`); 8 homework items |
+| C, insufficient evidence (`retinopathy-insufficient-evidence`) | `insufficient-20261108-3` | 7 | 0 of 1 | Not as expected: answers typed `policy_gap` and `implementation_gap` instead of homework; quotes real but some do not concern transfer |
+| **D, scripted control for A (not an AI decision)** (`retinopathy-governed`, `--reviewer scripted`) | `governed-scripted-20261108-3` | 11 | 3 of 3 | Reference answers stood in for the AI liaison reviewer; code still checked all 21 quotes and the human approval for the recall list. Shows the route works; says nothing about the AI review |
 
 Patient data crossed only in Drill D, with verified national-law quotes and a
-recorded human approval matching the letter. Running Drills A and D a second
-time on the same code gave byte-identical logs. The four gap candidates
+recorded human approval matching the letter. Running all four drills again after one change to the quote check gave byte-identical logs for A, C and D; B differed only in two quotes that the change now accepts. The four gap candidates
 (CAND-001 to CAND-004) are all `SUPPORTED_CANDIDATE` under the project's
 four-part rule (`make assess-candidates`); they are unreviewed. Earlier runs,
 made before the final fixes, are kept as history in the
@@ -110,8 +109,10 @@ make drill INTENT=retinopathy-ae-ch RUN=demo-2026-10-30
 make verify-log RUN=demo-2026-10-30
 ```
 
-To reproduce the 8 November drills fully offline with local Ollama (no API key;
-needs `ollama pull qwen3:8b` and `ollama pull nomic-embed-text`). Each run ID must be new:
+To reproduce the final 8 November runs with local Ollama (no application programming
+interface (API) key; needs `ollama pull qwen3:8b`; search uses the local embedding model
+`paraphrase-multilingual-MiniLM-L12-v2`, which `make index` downloads once through fastembed).
+Each run ID must be new:
 
 ```sh
 export BORDERLINE_LLM_PROVIDER=ollama BORDERLINE_LLM_MODEL=qwen3:8b
