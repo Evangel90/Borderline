@@ -25,8 +25,6 @@ chromadb/
 /docs/
 /AGENTS.md
 
-# Streamlit viewer: built for an earlier scenario, not part of the submission.
-/ui/
 
 # Report folder: only the submission report and the material it cites are published.
 /report/*

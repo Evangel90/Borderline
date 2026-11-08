@@ -1,4 +1,4 @@
-.PHONY: step-coverage decision-trail verify-sources ingest index drill verify-log audit-evidence assess-candidates evaluate-claims evaluate-retrieval replay itu-smoke
+.PHONY: ui step-coverage decision-trail verify-sources ingest index drill verify-log audit-evidence assess-candidates evaluate-claims evaluate-retrieval replay itu-smoke
 
 INTENT ?= retinopathy-ae-ch
 RUN ?=
@@ -50,6 +50,10 @@ evaluate-retrieval:
 replay:
 	@if [ -z "$(RUN)" ]; then echo "Error: specify RUN=<run_id>"; exit 1; fi
 	$(PYTHON) scripts/replay.py --run $(RUN) $(REPLAY_ARGS)
+
+# Judge dashboard at http://localhost:8501 (reads saved files only; no model needed).
+ui:
+	STREAMLIT_BROWSER_GATHER_USAGE_STATS=false $(PYTHON) -m streamlit run ui/app.py --server.headless true --server.address localhost
 
 # Optional check: ITU reference ingestion on one PDF, into a throwaway index.
 # Needs `ollama serve` running and `ollama pull nomic-embed-text`.

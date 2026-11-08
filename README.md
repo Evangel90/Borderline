@@ -39,6 +39,7 @@ configuration format).
 | If you want to… | Open |
 |---|---|
 | Read the submission | [Technical report](report/technical-report.md) |
+| Explore the drills, agents, sources and audit checks in a browser | `make ui` after [installing](#1-install), then http://localhost:8501 ([`ui/`](ui/app.py)); no model needed |
 | See every drill result against what was expected | [Final run review](report/run-review-2026-11-08-final-runs.md) |
 | See what each AI agent does | [The AI agents and their roles](#the-ai-agents-and-their-roles) |
 | See who decided what, step by step | Decision trails for drills [A](report/decision-trail-governed-20261108-4.md), [B](report/decision-trail-ungoverned-20261108-3.md), [C](report/decision-trail-insufficient-20261108-3.md), [D](report/decision-trail-governed-scripted-20261108-3.md) |
@@ -187,14 +188,14 @@ review.
 
 ## Reproducibility guide
 
-There are three levels of check. The first two need no language model and take a
-few minutes.
+Install once, then there are three levels of check. The dashboard and the terminal
+checks need no language model and take a few minutes.
 
 ### Environment used for the final runs
 
 | Item | Value |
 |---|---|
-| Code | commit `b229477` (drill code is unchanged since; later commits touch documentation only) |
+| Code | commit `b229477`. Later commits change documentation, remove unused `make` targets and make `scripts/replay.py` record a relative log path; none changes how a drill runs |
 | Python | 3.11.17; exact packages in [`requirements-lock.txt`](requirements-lock.txt) |
 | Ollama | 0.40.6 |
 | Model | `qwen3:8b`, digest `500a1f067a9f` (8.2B parameters, Q4_K_M quantisation) |
@@ -213,7 +214,24 @@ python3.11 -m venv .venv
 make index        # builds the local search index; downloads the embedding model once (~220 MB)
 ```
 
-### 2. Check the published results (no model needed)
+### 2. Open the review dashboard (no model needed)
+
+```sh
+make ui           # then open http://localhost:8501
+```
+
+The dashboard ([`ui/`](ui/app.py)) reads the saved runs and sources and calls no AI model. It has five pages:
+
+1. **Overview:** the scenario, how a decision is made, and what each drill showed.
+2. **The drills:** every cross-border letter, the three answers, each quote and whether it matched the law;
+   every agent's input and decision one click deeper.
+3. **Policy gaps found:** the four gap candidates, each with local evidence and a global comparison.
+4. **Agents and sources:** each AI agent's mandate, allowed actions and decisions; the registered sources, and
+   the text behind any passage ID.
+5. **Verify and reproduce:** runs the hash-chain, git-tag, replay and source-hash checks in the browser, and a
+   tamper test that edits a temporary copy of a log to show what each check catches.
+
+### 3. Check the published results in the terminal (no model needed)
 
 ```sh
 make verify-sources                       # every source file still matches its registered hash
@@ -237,7 +255,7 @@ from the logged AI answers and the code. To see the code react to a changed answ
 edit a copy of a log and run `make replay RUN=<id> REPLAY_ARGS="--log edited.jsonl"`;
 the hash-chain check will also report the edit.
 
-### 3. Re-run the drills with the model
+### 4. Re-run the drills with the model
 
 Install [Ollama](https://ollama.com), then:
 
@@ -307,6 +325,7 @@ packs/bridge/ae-ch.yaml      counterparts and reference answers between the two 
 packs/global/                global guidance and the neutral adviser
 data/sources.csv, data/raw/  source register and source files
 scripts/                     command-line tools behind the make targets
+ui/                          review dashboard (`make ui`): reads saved files, calls no model
 tests/                       unit and scenario tests
 vendor/ITUAIReadiness/       ITU reference code (git submodule, MIT)
 ```
@@ -317,6 +336,7 @@ Run from the repository root.
 
 | Command | What it does |
 | --- | --- |
+| `make ui` | Open the review dashboard at http://localhost:8501 (overview, drills, policy gaps, agents and sources, live checks and tamper test). Reads saved files only |
 | `make verify-sources` | Re-hash every registered source and flag any change |
 | `make ingest` | Rebuild the provenance-bearing passages and the search index |
 | `make index` | Build or update the local search index from the existing passages |
