@@ -189,7 +189,6 @@ few minutes.
 ```sh
 git clone --recurse-submodules https://github.com/Evangel90/Borderline.git
 cd Borderline
-git checkout incident-drill
 python3.11 -m venv .venv
 .venv/bin/pip install -r requirements-lock.txt   # exact versions used
 .venv/bin/pip install -e .
