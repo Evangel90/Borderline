@@ -29,7 +29,7 @@ Three decision-makers take part, and each log entry names which one decided: **i
 
 **Context provided by the knowledge base (KB).**
 
-- 49 hashed files (26 UAE, 9 Swiss, 14 global; see SRC below) split into 2,286 passages, each with document, page, language, binding status and an ID such as `CH-HEALTH-TPA:p40:c1`.
+- 49 hashed files (26 UAE, 9 Swiss, 14 global; SRC below), 2,286 passages with page-level IDs such as `CH-HEALTH-TPA:p40:c1`. The KB, built with the ITU code: [`knowledge-base`](https://github.com/Evangel90/Borderline/tree/v0.1/knowledge-base).
 - An agent sees only its institution's view, mandate and allowed actions, and passages from its own country plus global guidance (the adviser sees both countries); it may cite only these. The reviewer sees passages searched per country, the provision the letter relies on, and any drill exhibits (labelled synthetic documents).
 - Gaps are recorded, not guessed (garbled Arabic is not quoted; a missing document becomes homework). Retrieval puts the exact passage in the top six for 8 of 10 test questions.
 
