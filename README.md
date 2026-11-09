@@ -195,7 +195,7 @@ checks need no language model and take a few minutes.
 
 | Item | Value |
 |---|---|
-| Code | commit `b229477`. Later commits change documentation, remove unused `make` targets and make `scripts/replay.py` record a relative log path; none changes how a drill runs |
+| Code | commit `b229477`. Later commits change documentation, add the review dashboard, remove unused `make` targets and make `scripts/replay.py` record a relative log path; none changes how a drill runs |
 | Python | 3.11.17; exact packages in [`requirements-lock.txt`](requirements-lock.txt) |
 | Ollama | 0.40.6 |
 | Model | `qwen3:8b`, digest `500a1f067a9f` (8.2B parameters, Q4_K_M quantisation) |
@@ -206,7 +206,7 @@ checks need no language model and take a few minutes.
 ### 1. Install
 
 ```sh
-git clone --recurse-submodules https://github.com/Evangel90/Borderline.git
+git clone https://github.com/Evangel90/Borderline.git
 cd Borderline
 python3.11 -m venv .venv
 .venv/bin/pip install -r requirements-lock.txt   # exact versions used
@@ -257,10 +257,27 @@ the hash-chain check will also report the edit.
 
 ### 4. Re-run the drills with the model
 
-Install [Ollama](https://ollama.com), then:
+**Set up Ollama** (the local model runner; about 5 GB for the model, and 16 GB of memory or more is advisable):
 
 ```sh
-ollama pull qwen3:8b
+brew install ollama        # macOS; on Linux: curl -fsSL https://ollama.com/install.sh | sh; Windows: ollama.com/download
+ollama serve               # leave this running in its own terminal tab
+```
+
+In a second terminal tab:
+
+```sh
+ollama pull qwen3:8b       # one-time download of the model (8.2B parameters, Q4_K_M)
+ollama list                # qwen3:8b should be listed
+ollama run qwen3:8b "Reply with one word: ready" --think=false   # optional smoke test; /bye to exit
+```
+
+If `ollama serve` reports that the address is already in use, Ollama is already
+running (the macOS app starts it automatically) and you can skip that step.
+
+Then run the drills:
+
+```sh
 export BORDERLINE_LLM_PROVIDER=ollama BORDERLINE_LLM_MODEL=qwen3:8b
 make drill INTENT=retinopathy-governed RUN=repro-A
 make drill INTENT=retinopathy-ae-ch RUN=repro-B DRILL_ARGS=--include-optional-events
@@ -268,6 +285,9 @@ make drill INTENT=retinopathy-insufficient-evidence RUN=repro-C
 make drill INTENT=retinopathy-governed RUN=repro-D DRILL_ARGS="--reviewer scripted"
 shasum -a 256 runs/repro-*/log.jsonl
 ```
+
+Drill D uses scripted reviewer answers and calls no model. Each AI drill takes
+many model calls and can run for a long time on a laptop.
 
 Logs contain no run IDs or timestamps, so a faithful re-run produces a
 byte-identical `log.jsonl`. Compare with the published logs (also recorded in the

@@ -1,6 +1,6 @@
 # Run review: final runs of Drills A, B, C and D, 8 November 2026
 
-**Model:** local `qwen3:8b` through Ollama, 16,384-token context, temperature 0, for every institution agent and for the AI liaison reviewer. **Code:** branch `incident-drill` at `b229477`; 174 tests pass. All four runs used the same code and model. **Status:** unreviewed synthetic drill output. Nothing here is a legal conclusion, and no person with legal standing has reviewed it. Run folders (`runs/`) are git-ignored, so the numbers below are copied from them.
+**Model:** local `qwen3:8b` through Ollama, 16,384-token context, temperature 0, for every institution agent and for the AI liaison reviewer. **Code:** branch `incident-drill` at `b229477`; 174 tests pass. All four runs used the same code and model. **Status:** unreviewed synthetic drill output. Nothing here is a legal conclusion, and no person with legal standing has reviewed it. The four run folders are published under `runs/` (other runs stay local), so the numbers below can be checked with `make verify-log`, `make replay` and `make ui`.
 
 These four runs, all on the same code, are the basis of the technical report. Their logs are in `runs/`, so every figure below can be re-checked with `make verify-log` and `make replay`.
 
@@ -21,7 +21,7 @@ Abbreviations used below: Emirates Drug Establishment (EDE); Swiss Agency for Th
 | `insufficient-20261108-3` | C, insufficient evidence | 7 | verified | 1 (no citation) | 1 | 0 of 1 | 6 of 6 | **0** | **1** (`policy_gap`, `implementation_gap`) |
 | `governed-scripted-20261108-3` | **D, scripted control for A (not an AI decision)** | 11 | verified | 2 (1 no citation, 1 citation needs review) | 2 | 3 of 3 | 21 of 21 | 0 | 0 |
 
-Final hashes: A `7f02b684…63c5ba`, B `bc42b877…9b60a7`, C `5a87602d…f13c7a`, D `d7ec48e0…c93c69`. `make replay` reports 0 differences for all four runs (11 letters, 33 answers, 70 quotes; every conditional step agrees with the replayed state).
+Final hash-chain heads (the last entry's hash, not the file hash): A `7f02b684…63c5ba`, B `bc42b877…9b60a7`, C `5a87602d…f13c7a`, D `d7ec48e0…c93c69`. `make replay` reports 0 differences for all four runs (11 letters, 33 answers, 70 quotes; every conditional step agrees with the replayed state).
 
 **Reproducibility.** These runs were made after one change to the quote check (a missing or extra space now counts as one slip). Compared with the set run just before that change: Drills A, C and D gave byte-identical logs; Drill B differed only at step 9, where two quotes with a dropped space ("ProperProtection") now verify. No answer, outcome or step changed. At temperature 0 the same code and model gave the same log.
 

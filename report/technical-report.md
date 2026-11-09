@@ -4,7 +4,7 @@
 
 **Team:** Borderline · **Team leader:** Oladipo Evangel · **Members:** Oladipo Evangel, Professor James Agajo
 **Contact:** [oladipoevangel90@gmail.com](mailto:oladipoevangel90@gmail.com), +2348135001380 · **GitHub:** [github.com/Evangel90/Borderline](https://github.com/Evangel90/Borderline/tree/incident-drill) (branch `incident-drill`)
-**Status:** draft, 8 November 2026. Results come from four runs on commit `b229477` (listed in section 5); Drill D's liaison answers are scripted, **not AI decisions**. Nothing here is a legal conclusion or has had legal review; policy gaps are **candidates**.
+**Status:** submission version, 9 November 2026. Results come from four runs on commit `b229477` (listed in section 5); Drill D's liaison answers are scripted, **not AI decisions**. Nothing here is a legal conclusion or has had legal review; policy gaps are **candidates**.
 
 ## 1. Introduction
 
