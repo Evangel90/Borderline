@@ -11,6 +11,8 @@ venv/
 index/
 qdrant_storage/
 chromadb/
+# ...except the published knowledge base built with the ITU reference code (`make knowledge-base`)
+!/knowledge-base/chromadb/
 
 # Drill outputs are generated locally. Only the four final runs the report is based on are
 # published, so `make replay` and `make verify-log` can be checked against them.

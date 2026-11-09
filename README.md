@@ -43,6 +43,7 @@ configuration format).
 | See every drill result against what was expected | [Final run review](report/run-review-2026-11-08-final-runs.md) |
 | See what each AI agent does | [The AI agents and their roles](#the-ai-agents-and-their-roles) |
 | See who decided what, step by step | Decision trails for drills [A](report/decision-trail-governed-20261108-4.md), [B](report/decision-trail-ungoverned-20261108-3.md), [C](report/decision-trail-insufficient-20261108-3.md), [D](report/decision-trail-governed-scripted-20261108-3.md) |
+| See the knowledge base of policies, regulations and strategies | [`knowledge-base/`](knowledge-base/) (ChromaDB database built with the ITU reference code, with its document list and search example) |
 | Check the results yourself in a few minutes | [Reproducibility guide](#reproducibility-guide) |
 | See the code that makes the final decision | [`engine/liaison.py`](engine/liaison.py), [`engine/quotes.py`](engine/quotes.py) |
 
@@ -141,6 +142,18 @@ official positions of the real institutions. Drill D uses the same agents as Dri
   kept out of quoting; documents that could not be obtained are registered as such;
   absence searches (what was searched for, where, and what was found) are kept in
   [`gaps/searches/`](gaps/searches).
+
+### Knowledge base in the ITU format
+
+The knowledge base asked for in the hackathon submission is the folder
+[`knowledge-base/`](knowledge-base/), laid out like the ITU AI Readiness reference code
+([CrashingGuru/ITUAIReadiness](https://github.com/CrashingGuru/ITUAIReadiness)) and built with it:
+the 40 documents the drills search in `InputDocs/` with an [`Inputs.md`](knowledge-base/InputDocs/Inputs.md)
+manifest, and a ChromaDB vector database in `chromadb/` (**2,247 passages**, plus the
+19 ITU AI Readiness framework definitions). Its [README](knowledge-base/README.md) shows how
+to search it and how to rebuild it, with the ITU command or with `make knowledge-base`.
+The documents in `InputDocs/` are copies of the registered files in `data/raw/`, checked
+against their hashes (`make verify-knowledge-base`).
 
 ## The drills
 
@@ -350,7 +363,10 @@ intents/                     drill specifications
 packs/ae/, packs/ch/         country packs: institution profiles and passages
 packs/bridge/ae-ch.yaml      counterparts and reference answers between the two countries
 packs/global/                global guidance and the neutral adviser
-data/sources.csv, data/raw/  source register and source files
+data/sources.csv, data/raw/  source register and all registered source files
+knowledge-base/              the knowledge base in the ITU layout
+  InputDocs/                   the 40 documents it holds, with the Inputs.md manifest
+  chromadb/                    the vector database built with the ITU reference code
 scripts/                     command-line tools behind the make targets
 ui/                          review dashboard (`make ui`): reads saved files, calls no model
 tests/                       unit and scenario tests
@@ -374,6 +390,8 @@ Run from the repository root.
 | `make step-coverage RUNS="..."` | Show which steps and liaison branches ran across runs |
 | `make assess-candidates` | Apply the four-part evidence rule to the gap candidates |
 | `make evaluate-retrieval` | Measure retrieval on the ten-question test set |
+| `make knowledge-base` | Rebuild the knowledge base with the ITU reference ingestion: documents, database and [`Inputs.md`](knowledge-base/InputDocs/Inputs.md) (setup in [`knowledge-base/README.md`](knowledge-base/README.md#rebuild-it)) |
+| `make verify-knowledge-base` | Check every document in `knowledge-base/InputDocs/` against its hash in the register |
 | `make itu-smoke` | Optional: run the ITU reference ingestion on one PDF (needs the `itu` extra and an Ollama embedding model) |
 
 ## Configuration

@@ -14,7 +14,7 @@ dependencies = [
 ]
 
 [project.optional-dependencies]
-# Runs the optional local ITU ingestion check (`make itu-smoke`; vendor/ is not in the repository)
+# Runs the ITU reference ingestion (`make knowledge-base`, `make itu-smoke`; vendor/ is not in the repository)
 itu = [
     "ollama>=0.4.0",
     "pydantic-settings>=2.0.0",

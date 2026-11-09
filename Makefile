@@ -1,4 +1,4 @@
-.PHONY: ui step-coverage decision-trail verify-sources ingest index drill verify-log audit-evidence assess-candidates evaluate-claims evaluate-retrieval replay itu-smoke
+.PHONY: ui step-coverage decision-trail verify-sources ingest index drill verify-log audit-evidence assess-candidates evaluate-claims evaluate-retrieval replay itu-smoke knowledge-base verify-knowledge-base
 
 INTENT ?= retinopathy-ae-ch
 RUN ?=
@@ -61,3 +61,13 @@ ui:
 itu-smoke:
 	cd $(ITU_SIM) && AIREADY_CHROMADB_DIR=$(CURDIR)/index/itu-smoke \
 		$(PYTHON) -m server.knowledge.ingest --reset --file "$(PDF)"
+
+# Build the knowledge base in the ITU layout: copy the registered files the drills search into
+# knowledge-base/InputDocs/ (hash-checked), build knowledge-base/chromadb/ with the unmodified ITU
+# ingestion functions, and regenerate knowledge-base/InputDocs/Inputs.md. Same prerequisites as itu-smoke.
+knowledge-base:
+	$(PYTHON) scripts/build_knowledge_base.py --ingest
+
+# Check the copies in knowledge-base/InputDocs/ against data/sources.csv (no model needed).
+verify-knowledge-base:
+	$(PYTHON) scripts/build_knowledge_base.py --check
