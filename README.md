@@ -220,7 +220,7 @@ make index        # builds the local search index; downloads the embedding model
 make ui           # then open http://localhost:8501
 ```
 
-The dashboard ([`ui/`](ui/app.py)) reads the saved runs and sources and calls no AI model. It has five pages:
+The dashboard ([`ui/`](ui/app.py)) reads the saved runs and sources and calls no AI model. It has six pages:
 
 1. **Overview:** the scenario, how a decision is made, and what each drill showed.
 2. **The drills:** every cross-border letter, the three answers, each quote and whether it matched the law;
@@ -230,6 +230,8 @@ The dashboard ([`ui/`](ui/app.py)) reads the saved runs and sources and calls no
    the text behind any passage ID.
 5. **Verify and reproduce:** runs the hash-chain, git-tag, replay and source-hash checks in the browser, and a
    tamper test that edits a temporary copy of a log to show what each check catches.
+6. **Source passage:** every citation and quote on the other pages links here. It shows the page of the
+   registered document with the cited text highlighted, the passage the agent was given, and the official link.
 
 ### 3. Check the published results in the terminal (no model needed)
 

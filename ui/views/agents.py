@@ -6,7 +6,8 @@ from collections import Counter
 
 import streamlit as st
 
-from common import FINAL_RUNS, chunks, institutions, label, load_run, passage, sidebar_note, sources
+from common import (FINAL_RUNS, chunks, cited_ids, institutions, label, load_run, passage, sidebar_note, source_href,
+                    source_links, sources)
 
 sidebar_note()
 st.title("🏛️ Agents and sources")
@@ -53,8 +54,8 @@ with tab_agents:
             with st.popover(f"Drill {FINAL_RUNS[run]['letter']} · step {e.get('step')} · `{e.get('action_taken')}`"):
                 st.markdown(f"**Input:** {e.get('visible_event', '')}")
                 st.markdown(f"**Output:** `{e.get('action_taken')}`: {e.get('justification', '')}")
-                if e.get("cited_clauses"):
-                    st.caption("Cited: " + ", ".join(e["cited_clauses"]))
+                st.markdown(source_links(cited_ids(e.get("cited_clauses", [])))
+                            or "*No passage cited for this explanation.*")
     st.caption(f"Full profile: `{p['_file']}`")
 
 # ---------------- sources ----------------
@@ -73,6 +74,7 @@ with tab_sources:
         title, text = passage(cid.strip())
         st.markdown(f"**{title}**")
         if text:
+            st.markdown(f"[See it on the page it comes from ↗]({source_href(cid.strip())})")
             st.text(text)
         else:
             st.error("No passage with that ID.")

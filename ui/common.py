@@ -10,8 +10,10 @@ import csv
 import hashlib
 import json
 from pathlib import Path
+import re
 import sys
 from typing import Any
+from urllib.parse import quote_plus, urlencode
 
 import streamlit as st
 import yaml
@@ -161,6 +163,37 @@ def passage(chunk_id: str) -> tuple[str, str]:
     if exhibit:
         return f"Synthetic drill exhibit: {exhibit.get('title', exhibit['id'])}", exhibit.get("text", "")
     return "Not found in the knowledge base", ""
+
+
+CHUNK_ID = re.compile(r"[A-Za-z0-9_.\-]+:p\d+:c\d+")
+
+
+def cited_ids(clauses: list[str]) -> list[str]:
+    """Passage IDs inside an agent's cited clauses, e.g. 'CH-HEALTH-MedDO (p. 28; CH-HEALTH-MedDO:p28:c1)'."""
+    found = [m.group(0) for clause in clauses or [] for m in CHUNK_ID.finditer(clause)]
+    return list(dict.fromkeys(found))
+
+
+def source_href(chunk_id: str, quote: str | None = None) -> str:
+    """Link to the Source passage page, which shows the PDF page with the passage or quote highlighted."""
+    params = {"chunk": chunk_id}
+    if quote:
+        params["quote"] = quote
+    return "source?" + urlencode(params, quote_via=quote_plus)
+
+
+def source_label(chunk_id: str) -> str:
+    record = chunks().get(chunk_id)
+    if record:
+        return f"{record.get('doc_id')}, page {record.get('page')}"
+    return chunk_id.split(":")[0]
+
+
+def source_links(chunk_ids: list[str], lead: str = "Read the source") -> str:
+    """Markdown line linking each passage to the exact page it comes from."""
+    if not chunk_ids:
+        return ""
+    return f"{lead}: " + " · ".join(f"[{source_label(c)} ↗]({source_href(c)})" for c in chunk_ids)
 
 
 @st.cache_data

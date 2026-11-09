@@ -7,7 +7,7 @@ import json
 import streamlit as st
 import yaml
 
-from common import ROOT, passage, sidebar_note
+from common import ROOT, passage, sidebar_note, source_href
 
 sidebar_note()
 st.title("🧩 Policy gaps found")
@@ -25,7 +25,8 @@ ROLE = {"host": "UAE", "partner": "Switzerland", "global_comparator": "Global co
 
 def quote_block(q: dict) -> None:
     title, _ = passage(q["chunk_id"])
-    st.markdown(f"> {q['quote']}\n>\n> {'✓' if q.get('verified') else '✗'} `{q['chunk_id']}` · {title}")
+    st.markdown(f"> {q['quote']}\n>\n> {'✓' if q.get('verified') else '✗'} `{q['chunk_id']}` · {title} · "
+                f"[see it on the page ↗]({source_href(q['chunk_id'], q['quote'])})")
 
 
 for cand in sorted(status.get("candidates", []), key=lambda c: c["candidate_id"]):

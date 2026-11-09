@@ -5,7 +5,7 @@ from __future__ import annotations
 import streamlit as st
 
 from common import (CHECK_LABELS, FINAL_RUNS, REFERENCE_FILE, REPO_URL, STATUS_LABELS, TAG, expected_status, label,
-                    load_run, name, passage, run_summary, sidebar_note)
+                    cited_ids, load_run, name, passage, run_summary, sidebar_note, source_href, source_links)
 
 sidebar_note()
 
@@ -97,13 +97,16 @@ def letter_card(entry: dict) -> None:
                 st.markdown(f"**{CHECK_LABELS.get(check['check'], check['check'])}**: {check.get('answer')}")
                 if check.get("reason"):
                     st.caption(f"Reviewer's reason: {check['reason']}")
+                    st.caption(source_links([q["chunk_id"] for q in check.get("quotes", [])],
+                                            "Where to check the reason") or "No passage cited for this reason.")
                 rq = {q["chunk_id"]: q for q in by_check.get(check["check"], {}).get("quotes", [])}
                 for q in check.get("quotes", []):
                     res = rq.get(q.get("chunk_id"), {})
                     verdict = ("✓ matches the passage" if res.get("verified")
                                else f"✗ rejected: {res.get('failure') or 'not found in the passage'}")
                     title, _ = passage(q["chunk_id"])
-                    st.markdown(f"> {q.get('quote', '')}\n>\n> `{q['chunk_id']}` · {title} · **{verdict}**")
+                    st.markdown(f"> {q.get('quote', '')}\n>\n> `{q['chunk_id']}` · {title} · **{verdict}** · "
+                                f"[see it on the page ↗]({source_href(q['chunk_id'], q.get('quote'))})")
 
 
 letters = [e for e in log if e.get("liaison_status") in ("ROUTE", "BLOCK")]
@@ -140,8 +143,8 @@ with st.expander(f"Step-by-step record: every agent's input and decision ({len(t
                     st.caption("Passages retrieved: " + ", ".join(e["retrieved_chunk_ids"]))
                 st.markdown("**Output: what it decided**")
                 st.markdown(f"`{e.get('action_taken')}`: {e.get('justification', '')}")
-                if e.get("cited_clauses"):
-                    st.caption("Cited: " + ", ".join(e["cited_clauses"]))
+                st.markdown(source_links(cited_ids(e.get("cited_clauses", [])))
+                            or "*No passage cited for this explanation.*")
 
 if data["gaps"] or data["homework"]:
     with st.expander(f"Raised for human review: {len(data['gaps'])} gap record(s), "

@@ -20,4 +20,5 @@ st.navigation([
     st.Page(VIEWS / "gap_candidates.py", title="3. Policy gaps found", icon="🧩"),
     st.Page(VIEWS / "agents.py", title="4. Agents and sources", icon="🏛️"),
     st.Page(VIEWS / "verify.py", title="5. Verify and reproduce", icon="🔐"),
+    st.Page(VIEWS / "source.py", title="6. Source passage", icon="📄", url_path="source"),
 ]).run()
