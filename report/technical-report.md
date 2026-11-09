@@ -127,7 +127,7 @@ Details: [`run-review-2026-11-08-final-runs.md`](run-review-2026-11-08-final-run
 
 ## 6. Policy and standards gaps derived from the mapping
 
-All four gaps in [`gaps/candidate_register.yaml`](../gaps/candidate_register.yaml) pass a four-part check run by code (`make assess-candidates`, 9 November 2026): every quote matches its source word for word; each search for missing rules is recorded; each gap quotes a verified global comparison (European Union (EU), IMDRF, Organisation for Economic Co-operation and Development (OECD)); and no document we could still obtain might disprove it. They are findings subject to expert legal review; "absent" means absent from this KB.
+All four gaps in [`gaps/candidate_register.yaml`](../gaps/candidate_register.yaml) pass a four-part check run by code (`make assess-candidates`, 9 November 2026): every quote matches its source word for word; each search for missing rules is recorded; each gap quotes a verified global comparison (European Union (EU), IMDRF, Organisation for Economic Co-operation and Development (OECD)); and no document we could still obtain might disprove it. They are findings subject to expert legal review.
 
 | ID | Gap type | Local evidence (verified quote) | Global comparison (verified quote) and recommendation |
 |---|---|---|---|
