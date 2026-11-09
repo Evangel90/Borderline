@@ -47,6 +47,9 @@ class Assessment:
     candidate_id: str
     title: str
     status: str
+    category: str = ""
+    reason_from_drill: str = ""
+    recommendation: str = ""
     unmet: list[dict[str, str]] = field(default_factory=list)  # {"condition", "detail"}
     notes: list[str] = field(default_factory=list)
     quotes: list[dict[str, Any]] = field(default_factory=list)
@@ -63,6 +66,9 @@ class Assessment:
         return {
             "candidate_id": self.candidate_id,
             "title": self.title,
+            "category": self.category,
+            "reason_from_drill": self.reason_from_drill,
+            "recommendation": self.recommendation,
             "status": self.status,
             "unmet_conditions": self.unmet,
             "notes": self.notes,
@@ -127,7 +133,10 @@ def missing_document_kind(document: dict[str, Any], chunks: dict[str, Chunk]) ->
 
 def assess_candidate(candidate: dict[str, Any], missing: dict[str, dict[str, Any]],
                      chunks: dict[str, Chunk], search_dir: str) -> Assessment:
-    result = Assessment(candidate["id"], candidate.get("title", ""), OPEN)
+    result = Assessment(candidate["id"], candidate.get("title", ""), OPEN,
+                        category=candidate.get("category", ""),
+                        reason_from_drill=" ".join(candidate.get("reason_from_drill", "").split()),
+                        recommendation=" ".join(candidate.get("recommendation", "").split()))
 
     # 1. Every quote verifies.
     for item in candidate.get("quotes", []):

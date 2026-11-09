@@ -179,12 +179,14 @@ no obtainable missing document could refute the candidate. All four currently me
 it ([`report/candidate-status.json`](report/candidate-status.json)) and await expert
 review.
 
-| ID | Candidate |
-|---|---|
-| CAND-001 | No single UAE authority is clearly competent to protect UAE health data held abroad |
-| CAND-002 | DHA's AI policy requires certification of "major upgraded versions" without defining them |
-| CAND-003 | Neither country takes part in the international device-incident report exchange |
-| CAND-004 | The exceptions to the UAE health-data localisation rule are in a resolution that is not publicly available |
+| ID | Gap (domain wording) | Category | Reason from drill |
+|---|---|---|---|
+| CAND-001 | No designated authority for cross-border enforcement cooperation on patient data used by diagnostic AI | Unclear responsibilities; coordination problem | UAE retinal images held in Zurich; the Swiss regulator needs a reciprocal counterpart, and the sources held do not name the UAE body for health data |
+| CAND-002 | No defined threshold for when an update to a diagnostic AI model needs re-approval | Standards gap; technology gap | A model update is linked to missed diagnoses; the DHA AI policy asks for certification of "major upgraded versions" without defining "major" |
+| CAND-003 | No route for regulators to share AI medical-device incident reports outside a closed international exchange | Coordination problem; standards gap | Neither regulator is on the participant list of the International Medical Device Regulators Forum (IMDRF) incident-report exchange |
+| CAND-004 | The rules on when health data may leave the country are hard to locate and inconsistently cited | Legislative gap (transparency) | The deciding resolution was not publicly accessible to the project after documented attempts and is cited under two instrument types |
+
+Each candidate also carries a recommendation drawn from its global example (see the register).
 
 ## Reproducibility guide
 

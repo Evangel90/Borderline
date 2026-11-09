@@ -7,7 +7,7 @@ import json
 import streamlit as st
 import yaml
 
-from common import ROOT, passage, sidebar_note, source_href
+from common import FINAL_RUNS, ROOT, passage, sidebar_note, source_href
 
 sidebar_note()
 st.title("🧩 Policy gaps found")
@@ -29,6 +29,18 @@ def quote_block(q: dict) -> None:
                 f"[see it on the page ↗]({source_href(q['chunk_id'], q['quote'])})")
 
 
+def linked(text: str, links: list[dict], quotes: list[dict]) -> str:
+    """Turn each listed phrase into a link to the exact source passage, highlighting the candidate's quote."""
+    text = " ".join(text.split())
+    quote_for = {q["chunk_id"]: q["quote"] for q in quotes}
+    for item in links:
+        phrase = item["text"]
+        if phrase in text:
+            href = source_href(item["chunk_id"], quote_for.get(item["chunk_id"]))
+            text = text.replace(phrase, f"[{phrase} ↗]({href})", 1)
+    return text
+
+
 for cand in sorted(status.get("candidates", []), key=lambda c: c["candidate_id"]):
     reg = reg_by_id.get(cand["candidate_id"], {})
     quotes = cand.get("quotes", [])
@@ -36,11 +48,21 @@ for cand in sorted(status.get("candidates", []), key=lambda c: c["candidate_id"]
     global_q = [q for q in quotes if q.get("role") == "global_comparator"]
     with st.container(border=True):
         st.markdown(f"#### {cand['title']}")
-        st.caption(f"{cand['candidate_id']} · {reg.get('type', '')} gap · "
+        st.caption(f"{cand['candidate_id']} · Category: {cand.get('category') or reg.get('category', '')} · "
                    + ("✅ passes all four evidence checks" if cand["status"] == "SUPPORTED_CANDIDATE"
                       else "🟡 open: " + "; ".join(cand.get("unmet_conditions", []))))
-        if reg.get("hypothesis"):
-            st.write(" ".join(reg["hypothesis"].split()))
+        links = reg.get("links", [])
+        reason = reg.get("reason_from_drill") or cand.get("reason_from_drill", "")
+        if reason:
+            st.markdown(f"**Reason from drill:** {linked(reason, links, quotes)}")
+        for ref in reg.get("drill_steps", []):
+            info = FINAL_RUNS.get(ref["run"], {})
+            step_word = "step" if "–" not in str(ref["steps"]) else "steps"
+            st.page_link("views/drills.py", icon="🎬", query_params={"run": ref["run"]},
+                         label=f"See Drill {info.get('letter', '?')} · {info.get('name', ref['run'])}, {step_word} {ref['steps']}")
+        recommendation = reg.get("recommendation") or cand.get("recommendation", "")
+        if recommendation:
+            st.markdown(f"**Recommendation from global practice:** {linked(recommendation, links, quotes)}")
         left, right = st.columns(2)
         with left:
             st.markdown("**What the local law says (or does not)**")

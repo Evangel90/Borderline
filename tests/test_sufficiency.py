@@ -249,8 +249,8 @@ def test_resolution_51_stays_missing_and_is_worded_as_inaccessible(checked_in):
     mr51 = next(d for d in register["missing_documents"] if d["id"] == "AE-HEALTH-DATA-EXEMPTIONS-MR51-2021")
     assert mr51["kind"] == "unobtainable_after_documented_attempts" and mr51["attempts"]
     assert "AE-HEALTH-DATA-EXEMPTIONS-MR51-2021" in checked_in["CAND-001"]["unobtainable_documents"]
-    title = checked_in["CAND-004"]["title"]
-    assert "not publicly accessible to the project after documented attempts" in title
+    reason = checked_in["CAND-004"]["reason_from_drill"]
+    assert "not publicly accessible to the project after documented attempts" in reason
     assert "does not exist" not in json.dumps(register)
     assert assess_register(register, load_chunks())["register_problems"] == []
 
@@ -267,3 +267,19 @@ def test_absence_search_can_be_limited_to_named_documents():
     result = search(["global"], ["Switzerland"], ["IMDRF-NCAR-N14-2025"])
     assert set(result["documents"]) == {"IMDRF-NCAR-N14-2025"}
     assert result["hits"]["Switzerland"] == []
+
+
+def test_every_gap_link_points_to_its_text_a_real_passage_and_a_final_drill():
+    from ui.common import FINAL_RUNS
+    chunk_ids = set(load_chunks())
+    for cand in load_register()["candidates"]:
+        for field_name in ("category", "reason_from_drill", "recommendation"):
+            assert cand.get(field_name), f"{cand['id']} has no {field_name}"
+        body = " ".join((cand["reason_from_drill"] + " " + cand["recommendation"]).split())
+        assert cand.get("links"), f"{cand['id']} has no source links"
+        for link in cand["links"]:
+            assert link["text"] in body, f"{cand['id']}: link text not in reason or recommendation: {link['text']}"
+            assert link["chunk_id"] in chunk_ids, f"{cand['id']}: unknown passage {link['chunk_id']}"
+        assert cand.get("drill_steps"), f"{cand['id']} has no drill link"
+        for ref in cand["drill_steps"]:
+            assert ref["run"] in FINAL_RUNS, f"{cand['id']}: {ref['run']} is not a final run"
