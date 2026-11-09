@@ -3,8 +3,8 @@
 **(Cross-border response to safety, security and data incidents in diabetic-retinopathy screening AI)**
 
 **Team:** Borderline · **Team leader:** Oladipo Evangel · **Members:** Oladipo Evangel, Professor James Agajo
-**Contact:** [oladipoevangel90@gmail.com](mailto:oladipoevangel90@gmail.com), +2348135001380 · **GitHub:** [github.com/Evangel90/Borderline](https://github.com/Evangel90/Borderline/tree/v1.0)
-**Status:** submitted 9 November 2026; results from release [`v1.0`](https://github.com/Evangel90/Borderline/releases/tag/v1.0) (drill code unchanged since `b229477`).
+**Contact:** [oladipoevangel90@gmail.com](mailto:oladipoevangel90@gmail.com), +2348135001380 · **GitHub:** [github.com/Evangel90/Borderline](https://github.com/Evangel90/Borderline/tree/v0.1)
+**Status:** submitted 9 November 2026; results from release [`v0.1`](https://github.com/Evangel90/Borderline/releases/tag/v0.1) (drill code unchanged since `b229477`).
 
 ## 1. Introduction
 
