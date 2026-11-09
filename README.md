@@ -124,14 +124,28 @@ official positions of the real institutions. Drill D uses the same agents as Dri
 
 ## The knowledge base
 
-- **49 registered source and extraction files** (26 UAE, 9 Swiss, 14 global) in
-  [`data/raw/`](data/raw), each with its URL, issuer, language, legal status and
-  SHA-256 hash in the register [`data/sources.csv`](data/sources.csv).
-- **2,286 passages** in [`packs/ae/chunks.jsonl`](packs/ae/chunks.jsonl),
+**The knowledge base is the folder [`knowledge-base/`](knowledge-base/):** 40 UAE, Swiss and
+global policies, regulations and strategies, laid out like the ITU AI Readiness reference code
+([CrashingGuru/ITUAIReadiness](https://github.com/CrashingGuru/ITUAIReadiness)) and built with
+it into a ChromaDB vector database: **2,247 passages**, plus the 19 ITU AI Readiness framework
+definitions. Its [README](knowledge-base/README.md) lists the documents
+([`Inputs.md`](knowledge-base/InputDocs/Inputs.md)), shows how to search it, and how to rebuild
+it with the ITU command or with `make knowledge-base`.
+
+- **Provenance.** [`data/raw/`](data/raw) holds all **49 registered source and extraction
+  files** (26 UAE, 9 Swiss, 14 global), each with its URL, issuer, language, legal status and
+  SHA-256 hash in the register [`data/sources.csv`](data/sources.csv). The 40 that are searched
+  are copied into `knowledge-base/InputDocs/` and checked against those hashes
+  (`make verify-knowledge-base`), so the knowledge base is a self-contained folder while the
+  drills and published runs keep their original paths
+  ([why both](knowledge-base/README.md#why-the-documents-are-also-in-dataraw)).
+- **How the drills search it.** The drills use a page-level index of the same 40 documents:
+  **2,286 passages** in [`packs/ae/chunks.jsonl`](packs/ae/chunks.jsonl),
   [`packs/ch/chunks.jsonl`](packs/ch/chunks.jsonl) and
   [`packs/global/chunks.jsonl`](packs/global/chunks.jsonl). Each keeps its document,
   page, language and binding status, and an ID such as `CH-HEALTH-TPA:p40:c1` that
-  every citation in the report points to.
+  every citation in the report points to. (The ITU code splits text by word count without
+  page numbers, hence the different passage count.)
 - **Search** combines keyword matching with a local multilingual embedding model
   (`paraphrase-multilingual-MiniLM-L12-v2`, through fastembed) over a Chroma index
   ([`engine/knowledge.py`](engine/knowledge.py)). On a ten-question test set it puts
@@ -142,20 +156,6 @@ official positions of the real institutions. Drill D uses the same agents as Dri
   kept out of quoting; documents that could not be obtained are registered as such;
   absence searches (what was searched for, where, and what was found) are kept in
   [`gaps/searches/`](gaps/searches).
-
-### Knowledge base in the ITU format
-
-The knowledge base asked for in the hackathon submission is the folder
-[`knowledge-base/`](knowledge-base/), laid out like the ITU AI Readiness reference code
-([CrashingGuru/ITUAIReadiness](https://github.com/CrashingGuru/ITUAIReadiness)) and built with it:
-the 40 documents the drills search in `InputDocs/` with an [`Inputs.md`](knowledge-base/InputDocs/Inputs.md)
-manifest, and a ChromaDB vector database in `chromadb/` (**2,247 passages**, plus the
-19 ITU AI Readiness framework definitions). Its [README](knowledge-base/README.md) shows how
-to search it and how to rebuild it, with the ITU command or with `make knowledge-base`.
-The documents in `InputDocs/` are copies of the registered files in `data/raw/`, checked
-against their hashes (`make verify-knowledge-base`), so the knowledge base is a self-contained
-folder while the drills and published runs keep their original paths
-([why both](knowledge-base/README.md#why-the-documents-are-also-in-dataraw)).
 
 ## The drills
 
