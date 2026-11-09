@@ -47,7 +47,7 @@ class Assessment:
     candidate_id: str
     title: str
     status: str
-    category: str = ""
+    gap_type: str = ""
     reason_from_drill: str = ""
     recommendation: str = ""
     unmet: list[dict[str, str]] = field(default_factory=list)  # {"condition", "detail"}
@@ -66,7 +66,7 @@ class Assessment:
         return {
             "candidate_id": self.candidate_id,
             "title": self.title,
-            "category": self.category,
+            "gap_type": self.gap_type,
             "reason_from_drill": self.reason_from_drill,
             "recommendation": self.recommendation,
             "status": self.status,
@@ -134,7 +134,7 @@ def missing_document_kind(document: dict[str, Any], chunks: dict[str, Chunk]) ->
 def assess_candidate(candidate: dict[str, Any], missing: dict[str, dict[str, Any]],
                      chunks: dict[str, Chunk], search_dir: str) -> Assessment:
     result = Assessment(candidate["id"], candidate.get("title", ""), OPEN,
-                        category=candidate.get("category", ""),
+                        gap_type=candidate.get("gap_type", ""),
                         reason_from_drill=" ".join(candidate.get("reason_from_drill", "").split()),
                         recommendation=" ".join(candidate.get("recommendation", "").split()))
 

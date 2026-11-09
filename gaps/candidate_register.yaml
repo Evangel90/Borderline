@@ -96,7 +96,7 @@ missing_documents:
 candidates:
   - id: CAND-003
     title: "No route for regulators to share AI medical-device incident reports outside a closed international exchange"
-    category: "Coordination problem; standards gap"
+    gap_type: "Standards gap (coordination)"
     reason_from_drill: >-
       In the drill, a Swiss manufacturer's software update is linked to missed diagnoses in Dubai.
       The international exchange of regulators' incident reports (the International Medical Device
@@ -140,7 +140,7 @@ candidates:
 
   - id: CAND-002
     title: "No defined threshold for when an update to a diagnostic AI model needs re-approval"
-    category: "Standards gap; technology gap"
+    gap_type: "Standards gap (technology)"
     reason_from_drill: >-
       In the drill, a software update to the screening model is linked to missed diagnoses. The Dubai
       Health Authority (DHA) AI policy asks for certification of "major upgraded versions", but the
@@ -191,7 +191,7 @@ candidates:
 
   - id: CAND-001
     title: "No designated authority for cross-border enforcement cooperation on patient data used by diagnostic AI"
-    category: "Unclear responsibilities; coordination problem"
+    gap_type: "Policy gap (unclear responsibilities)"
     reason_from_drill: >-
       In the drill, UAE patients' retinal images are held and processed in Zurich. The Swiss
       data-protection regulator (the Federal Data Protection and Information Commissioner, FDPIC) may
@@ -258,7 +258,7 @@ candidates:
 
   - id: CAND-004
     title: "The rules on when health data may leave the country are hard to locate and inconsistently cited"
-    category: "Legislative gap (transparency)"
+    gap_type: "Policy gap (legislative)"
     reason_from_drill: >-
       In the drill, the deciding question is whether UAE patients' retinal images may be kept in Zurich.
       The answer depends on Ministerial Resolution No. 51 of 2021, which is not publicly accessible to

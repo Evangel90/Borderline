@@ -273,7 +273,7 @@ def test_every_gap_link_points_to_its_text_a_real_passage_and_a_final_drill():
     from ui.common import FINAL_RUNS
     chunk_ids = set(load_chunks())
     for cand in load_register()["candidates"]:
-        for field_name in ("category", "reason_from_drill", "recommendation"):
+        for field_name in ("gap_type", "reason_from_drill", "recommendation"):
             assert cand.get(field_name), f"{cand['id']} has no {field_name}"
         body = " ".join((cand["reason_from_drill"] + " " + cand["recommendation"]).split())
         assert cand.get("links"), f"{cand['id']} has no source links"

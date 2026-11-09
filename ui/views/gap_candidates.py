@@ -52,7 +52,7 @@ for cand in sorted(status.get("candidates", []), key=lambda c: c["candidate_id"]
     global_q = [q for q in quotes if q.get("role") == "global_comparator"]
     with st.container(border=True):
         st.markdown(f"#### {cand['title']}")
-        st.caption(f"{cand['candidate_id']} · Category: {cand.get('category') or reg.get('category', '')} · "
+        st.caption(f"{cand['candidate_id']} · Gap type: {cand.get('gap_type') or reg.get('gap_type', '')} · "
                    + ("✅ passes all four evidence checks" if cand["status"] == "SUPPORTED_CANDIDATE"
                       else "🟡 open: " + "; ".join(cand.get("unmet_conditions", []))))
         links = reg.get("links", [])

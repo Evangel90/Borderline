@@ -77,7 +77,7 @@
     {
       "candidate_id": "CAND-003",
       "title": "No route for regulators to share AI medical-device incident reports outside a closed international exchange",
-      "category": "Coordination problem; standards gap",
+      "gap_type": "Standards gap (coordination)",
       "reason_from_drill": "In the drill, a Swiss manufacturer's software update is linked to missed diagnoses in Dubai. The international exchange of regulators' incident reports (the International Medical Device Regulators Forum (IMDRF) National Competent Authority Report (NCAR) programme) is open only to the forum's management-committee regulators. Neither the Swiss nor the UAE regulator appears on its participant list, so the drill found no established regulator-to-regulator channel for the report.",
       "recommendation": "Let regulators outside the forum's management committee join the incident-report exchange, or provide a model bilateral confidentiality arrangement they can use. This is a candidate standards contribution to an ITU Study Group.",
       "status": "SUPPORTED_CANDIDATE",
@@ -148,7 +148,7 @@
     {
       "candidate_id": "CAND-002",
       "title": "No defined threshold for when an update to a diagnostic AI model needs re-approval",
-      "category": "Standards gap; technology gap",
+      "gap_type": "Standards gap (technology)",
       "reason_from_drill": "In the drill, a software update to the screening model is linked to missed diagnoses. The Dubai Health Authority (DHA) AI policy asks for certification of \"major upgraded versions\", but the sources held do not define \"major\" or name the certifying body. The institutions in the drill therefore could not tell from the text whether this update needed approval before release.",
       "recommendation": "Define which model changes need prior approval and allow pre-approved change plans, as the EU Medical Device Regulation (MDR), its guidance MDCG 2020-3 and the US Food and Drug Administration (FDA) predetermined change control plans do.",
       "status": "SUPPORTED_CANDIDATE",
@@ -243,7 +243,7 @@
     {
       "candidate_id": "CAND-001",
       "title": "No designated authority for cross-border enforcement cooperation on patient data used by diagnostic AI",
-      "category": "Unclear responsibilities; coordination problem",
+      "gap_type": "Policy gap (unclear responsibilities)",
       "reason_from_drill": "In the drill, UAE patients' retinal images are held and processed in Zurich. The Swiss data-protection regulator (the Federal Data Protection and Information Commissioner, FDPIC) may exchange information only with a foreign data-protection authority that offers reciprocity. UAE law governs health data through its own health legislation rather than the general data-protection law, and the sources in this knowledge base do not name which UAE body would act as the FDPIC's counterpart for health data held abroad.",
       "recommendation": "Designate a national contact point for cross-border cooperation on health-data protection, as the Organisation for Economic Co-operation and Development (OECD) 2007 Recommendation on privacy enforcement asks its adherents to do.",
       "status": "SUPPORTED_CANDIDATE",
@@ -387,7 +387,7 @@
     {
       "candidate_id": "CAND-004",
       "title": "The rules on when health data may leave the country are hard to locate and inconsistently cited",
-      "category": "Legislative gap (transparency)",
+      "gap_type": "Policy gap (legislative)",
       "reason_from_drill": "In the drill, the deciding question is whether UAE patients' retinal images may be kept in Zurich. The answer depends on Ministerial Resolution No. 51 of 2021, which is not publicly accessible to the project after documented attempts: the hosting portal could not be reached from outside the region, two health-authority policies cite it under a different instrument type (\"Cabinet Decision\"), and one linked copy is a gazette issue containing a different law. This describes the project's access, not whether the resolution has been published.",
       "recommendation": "Publish the exceptions at a stable address with one consistent citation, as the EU does when it keeps notified national derogations publicly available (an analogy only).",
       "status": "SUPPORTED_CANDIDATE",
