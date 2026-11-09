@@ -257,7 +257,10 @@ the hash-chain check will also report the edit.
 
 ### 4. Re-run the drills with the model
 
-**Set up Ollama** (the local model runner; about 5 GB for the model, and 16 GB of memory or more is advisable):
+**Set up Ollama** (the local model runner; about 5 GB for the model, and 16 GB of memory or more is advisable).
+Official setup guide: [Ollama quickstart](https://docs.ollama.com/quickstart) (installers for macOS, Linux and
+Windows at [ollama.com/download](https://ollama.com/download)); the model used is
+[`qwen3:8b`](https://ollama.com/library/qwen3).
 
 ```sh
 brew install ollama        # macOS; on Linux: curl -fsSL https://ollama.com/install.sh | sh; Windows: ollama.com/download
