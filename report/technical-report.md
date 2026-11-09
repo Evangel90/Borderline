@@ -4,7 +4,7 @@
 
 **Team:** Borderline · **Team leader:** Oladipo Evangel · **Members:** Oladipo Evangel, Professor James Agajo
 **Contact:** [oladipoevangel90@gmail.com](mailto:oladipoevangel90@gmail.com), +2348135001380 · **GitHub:** [github.com/Evangel90/Borderline](https://github.com/Evangel90/Borderline/tree/submission-2026-11-09)
-**Status:** final submission (release `submission-2026-11-09`), drills run on commit `b229477`.
+**Status:** submitted 9 November 2026 (release `submission-2026-11-09`); drills run on commit `b229477`.
 
 ## 1. Introduction
 
