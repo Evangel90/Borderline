@@ -9,6 +9,8 @@
 # Otherwise it stays OPEN_CANDIDATE, and the output lists each unmet condition.
 #
 # Quote roles: host (UAE side), partner (Swiss side), global_comparator, context.
+# links: dashboard phrase links, kept sparse: one per source passage, and none to a passage the card
+# already quotes in its evidence boxes. drill_steps: where in the final drills the gap came up.
 
 # Documents we know exist but do not hold. Two kinds:
 #   unobtainable_after_documented_attempts: does not block; needs at least one documented attempt
@@ -108,10 +110,7 @@ candidates:
     drill_steps:
       - {run: insufficient-20261108-3, steps: "5–6"}
     links:
-      - {text: "International Medical Device Regulators Forum (IMDRF) National Competent Authority Report (NCAR) programme", chunk_id: "IMDRF-NCAR-N14-2025:p9:c1"}
-      - {text: "open only to the forum's management-committee regulators", chunk_id: "IMDRF-NCAR-N14-2025:p9:c1"}
       - {text: "participant list", chunk_id: "IMDRF-NCAR-N14-2025:p16:c1"}
-      - {text: "model bilateral confidentiality arrangement", chunk_id: "IMDRF-NCAR-N14-2025:p9:c2"}
     hypothesis: >-
       An international channel exists for medical-device regulators to exchange incident reports under
       confidentiality arrangements, but neither Swissmedic nor any UAE regulator participates. In the
@@ -155,9 +154,6 @@ candidates:
     drill_steps:
       - {run: ungoverned-20261108-3, steps: "1–2"}
     links:
-      - {text: "Dubai Health Authority (DHA) AI policy", chunk_id: "AE-DHA-AI-HEALTH-2021:p10:c1"}
-      - {text: "\"major upgraded versions\"", chunk_id: "AE-DHA-AI-HEALTH-2021:p10:c1"}
-      - {text: "EU Medical Device Regulation (MDR)", chunk_id: "EU-MDR-2017-745:p202:c1"}
       - {text: "MDCG 2020-3", chunk_id: "EU-MDCG-2020-3-REV1:p13:c2"}
       - {text: "predetermined change control plans", chunk_id: "US-FDA-PCCP-AI-2025:p7:c2"}
     hypothesis: >-
@@ -212,10 +208,7 @@ candidates:
       - {run: insufficient-20261108-3, steps: "2–4"}
     links:
       - {text: "Federal Data Protection and Information Commissioner, FDPIC", chunk_id: "CH-DATA-FADP:p24:c1"}
-      - {text: "offers reciprocity", chunk_id: "CH-DATA-FADP:p24:c1"}
       - {text: "its own health legislation", chunk_id: "AE-HEALTH-ICT-LAW-2019:p8:c1"}
-      - {text: "general data-protection law", chunk_id: "AE-DATA-PDPL-2021-EN:p6:c2"}
-      - {text: "2007 Recommendation on privacy enforcement", chunk_id: "OECD-LEGAL-0352:p9:c1"}
     hypothesis: >-
       When UAE patients' health data is held and reused abroad, the registered sources do not show an
       instrument connecting a competent UAE authority to the Swiss FDPIC with the reciprocity FADP
@@ -281,8 +274,6 @@ candidates:
       - {run: ungoverned-20261108-3, steps: "6"}
     links:
       - {text: "two health-authority policies cite it under a different instrument type", chunk_id: "AE-DHA-HEALTH-DATA-PROTECTION-PP11-2022:p27:c1"}
-      - {text: "one linked copy", chunk_id: "AE-DHA-HEALTH-DATA-PROTECTION-PP11-2022:p27:c1"}
-      - {text: "keeps notified national derogations publicly available", chunk_id: "EU-MDR-2017-745:p30:c1"}
     hypothesis: >-
       The binding list of cases in which UAE health data may leave the State is not publicly accessible
       to the project after documented attempts: the regulator's site was unreachable, and DHA's own

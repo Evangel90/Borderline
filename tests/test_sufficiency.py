@@ -277,6 +277,8 @@ def test_every_gap_link_points_to_its_text_a_real_passage_and_a_final_drill():
             assert cand.get(field_name), f"{cand['id']} has no {field_name}"
         body = " ".join((cand["reason_from_drill"] + " " + cand["recommendation"]).split())
         assert cand.get("links"), f"{cand['id']} has no source links"
+        linked_ids = [link["chunk_id"] for link in cand["links"]]
+        assert len(linked_ids) == len(set(linked_ids)), f"{cand['id']} links a passage twice"
         for link in cand["links"]:
             assert link["text"] in body, f"{cand['id']}: link text not in reason or recommendation: {link['text']}"
             assert link["chunk_id"] in chunk_ids, f"{cand['id']}: unknown passage {link['chunk_id']}"

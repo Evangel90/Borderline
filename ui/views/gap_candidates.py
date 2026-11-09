@@ -29,13 +29,17 @@ def quote_block(q: dict) -> None:
                 f"[see it on the page ↗]({source_href(q['chunk_id'], q['quote'])})")
 
 
-def linked(text: str, links: list[dict], quotes: list[dict]) -> str:
-    """Turn each listed phrase into a link to the exact source passage, highlighting the candidate's quote."""
+def linked(text: str, links: list[dict], quotes: list[dict], seen: set[str]) -> str:
+    """Link each listed phrase to its source passage, once per passage per card.
+
+    Passages in `seen` (already linked, or quoted in the card's evidence boxes) are not linked again.
+    """
     text = " ".join(text.split())
     quote_for = {q["chunk_id"]: q["quote"] for q in quotes}
     for item in links:
         phrase = item["text"]
-        if phrase in text:
+        if phrase in text and item["chunk_id"] not in seen:
+            seen.add(item["chunk_id"])
             href = source_href(item["chunk_id"], quote_for.get(item["chunk_id"]))
             text = text.replace(phrase, f"[{phrase} ↗]({href})", 1)
     return text
@@ -52,9 +56,10 @@ for cand in sorted(status.get("candidates", []), key=lambda c: c["candidate_id"]
                    + ("✅ passes all four evidence checks" if cand["status"] == "SUPPORTED_CANDIDATE"
                       else "🟡 open: " + "; ".join(cand.get("unmet_conditions", []))))
         links = reg.get("links", [])
+        seen = {q["chunk_id"] for q in local[:1] + global_q[:1]}  # these are quoted with a link below
         reason = reg.get("reason_from_drill") or cand.get("reason_from_drill", "")
         if reason:
-            st.markdown(f"**Reason from drill:** {linked(reason, links, quotes)}")
+            st.markdown(f"**Reason from drill:** {linked(reason, links, quotes, seen)}")
         for ref in reg.get("drill_steps", []):
             info = FINAL_RUNS.get(ref["run"], {})
             step_word = "step" if "–" not in str(ref["steps"]) else "steps"
@@ -62,7 +67,7 @@ for cand in sorted(status.get("candidates", []), key=lambda c: c["candidate_id"]
                          label=f"See Drill {info.get('letter', '?')} · {info.get('name', ref['run'])}, {step_word} {ref['steps']}")
         recommendation = reg.get("recommendation") or cand.get("recommendation", "")
         if recommendation:
-            st.markdown(f"**Recommendation from global practice:** {linked(recommendation, links, quotes)}")
+            st.markdown(f"**Recommendation from global practice:** {linked(recommendation, links, quotes, seen)}")
         left, right = st.columns(2)
         with left:
             st.markdown("**What the local law says (or does not)**")
