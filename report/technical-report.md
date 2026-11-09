@@ -4,7 +4,7 @@
 
 **Team:** Borderline · **Team leader:** Oladipo Evangel · **Members:** Oladipo Evangel, Professor James Agajo
 **Contact:** [oladipoevangel90@gmail.com](mailto:oladipoevangel90@gmail.com), +2348135001380 · **GitHub:** [github.com/Evangel90/Borderline](https://github.com/Evangel90/Borderline/tree/incident-drill) (branch `incident-drill`)
-**Status:** submission version, 9 November 2026. Results come from four runs on commit `b229477` (listed in section 5); Drill D's liaison answers are scripted, **not AI decisions**. The policy and standards gaps are findings subject to expert legal review.
+**Status:** final submission, 9 November 2026. Results come from four runs on commit `b229477` (listed in section 5); Drill D's liaison answers are scripted, **not AI decisions**. The policy and standards gaps are findings subject to expert legal review.
 
 ## 1. Introduction
 
@@ -51,7 +51,7 @@ Three decision-makers take part, and each log entry names which one decided: **i
 |---|---|---|---|---|
 | A, governed (`retinopathy-governed`) | 3 letters written to real provisions, assurances as labelled synthetic exhibits: EDE → Swissmedic vigilance request (TPA Art. 64(1)); Swissmedic → EDE recall list of 47 patients (TPA Art. 64(2)(c)), with a recorded human approval; UAE Data Office → FDPIC on staff data (FADP Art. 55) | 11 | 3 delivered | **0 delivered**: legal basis YES each time, but one question misread and joined quotes rejected by code |
 | B, ungoverned (`retinopathy-ae-ch`, optional step 13) | Staged incident, 12 institutions; DHA tries to send patient images to Switzerland | 16 | letters blocked with typed gaps; images stopped | 4 of 4 blocked, plus a letter with no receiver blocked by code; images stopped; 1 typed gap (`policy_gap`); 8 homework items |
-| C, insufficient evidence (`retinopathy-insufficient-evidence`) | Questions whose deciding document is missing | 8 | homework, not candidates | **Not as expected**: letter blocked, but answers typed `policy_gap` and `implementation_gap`; no homework |
+| C, insufficient evidence (`retinopathy-insufficient-evidence`) | Questions whose deciding document is missing | 8 | homework, not gaps | **Not as expected**: letter blocked, but answers typed `policy_gap` and `implementation_gap`; no homework |
 | D, scripted control for A (`--reviewer scripted`) | A's letters, with hand-written reference answers replacing the AI reviewer: do A's blocks come from the AI or from law and code? Agents still AI; code checks unchanged | 11 | 3 delivered if law and code allow | 3 delivered; not an AI result |
 
 ## 3. Use-case requirements
@@ -59,7 +59,7 @@ Three decision-makers take part, and each log entry names which one decided: **i
 - It is **critical** that every claim has an exact, code-verified quote and chunk ID, and that no output is presented as a legal conclusion.
 - It is **critical** that patient data never crosses the border without verified legal-basis and transfer-rules quotes and a recorded human approval.
 - It is **critical** that each institution acts only on what it sees, within its mandate, and that the log shows who decided.
-- It is **expected** that missing documents become homework, not proof of absence, and that each gap candidate has a verified global comparison.
+- It is **expected** that missing documents become homework, not proof of absence, and that each gap has a verified global comparison.
 - It is **of added value** that the engine is country-agnostic: country packs, a bridge pack and drill intents are plain YAML (a readable configuration format) and can be swapped.
 
 ## 4. Mapping to ITU-T Y.3172 and the AI Readiness Framework 2.0
@@ -111,7 +111,7 @@ Drill B releases staged events: a model update with fewer referrals, confirmed m
 | C `insufficient-20261108-3` | 7 | verified | 0 / 1 | 6 of 6 | 1 | 0 |
 | D (scripted, not AI) `governed-scripted-20261108-3` | 11 | verified | 3 / 3 | 21 of 21 | 2 | 0 |
 
-**Decisions:** institution-agent actions logged. **Quotes verified:** liaison-reviewer quotes that code found in the passages shown. **Audit-screen flags:** agent citations that the citation screen (`make audit-evidence`) marks as missing or needing review. **Homework:** `missing_evidence` items. All four runs also **replay with 0 differences**: re-running every code decision over the logged AI answers, without the model, gives the same outcomes. The logs are fixed by git tag `drills-final-20261108`; their SHA-256 hashes begin `c59a3118` (A), `5366b973` (B), `d5f2d063` (C) and `7920a757` (D), with full values and a step-by-step reproducibility guide in the repository's [README](../README.md#reproducibility-guide).
+**Decisions:** institution-agent actions logged. **Quotes verified:** liaison-reviewer quotes that code found in the passages shown. **Audit-screen flags:** agent citations that the citation screen (`make audit-evidence`) marks as missing or needing review. **Homework:** `missing_evidence` items. All four runs also **replay with 0 differences**: re-running every code decision over the logged AI answers, without the model, gives the same outcomes. The logs are fixed by git tag `drills-final-20261108`; their SHA-256 (Secure Hash Algorithm, 256-bit) hashes begin `c59a3118` (A), `5366b973` (B), `d5f2d063` (C) and `7920a757` (D), with full values and a step-by-step reproducibility guide in the repository's [README](../README.md#reproducibility-guide).
 
 What the runs show:
 
@@ -136,7 +136,7 @@ All four gaps in [`gaps/candidate_register.yaml`](../gaps/candidate_register.yam
 | CAND-01 | Policy gap (unclear responsibilities) | The general data-protection law excludes health data (`AE-DATA-PDPL-2021-EN:p6:c2`, quoted in section 4b), and the sources held do not name which authority would act as the reciprocal counterpart a foreign data-protection regulator needs for health data held abroad. | The OECD 2007 privacy-enforcement Recommendation has 38 adherents, Switzerland among them and no non-members: "Spain Sweden Switzerland Türkiye United Kingdom United States Non-Members None" (`OECD-LEGAL-0352-ADHERENTS-2026:p8:c1`). | Designate a national contact point for health-data enforcement cooperation. |
 | CAND-04 | Policy gap (legislative) | The Art. 13 exceptions are set out in a resolution this project could not obtain, which health-authority policy cites as "Cabinet Decision No. (51) of year 2021" (`AE-DHA-HEALTH-DATA-PROTECTION-PP11-2022:p27:c1`) | By analogy only, EU national derogations are published: "The Commission shall keep the information publicly available." (`EU-MDR-2017-745:p30:c1`). | Publish the exceptions at a stable address with one consistent citation. |
 
-The drills bear on, but do not prove, these candidates. Their two typed gap records (B: UAE Data Office transfer rules, `policy_gap`, quoting PDPL Art. 23; C: see section 5) need human review.
+Borderline addresses such gaps by surfacing them in a rehearsal, before a real incident, with each one traceable to its evidence. The drills bear on, but do not prove, these gaps; the drills' own two typed gap records (B: UAE Data Office transfer rules, `policy_gap`, quoting PDPL Art. 23; C: see section 5) need human review.
 
 ## References
 
