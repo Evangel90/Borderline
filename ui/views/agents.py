@@ -7,7 +7,7 @@ from collections import Counter
 import streamlit as st
 
 from common import (FINAL_RUNS, chunks, cited_ids, institutions, label, load_run, passage, sidebar_note, source_href,
-                    source_links, sources)
+                    source_links, sources, where)
 
 sidebar_note()
 st.title("🏛️ Agents and sources")
@@ -51,7 +51,8 @@ with tab_agents:
         if not taken:
             st.caption("Did not act in the four final drills.")
         for run, e in taken:
-            with st.popover(f"Drill {FINAL_RUNS[run]['letter']} · step {e.get('step')} · `{e.get('action_taken')}`"):
+            with st.popover(f"Drill {FINAL_RUNS[run]['letter']} · step {e.get('step')} · `{e.get('action_taken')}` · "
+                            f"{where(e)}"):
                 st.markdown(f"**Input:** {e.get('visible_event', '')}")
                 st.markdown(f"**Output:** `{e.get('action_taken')}`: {e.get('justification', '')}")
                 st.markdown(source_links(cited_ids(e.get("cited_clauses", [])))

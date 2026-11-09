@@ -237,6 +237,16 @@ def expected_status(entry: dict[str, Any]) -> str:
     return "BLOCK"
 
 
+def where(entry: dict[str, Any]) -> str:
+    """Short label for where an action went: kept inside the country, or a letter delivered or blocked."""
+    status = entry.get("liaison_status")
+    if status in ("ROUTE", "BLOCK"):
+        return f"cross-border letter {STATUS_LABELS[status].lower()}"
+    if status == "LOCAL_ONLY":
+        return "🏠 local action (nothing sent abroad)"
+    return STATUS_LABELS.get(status, label(status)).lower()
+
+
 def letter_entries(log: list[dict[str, Any]]) -> list[dict[str, Any]]:
     return [e for e in log if e.get("liaison_status") in ("ROUTE", "BLOCK")]
 

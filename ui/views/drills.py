@@ -5,7 +5,7 @@ from __future__ import annotations
 import streamlit as st
 
 from common import (CHECK_LABELS, FINAL_RUNS, REFERENCE_FILE, REPO_URL, STATUS_LABELS, TAG, expected_status, label,
-                    cited_ids, load_run, name, passage, run_summary, sidebar_note, source_href, source_links)
+                    cited_ids, load_run, name, passage, run_summary, sidebar_note, source_href, source_links, where)
 
 sidebar_note()
 
@@ -130,8 +130,7 @@ with st.expander(f"Step-by-step record: every agent's input and decision ({len(t
                     + ("" if ran else " · *did not run (depends on an earlier letter being delivered)*"))
         for e in entries:
             line = f"{name(e.get('actor_id'))} → `{e.get('action_taken')}`"
-            if e.get("liaison_status") in ("ROUTE", "BLOCK"):
-                line += f" · letter {STATUS_LABELS[e['liaison_status']].lower()}"
+            line += f" · {where(e)}"
             with st.popover(line):
                 st.markdown("**Input: what the agent was shown**")
                 st.write(e.get("visible_event", ""))
@@ -141,7 +140,7 @@ with st.expander(f"Step-by-step record: every agent's input and decision ({len(t
                     st.caption("Allowed actions: " + ", ".join(e["authorized_actions"]))
                 if e.get("retrieved_chunk_ids"):
                     st.caption("Passages retrieved: " + ", ".join(e["retrieved_chunk_ids"]))
-                st.markdown("**Output: what it decided**")
+                st.markdown(f"**Output: what it decided** · {where(e)}")
                 st.markdown(f"`{e.get('action_taken')}`: {e.get('justification', '')}")
                 st.markdown(source_links(cited_ids(e.get("cited_clauses", [])))
                             or "*No passage cited for this explanation.*")
