@@ -1,4 +1,4 @@
-"""Policy gaps found: the four gap candidates, each with local evidence and a global comparison."""
+"""Policy gaps found: the four gaps, each with local evidence and a global comparison."""
 
 from __future__ import annotations
 
@@ -13,8 +13,8 @@ sidebar_note()
 st.title("🧩 Policy gaps found")
 st.write(
     "Running the drills against both countries' law surfaced four places where the rules are missing, unclear or "
-    "out of reach. Each is paired with how other systems handle the same question. They are **candidates for "
-    "human review, not legal findings**: \"missing\" means missing from this knowledge base."
+    "out of reach. Each is paired with how other systems handle the same question. They are findings subject to "
+    "expert legal review; \"missing\" means missing from this knowledge base."
 )
 
 status = json.loads((ROOT / "report" / "candidate-status.json").read_text(encoding="utf-8"))

@@ -4,7 +4,7 @@
 
 **Team:** Borderline · **Team leader:** Oladipo Evangel · **Members:** Oladipo Evangel, Professor James Agajo
 **Contact:** [oladipoevangel90@gmail.com](mailto:oladipoevangel90@gmail.com), +2348135001380 · **GitHub:** [github.com/Evangel90/Borderline](https://github.com/Evangel90/Borderline/tree/incident-drill) (branch `incident-drill`)
-**Status:** submission version, 9 November 2026. Results come from four runs on commit `b229477` (listed in section 5); Drill D's liaison answers are scripted, **not AI decisions**. Nothing here is a legal conclusion or has had legal review; policy gaps are **candidates**.
+**Status:** submission version, 9 November 2026. Results come from four runs on commit `b229477` (listed in section 5); Drill D's liaison answers are scripted, **not AI decisions**. The policy and standards gaps are findings subject to expert legal review.
 
 ## 1. Introduction
 
@@ -43,7 +43,7 @@ Three decision-makers take part, and each log entry names which one decided: **i
    - Patient data needs two keys: verified national-law quotes behind YES on legal basis and transfer rules, and a recorded human approval matching the letter's scope.
    - A letter with no receiver is blocked; delivery needs three YES answers, each flagged for human review.
    - An uncited legal claim in an agent's explanation is returned once, then replaced by fixed wording or a review action, and logged.
-   - Every UNCLEAR or NO is typed `policy_gap`, `implementation_gap`, `conflict` (possible gap candidates) or `missing_evidence` (homework).
+   - Every UNCLEAR or NO is typed `policy_gap`, `implementation_gap`, `conflict` (possible gaps) or `missing_evidence` (homework).
 
 ### 2b. Demo scenarios: three AI drills and one scripted control
 
@@ -125,15 +125,15 @@ What the runs show:
 
 Details: [`run-review-2026-11-08-final-runs.md`](run-review-2026-11-08-final-runs.md).
 
-## 6. Policy and standards gap candidates derived from the mapping
+## 6. Policy and standards gaps derived from the mapping
 
-All four candidates in [`gaps/candidate_register.yaml`](../gaps/candidate_register.yaml) pass the four-part rule (`make assess-candidates`, 8 November 2026): quotes verify; an absence search is recorded; a verified global comparison (European Union (EU), IMDRF) is quoted; no obtainable missing document could refute it. They are **candidates, not findings**: unreviewed, and "absent" means absent from this KB.
+All four gaps in [`gaps/candidate_register.yaml`](../gaps/candidate_register.yaml) pass a four-part check run by code (`make assess-candidates`, 9 November 2026): every quote matches its source word for word; each search for missing rules is recorded; each gap quotes a verified global comparison (European Union (EU), IMDRF, Organisation for Economic Co-operation and Development (OECD)); and no document we could still obtain might disprove it. They are findings subject to expert legal review; "absent" means absent from this KB.
 
 | ID | Gap type | Local evidence (verified quote) | Global comparison (verified quote) and recommendation |
 |---|---|---|---|
 | CAND-003 | Standards gap (coordination) | The partner regulator's access to device-safety information is limited: "However, without resolving the institutional issues, Switzerland remains excluded from market surveillance with EU member states for medical devices." (`CH-EU-MRA-FACTSHEET-2025:p2:c2`). Neither regulator in the drill is on the IMDRF National Competent Authority Report (NCAR) participant list (search [`SEARCH-NCAR-PARTICIPANTS-001`](../gaps/searches/SEARCH-NCAR-PARTICIPANTS-001.json)). | "Participation in the NCAR Exchange Program will be limited to the IMDRF Management Committee (MC) Regulators. A list of NCAR Participant Countries is provided in Annex1." (`IMDRF-NCAR-N14-2025:p9:c1`). **Recommendation:** open the exchange to other regulators or provide a model bilateral confidentiality arrangement; a candidate contribution to an ITU Study Group. |
 | CAND-002 | Standards gap (technology) | The applicable AI-in-health policy requires certification of "major upgraded versions"; the sources held do not define "major" (`AE-DHA-AI-HEALTH-2021:p10:c1`; full quote at node M, section 4a). | "Changes to the approved device shall require approval from the notified body which issued the EU technical documentation assessment certificate where such changes could affect the safety and performance of the device" (`EU-MDR-2017-745:p202:c1`). **Recommendation:** define which model changes need prior approval and allow pre-approved change plans. |
-| CAND-001 | Policy gap (unclear responsibilities) | The general data-protection law excludes health data (`AE-DATA-PDPL-2021-EN:p6:c2`, quoted in section 4b), and the sources held do not name which authority would act as the reciprocal counterpart a foreign data-protection regulator needs for health data held abroad. | The Organisation for Economic Co-operation and Development (OECD) 2007 privacy-enforcement Recommendation has 38 adherents, Switzerland among them and no non-members: "Spain Sweden Switzerland Türkiye United Kingdom United States Non-Members None" (`OECD-LEGAL-0352-ADHERENTS-2026:p8:c1`). **Recommendation:** designate a national contact point for health-data enforcement cooperation. |
+| CAND-001 | Policy gap (unclear responsibilities) | The general data-protection law excludes health data (`AE-DATA-PDPL-2021-EN:p6:c2`, quoted in section 4b), and the sources held do not name which authority would act as the reciprocal counterpart a foreign data-protection regulator needs for health data held abroad. | The OECD 2007 privacy-enforcement Recommendation has 38 adherents, Switzerland among them and no non-members: "Spain Sweden Switzerland Türkiye United Kingdom United States Non-Members None" (`OECD-LEGAL-0352-ADHERENTS-2026:p8:c1`). **Recommendation:** designate a national contact point for health-data enforcement cooperation. |
 | CAND-004 | Policy gap (legislative) | The Art. 13 exceptions are set out in a resolution this project could not obtain, which health-authority policy cites as: "a. Cabinet Decision No. (51) of year 2021 on exemption for storage and transfer of health records and information must be abide to:" (`AE-DHA-HEALTH-DATA-PROTECTION-PP11-2022:p27:c1`) | By analogy only, EU national derogations are published: "The Commission shall keep the information publicly available." (`EU-MDR-2017-745:p30:c1`). **Recommendation:** publish the exceptions at a stable address with one consistent citation. |
 
 The drills bear on, but do not prove, these candidates. Their two typed gap records (B: UAE Data Office transfer rules, `policy_gap`, quoting PDPL Art. 23; C: see section 5) need human review.

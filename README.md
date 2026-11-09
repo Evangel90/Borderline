@@ -27,7 +27,7 @@ configuration format).
 5. [The knowledge base](#the-knowledge-base)
 6. [The drills](#the-drills)
 7. [Results](#results-8-november-2026)
-8. [Gap candidates](#gap-candidates)
+8. [Policy and standards gaps](#policy-and-standards-gaps)
 9. [Reproducibility guide](#reproducibility-guide)
 10. [Repository map](#repository-map)
 11. [Commands](#commands)
@@ -88,7 +88,7 @@ call that answers three questions, each YES, NO or UNCLEAR with exact quotes
 | A letter that names no receiver is blocked | [`engine/actions.py`](engine/actions.py) (`_block_unaddressed_letter`) |
 | An agent may only take actions its institution is allowed | [`engine/actions.py`](engine/actions.py), institution profiles |
 | An uncited legal claim in an agent's explanation is sent back once, then replaced by fixed wording, and the log says so | [`engine/agent.py`](engine/agent.py) (`evaluate_step`) |
-| Every UNCLEAR or NO is typed `policy_gap`, `implementation_gap`, `conflict` or `missing_evidence`; the last goes to a homework list, not to gap candidates | [`engine/liaison.py`](engine/liaison.py) (`finalize_answer`), [`engine/orchestrator.py`](engine/orchestrator.py) |
+| Every UNCLEAR or NO is typed `policy_gap`, `implementation_gap`, `conflict` or `missing_evidence`; the last goes to a homework list, not to the gap list | [`engine/liaison.py`](engine/liaison.py) (`finalize_answer`), [`engine/orchestrator.py`](engine/orchestrator.py) |
 
 Every decision is written to a hash-chained audit log
 ([`audit/hasher.py`](audit/hasher.py)): each entry includes the hash of the one
@@ -169,9 +169,9 @@ All four hash chains verify and all four replay with 0 differences. Drill-by-dri
 discussion, including where the 8-billion-parameter model fell short, is in the
 [final run review](report/run-review-2026-11-08-final-runs.md).
 
-## Gap candidates
+## Policy and standards gaps
 
-Four policy and standards gap candidates are kept in
+Four policy and standards gaps, findings subject to expert legal review, are kept in
 [`gaps/candidate_register.yaml`](gaps/candidate_register.yaml). Code applies a
 four-part evidence rule ([`gaps/sufficiency.py`](gaps/sufficiency.py)): every quote
 verifies, an absence search is recorded, a verified global comparison is quoted, and
@@ -227,7 +227,7 @@ The dashboard ([`ui/`](ui/app.py)) reads the saved runs and sources and calls no
 1. **Overview:** the scenario, how a decision is made, and what each drill showed.
 2. **The drills:** every cross-border letter, the three answers, each quote and whether it matched the law;
    every agent's input and decision one click deeper.
-3. **Policy gaps found:** the four gap candidates, each with local evidence and a global comparison.
+3. **Policy gaps found:** the four gaps, each with local evidence and a global comparison.
 4. **Agents and sources:** each AI agent's mandate, allowed actions and decisions; the registered sources, and
    the text behind any passage ID.
 5. **Verify and reproduce:** runs the hash-chain, git-tag, replay and source-hash checks in the browser, and a
