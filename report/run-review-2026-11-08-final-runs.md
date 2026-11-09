@@ -97,7 +97,7 @@ This shows the route works end to end when the answers are right. It shows nothi
 
 ## Step coverage and candidates
 
-`make step-coverage` for A, B and C (written to `report/step-coverage.json`): no unconditional step skipped or failed; all 5 blocked liaison branches covered; no delivered branch in the AI runs. Drill D, which uses Drill A's intent, covers the 3 delivered branches (checked by its replay, not by that file). `make assess-candidates`: CAND-001 to CAND-004 remain `SUPPORTED_CANDIDATE` (unreviewed, not legal conclusions); the candidate rule reads the candidate register, not the runs.
+`make step-coverage` for A, B and C (written to `report/step-coverage.json`): no unconditional step skipped or failed; all 5 blocked liaison branches covered; no delivered branch in the AI runs. Drill D, which uses Drill A's intent, covers the 3 delivered branches (checked by its replay, not by that file). `make assess-candidates`: CAND-01 to CAND-04 remain `SUPPORTED_CANDIDATE` (unreviewed, not legal conclusions); the candidate rule reads the candidate register, not the runs.
 
 ## Failed, skipped or open
 

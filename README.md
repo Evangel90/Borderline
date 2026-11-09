@@ -181,10 +181,10 @@ review.
 
 | ID | Gap (domain wording) | Gap type | Reason from drill |
 |---|---|---|---|
-| CAND-001 | No designated authority for cross-border enforcement cooperation on patient data used by diagnostic AI | Policy gap (unclear responsibilities) | UAE retinal images held in Zurich; the Swiss regulator needs a reciprocal counterpart, and the sources held do not name the UAE body for health data |
-| CAND-002 | No defined threshold for when an update to a diagnostic AI model needs re-approval | Standards gap (technology) | A model update is linked to missed diagnoses; the DHA AI policy asks for certification of "major upgraded versions" without defining "major" |
-| CAND-003 | No route for regulators to share AI medical-device incident reports outside a closed international exchange | Standards gap (coordination) | Neither regulator is on the participant list of the International Medical Device Regulators Forum (IMDRF) incident-report exchange |
-| CAND-004 | The rules on when health data may leave the country are hard to locate and inconsistently cited | Policy gap (legislative) | The deciding resolution was not publicly accessible to the project after documented attempts and is cited under two instrument types |
+| CAND-01 | No designated authority for cross-border enforcement cooperation on patient data used by diagnostic AI | Policy gap (unclear responsibilities) | UAE retinal images held in Zurich; the Swiss regulator needs a reciprocal counterpart, and the sources held do not name the UAE body for health data |
+| CAND-02 | No defined threshold for when an update to a diagnostic AI model needs re-approval | Standards gap (technology) | A model update is linked to missed diagnoses; the DHA AI policy asks for certification of "major upgraded versions" without defining "major" |
+| CAND-03 | No route for regulators to share AI medical-device incident reports outside a closed international exchange | Standards gap (coordination) | Neither regulator is on the participant list of the International Medical Device Regulators Forum (IMDRF) incident-report exchange |
+| CAND-04 | The rules on when health data may leave the country are hard to locate and inconsistently cited | Policy gap (legislative) | The deciding resolution was not publicly accessible to the project after documented attempts and is cited under two instrument types |
 
 Each candidate also carries a recommendation drawn from its global example (see the register).
 

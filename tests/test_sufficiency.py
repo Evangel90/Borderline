@@ -234,22 +234,22 @@ def test_checked_in_quotes_all_verify(checked_in):
 
 def test_checked_in_statuses(checked_in):
     assert {cid: c["status"] for cid, c in checked_in.items()} == {
-        "CAND-001": SUPPORTED, "CAND-002": SUPPORTED, "CAND-003": SUPPORTED, "CAND-004": SUPPORTED,
+        "CAND-01": SUPPORTED, "CAND-02": SUPPORTED, "CAND-03": SUPPORTED, "CAND-04": SUPPORTED,
     }
     # The controlling Arabic text of Law 38/2024 was not searched; that limit stays visible.
-    assert checked_in["CAND-002"]["unobtainable_documents"] == ["AE-FEDERAL-DECREE-LAW-38-2024-AR-CLEAN"]
-    assert any("the controlling Arabic text was not searched" in n for n in checked_in["CAND-002"]["notes"])
-    assert checked_in["CAND-003"]["answered_documents"] == ["CH-EU-MRA-1999"]
-    assert checked_in["CAND-001"]["answered_documents"] == ["OECD-LEGAL-0352-ADHERENTS"]
-    assert any("does not prove the" in n for n in checked_in["CAND-003"]["notes"])
+    assert checked_in["CAND-02"]["unobtainable_documents"] == ["AE-FEDERAL-DECREE-LAW-38-2024-AR-CLEAN"]
+    assert any("the controlling Arabic text was not searched" in n for n in checked_in["CAND-02"]["notes"])
+    assert checked_in["CAND-03"]["answered_documents"] == ["CH-EU-MRA-1999"]
+    assert checked_in["CAND-01"]["answered_documents"] == ["OECD-LEGAL-0352-ADHERENTS"]
+    assert any("does not prove the" in n for n in checked_in["CAND-03"]["notes"])
 
 
 def test_resolution_51_stays_missing_and_is_worded_as_inaccessible(checked_in):
     register = load_register()
     mr51 = next(d for d in register["missing_documents"] if d["id"] == "AE-HEALTH-DATA-EXEMPTIONS-MR51-2021")
     assert mr51["kind"] == "unobtainable_after_documented_attempts" and mr51["attempts"]
-    assert "AE-HEALTH-DATA-EXEMPTIONS-MR51-2021" in checked_in["CAND-001"]["unobtainable_documents"]
-    reason = checked_in["CAND-004"]["reason_from_drill"]
+    assert "AE-HEALTH-DATA-EXEMPTIONS-MR51-2021" in checked_in["CAND-01"]["unobtainable_documents"]
+    reason = checked_in["CAND-04"]["reason_from_drill"]
     assert "not publicly accessible to the project after documented attempts" in reason
     assert "does not exist" not in json.dumps(register)
     assert assess_register(register, load_chunks())["register_problems"] == []

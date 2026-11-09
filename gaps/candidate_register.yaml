@@ -94,7 +94,7 @@ missing_documents:
       38 OECD Members including Switzerland, and no non-members, so the UAE was not an adherent.
 
 candidates:
-  - id: CAND-003
+  - id: CAND-03
     title: "No route for regulators to share AI medical-device incident reports outside a closed international exchange"
     gap_type: "Standards gap (coordination)"
     reason_from_drill: >-
@@ -138,7 +138,7 @@ candidates:
       - "A bilateral UAE-Swiss memorandum on device vigilance (not known to exist)."
       - "IMDRF membership or NCAR participant changes after March 2025."
 
-  - id: CAND-002
+  - id: CAND-02
     title: "No defined threshold for when an update to a diagnostic AI model needs re-approval"
     gap_type: "Standards gap (technology)"
     reason_from_drill: >-
@@ -189,7 +189,7 @@ candidates:
       - "EDE implementing rules for software changes under Federal Decree-Law No. 38 of 2024 (not known to exist)."
       - "Any UAE AI-device guidance outside this knowledge base."
 
-  - id: CAND-001
+  - id: CAND-01
     title: "No designated authority for cross-border enforcement cooperation on patient data used by diagnostic AI"
     gap_type: "Policy gap (unclear responsibilities)"
     reason_from_drill: >-
@@ -256,7 +256,7 @@ candidates:
       - "Any Emirates Data Office cooperation agreement with the FDPIC (not known to exist)."
       - "PDPL Executive Regulations (reportedly not issued as of mid-2026; not verified)."
 
-  - id: CAND-004
+  - id: CAND-04
     title: "The rules on when health data may leave the country are hard to locate and inconsistently cited"
     gap_type: "Policy gap (legislative)"
     reason_from_drill: >-
