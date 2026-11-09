@@ -37,6 +37,23 @@ knowledge-base/
 | Passages | **2,247** in `kb_main`, plus **19** ITU AI Readiness framework definitions (13 dimensions and 6 factors) |
 | Built with | ITU reference code at commit `84010da`, `nomic-embed-text` embeddings, ChromaDB 1.5.9 |
 
+## Why the documents are also in `data/raw/`
+
+The files in `InputDocs/` are byte-identical copies of files in [`data/raw/`](../data/raw/).
+This is deliberate:
+
+- **`data/raw/` is the project's source archive.** It holds all 48 registered files, including
+  8 kept out of search but retained to check wording or provenance. The drills, their passage
+  files and the four published runs cite these paths, so the files stay where they are.
+- **`InputDocs/` is the knowledge base as a self-contained folder.** It holds only the 40
+  documents that are searched, in the ITU layout, so it can be passed to the ITU ingestion
+  command or moved into the ITU AI for Good Lab without the rest of the repository.
+- **The copies cannot drift.** `make knowledge-base` copies each file from `data/raw/` and checks
+  it against its SHA-256 hash in [`data/sources.csv`](../data/sources.csv);
+  `make verify-knowledge-base` re-checks all 40 at any time.
+- **No extra storage.** Git stores identical files once, so the copies add almost nothing to the
+  repository's size.
+
 ## What is in it
 
 **UAE (19).** Federal laws on personal data protection (Federal Decree-Law 45/2021), information

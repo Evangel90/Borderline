@@ -153,7 +153,9 @@ manifest, and a ChromaDB vector database in `chromadb/` (**2,247 passages**, plu
 19 ITU AI Readiness framework definitions). Its [README](knowledge-base/README.md) shows how
 to search it and how to rebuild it, with the ITU command or with `make knowledge-base`.
 The documents in `InputDocs/` are copies of the registered files in `data/raw/`, checked
-against their hashes (`make verify-knowledge-base`).
+against their hashes (`make verify-knowledge-base`), so the knowledge base is a self-contained
+folder while the drills and published runs keep their original paths
+([why both](knowledge-base/README.md#why-the-documents-are-also-in-dataraw)).
 
 ## The drills
 
